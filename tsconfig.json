@@ -1,4 +1,53 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
-  "extends": "./.nuxt/tsconfig.json"
+  // TypeScript 컴파일러 옵션 설정
+  "compilerOptions": {
+    "target": "esnext", // 컴파일 대상을 ESNext로 설정
+    "module": "esnext", // 모듈 형식을 ESNext로 설정
+    "moduleResolution": "node", // 모듈 해결 방식을 Node.js 스타일로 설정
+    "lib": [
+      "esnext",
+      "esnext.asynciterable",
+      "dom"
+    ], // 사용할 라이브러리 설정
+    "noImplicitThis": false, // 암묵적인 'this' 타입 체크를 사용하지 않음
+    "experimentalDecorators": false, // 실험적인 데코레이터 사용 비활성화
+    "resolveJsonModule": true, // JSON 모듈 해결 활성화
+    "esModuleInterop": true, // ES 모듈 형식의 상호 운용성을 위해 CommonJS를 ES 모듈로 변환
+    "allowJs": true, // JavaScript 파일도 컴파일에 포함
+    "checkJs": false, // JavaScript 파일의 타입 체크를 비활성화
+    "sourceMap": true, // 소스 맵 생성
+    "strict": true, // 엄격한 타입 체크 활성화
+    "noEmit": true, // 출력 파일 생성 비활성화
+    "baseUrl": ".", // 상대 경로를 기준으로 모듈 탐색 시작 위치 설정
+    "paths": {
+      "~/*": [
+        "./*"
+      ],
+      "@/*": [
+        "./*"
+      ],
+      "@/api/*": [
+        "./api/*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/interface/*": [
+        "./interface/*"
+      ]
+    }, // 모듈 경로 별칭 설정
+    "typeRoots": ["types"], // 타입 정의 파일의 위치 설정
+    "types": [
+      "@nuxt/types",
+      "@types/node",
+    ], // 사용할 타입 정의 설정
+    "exclude": [
+      "node_modules"
+    ], // 컴파일 제외할 파일 및 폴더 설정
+    "include": [
+      "/**/*.ts",
+      "**/*.vue"
+    ] // 컴파일에 포함할 파일 및 폴더 설정
+  },
+  "extends": "./.nuxt/tsconfig.json" // 다른 tsconfig 파일을 확장하여 사용
 }
