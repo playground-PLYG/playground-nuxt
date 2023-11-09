@@ -54,7 +54,7 @@ const essentialLinks: EssentialLinkProps[] = [
   {
     title: 'api 샘플',
     icon: 'favorite',
-    link: '/api',
+    link: '/api-test',
   }
 ];
 
