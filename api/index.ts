@@ -1,4 +1,4 @@
-import { type IFetchOptions, type ApiResponse } from '~/interface/server'
+import { type IFetchOptions, type ApiResponse } from '../interface/server'
 
 export default class ApiService {
     private static async fetch<T>(
