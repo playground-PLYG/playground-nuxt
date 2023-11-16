@@ -129,22 +129,28 @@ const selectMenu = async () => {
   const result = await $fetch<ApiResponse<MenuData>>("/playground/public/menu/select", {
             method: 'GET'
         })
-        
-  const resData = result.data
+        .catch((error) => {
+          console.error('error: ', error)
+          return
+        })
+  
+  const resData = result?.data
   // essentialLinks.value = defaultMenus
 
-  // const menu = Object.entries(resData)
-  // const menu = Object.keys(resData)
-  const menu = Object.values(resData)
-
-  menu.forEach((item, idx) => {
-    const menuItem: EssentialLinkProps = {
-      title: item.menuNm,
-      icon: iconList[idx],
-      link: item.menuUrl
-    }
-    essentialLinks.value.push(menuItem)
-  })
+  if (resData != undefined) {
+    // const menu = Object.entries(resData)
+    // const menu = Object.keys(resData)
+    const menu = Object.values(resData)
+    
+    menu.forEach((item, idx) => {
+      const menuItem: EssentialLinkProps = {
+        title: item.menuNm,
+        icon: iconList[idx],
+        link: item.menuUrl
+      }
+      essentialLinks.value.push(menuItem)
+    })
+  }
   loading.hide()
 }
 
