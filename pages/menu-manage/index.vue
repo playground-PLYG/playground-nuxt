@@ -10,14 +10,15 @@
   </div>
   <div style="width: 20rem; margin-top: 7rem; margin-left: 5rem;">
     <q-form
+      ref = "menuForm"
       @submit="onSubmit"
       @reset="onReset"
     >
-      <q-input v-model="param.menuNm" label="메뉴명"/>
-      <q-input v-model="param.menuUrl" label="메뉴URL"/>
-      <q-input v-model="param.menuLvl" label="메뉴레벨"/>
-      <q-input v-model="param.menuSortOrder" label="정렬순서"/>
-      <q-input v-model="param.parentMenuId" label="상위메뉴ID"/>
+      <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]"/>
+      <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]"/>
+      <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]"/>
+      <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]"/>
+      <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;"/>
       <q-select outlined v-model="param.useYn" :options="options" label="사용여부"/>
       <div style="margin-left: 20rem; margin-top: 5rem; width: 100%; text-align: center;">
         <q-btn color="primary" label="등록하기" type="submit" style="display: inline-block; margin-right: 1rem;" />
@@ -29,9 +30,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-// import { type Router } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { type ApiResponse } from '../../interface/server';
 import { type QTableProps } from 'quasar';
+
+const router = useRouter();
+const menuForm = ref<any>();
+
+const ERROR_FIELD_EMPTY = "(은)는 필수값입니다.";
 
 interface Data {
   menuId: string,
@@ -100,11 +106,12 @@ const selectAllMenu = async () => {
 const clickRow = (evt: any, row: any, index: any) => {
   console.log('clickRow')
   // console.log('evt: ', evt, ' row: ', row, ' index: ', index)
-  param.value = row
+  param.value = { ...row }
 }
 
 const onSubmit = async () => {
   console.log('param: ', param)
+
   // 저장 API 호출
   const result = await $fetch<ApiResponse<Data[]>>("/playground/public/menu/save", {
             method: 'POST',
@@ -112,11 +119,11 @@ const onSubmit = async () => {
         })
         .then(() => {
           alert('저장이 완료되었습니다.')
-          // Router.push('/menu-manage')
+          // router.push('/menu-manage')
           // navigateTo('/menu-manage')
-          // navigateTo('/')
           // refreshNuxtData()
-          window.location.reload()
+          // window.location.reload()
+          router.go(0)
         })
         .catch((error) => {
           console.error(error)

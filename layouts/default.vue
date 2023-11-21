@@ -135,7 +135,6 @@ const selectMenu = async () => {
         })
   
   const resData = result?.data
-  // essentialLinks.value = defaultMenus
 
   if (resData != undefined) {
     // const menu = Object.entries(resData)
