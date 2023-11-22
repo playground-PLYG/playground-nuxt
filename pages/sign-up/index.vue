@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { onMounted } from 'vue'
-import axios from "axios";
 import { useAuthStore } from '../../stores/useAuthStore' 
 import { type ApiResponse } from '../../interface/server';
 import { getParsedCommandLineOfConfigFile, validateLocaleAndSetLanguage } from 'typescript';
@@ -63,6 +62,10 @@ interface Param {
   mbrEmlAddr:string
   mbrTelno: string
 }
+interface Token {
+  access_token: string,
+  refresh_token: string
+}
 
 let param = ref<Param>({
     mbrNm: '',
@@ -72,50 +75,53 @@ let param = ref<Param>({
     mbrTelno: ''
 });
 
-// let resData = ref<Data[]>();
+interface Email {
+    kakao_account : {
+        email:string
+    },
+    id: string,
+    properties: {
+        nickname:string
+    }
+}
+
 
 onMounted(() => {
     loading.show()
     getToken();
 })
 
-function getToken (){
-    const data ={
-        grant_type: 'authorization_code',
-        client_id: '68ae4b196239138e24e76a6664659155',
-        redirect_uri: new URL(document.location.origin ) +'/sign-up',
-        code: new URL(document.location.toString()).searchParams.get('code')
-    }
-    const config = {
+const getToken = async () => {
+    const client_id = '68ae4b196239138e24e76a6664659155'
+    const code = new URL(document.location.toString()).searchParams.get('code')
+    const redirect_uri = new URL(document.location.origin ) +'/sign-up'
+
+    await $fetch<Token>('https://kauth.kakao.com/oauth/token', {
+        method: 'POST',
         headers: {
             'Authorization': 'bearer ',
             'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-        }
-    }
-    
-    axios.post('https://kauth.kakao.com/oauth/token', data, config)
-    .then((res) => {
-        
-        console.log('res ::: '+ res.data.access_token)
-        config.headers.Authorization += res.data.access_token
-
-        //token = res.data.access_token
-        localStorage.setItem('access_token', res.data.access_token)
+        },
+        body: 'grant_type=authorization_code&client_id=' + client_id +'&redirect_uri=' + redirect_uri + '&code=' + code
+    })
+    .then((data) => {
+        console.log('data: ', data.access_token)
+        localStorage.setItem('access_token', data.access_token)
         console.log('localstorage.getItem(access_token) ::::: ' , localStorage.getItem('access_token'))
-        store.token = res.data.access_token
+        store.token = data.access_token
         console.log('store.token ::: ', store.token)
-
-        axios.post('https://kapi.kakao.com/v2/user/me', {}, config)
+        $fetch<Email>('https://kapi.kakao.com/v2/user/me', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'bearer ' + data.access_token,
+                'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+            }
+        })
         .then((response) => {
-            console.log('id : ' + response.data.id + ', email : ' + response.data.kakao_account.email + ', nickname : ' + response.data.properties.nickname)
+            console.log('id : ' + response.id + ', email : ' + response.kakao_account.email + ', nickname : ' + response.properties.nickname)
+            getEmail(response.kakao_account.email);
+        })
 
-            getEmail(response.data.kakao_account.email);
-        })
-        .catch((error) => {
-            // console.log('user No response received:', error.request);
-            // console.log('user Server responded with status code:', error.response.status);
-            // console.log('user Response data:', error.response.data);
-        })
     })
 }
 
