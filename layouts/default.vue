@@ -4,7 +4,6 @@ import { ref } from 'vue';
 import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
 import { type ApiResponse } from '../interface/server';
 import { useAuthStore } from '../stores/useAuthStore' 
-import { routerKey } from 'vue-router';
 
 const router = useRouter();
 const store = useAuthStore();
@@ -131,32 +130,35 @@ function toggleLeftDrawer() {
 
 const selectMenu = async () => {
   loading.show()
-  const result = await $fetch<ApiResponse<MenuData>>("/playground/public/menu/select", {
-            method: 'GET'
-        })
-        .catch((error) => {
-          console.error('error: ', error)
-          return
-        })
-  
-  const resData = result?.data
-
-  if (resData != undefined) {
-    // const menu = Object.entries(resData)
-    // const menu = Object.keys(resData)
-    const menu = Object.values(resData)
-    
-    menu.forEach((item, idx) => {
-      const menuItem: EssentialLinkProps = {
-        title: item.menuNm,
-        icon: iconList[idx],
-        link: item.menuUrl
-      }
-      essentialLinks.value.push(menuItem)
+  await $fetch<ApiResponse<MenuData>>(
+    "/playground/public/menu/select", 
+    { method: 'GET' }
+    )
+    .then(({ data }) => {
+      setMenu(data)
     })
-  }
+    .catch((error) => {
+      console.error('error: ', error)
+      alert('메뉴 목록을 불러오지 못했습니다.')
+      return
+    })
   loading.hide()
 }
+
+const setMenu = (arr: object) => {
+  // const menu = Object.entries(resData)
+  // const menu = Object.keys(resData)
+  const menu = Object.values(arr)
+  
+  menu.forEach((item, idx) => {
+    const menuItem: EssentialLinkProps = {
+      title: item.menuNm,
+      icon: iconList[idx],
+      link: item.menuUrl
+    }
+    essentialLinks.value.push(menuItem)
+  })
+} 
 
 const logout = () => {
   const access_token = localStorage.getItem('access_token')
