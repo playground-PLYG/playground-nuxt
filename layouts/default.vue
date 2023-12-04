@@ -162,12 +162,24 @@ const setMenu = (arr: object) => {
 
 const logout = () => {
   const access_token = localStorage.getItem('access_token')
+  const snsLogin = localStorage.getItem('snsLogin')
 
   if(access_token) {
-    const CLIENT_ID = '68ae4b196239138e24e76a6664659155'
+    store.resetAuth()
+    if(snsLogin == 'KAKAO') {
+      const CLIENT_ID = '68ae4b196239138e24e76a6664659155'
       const LOGOUT_REDIRECT_URI = new URL(document.location.origin)      
       const kakaoURL = `https://kauth.kakao.com/oauth/logout?client_id=${CLIENT_ID}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}`
       window.location.href = kakaoURL;
+    } else if (snsLogin == 'NAVER') {
+      localStorage.setItem('snsLogin', '')
+      localStorage.setItem('access_token','')
+      router.go(0)
+    }else {
+      localStorage.setItem('snsLogin', '')
+      localStorage.setItem('access_token','')
+      router.go(0)
+    }
   }
 }
 
@@ -204,8 +216,8 @@ onMounted(() => {
     >
       <q-list>
 
-        <q-item-label header v-if="store.name" class="text-subtitle1">
-          {{store.name}}님
+        <q-item-label header v-if="store.userName" class="text-subtitle1">
+          {{store.userName}}님
         </q-item-label>
 
         <EssentialLink
@@ -214,7 +226,7 @@ onMounted(() => {
           v-bind="link"
         />
 
-        <q-item v-if="store.token" clickable @click="logout" exact style="color: black;">
+        <q-item v-if="store.isLogin" clickable @click="logout" exact style="color: black;">
           <q-item-section avatar>
             <q-icon name="logout" />
           </q-item-section>

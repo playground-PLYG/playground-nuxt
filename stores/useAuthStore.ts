@@ -1,12 +1,18 @@
 import { defineStore } from "pinia"
 
 export const useAuthStore = defineStore('auth', () => {
-  let token = ref<any>("")
-  let name = ref<any>("")
 
-  function isLogin() {
-    return token == null? false : true ;
+  let accessToken = ref<any>("")
+  let userName = ref<any>("")
+  let snsLogin = ref<any>("")
+
+  const isLogin = computed(() => accessToken?.value == ''? false : true)
+
+  function resetAuth() {
+    accessToken = ''
+    userName = ''
+    snsLogin = ''
   }
 
-  return { token, name, isLogin}
+  return { accessToken, userName, snsLogin, isLogin, resetAuth}
 })
