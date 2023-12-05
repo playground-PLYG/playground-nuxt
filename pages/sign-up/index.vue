@@ -138,14 +138,6 @@ const getTokenKAKAO = async () => {
 }
 
 const getTokenNAVER = async () => {
-
-//     fetch.defaults.baseURL = 'http://localhost:3000'; //서버주소
-
-// axios.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
-
-// axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
-
-
     const client_id = 'CzAlAQJdMEto7NeN57QA'
     const client_secret = '4TqLSzR0O7'
     const state = 'RAMDOM_STATE'
@@ -154,7 +146,7 @@ const getTokenNAVER = async () => {
         'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
         // CORS....
         //'Access-Control-Allow-Origin' : '*',
-        //'x-cors-api-key': 'temp_3392ff3b011b83956a5d7e02ada48b34', // https://proxy.cors.sh/
+        'x-cors-api-key': 'temp_f4d4037d6e5c605391e488d986cc0a59', // https://proxy.cors.sh/
         //'APIKey': 'COVID_APIKEY' // https://cors-anywhere.herokuapp.com/
     }
     const code = new URL(document.location.toString()).searchParams.get('code')
@@ -190,7 +182,6 @@ const getTokenGOOGLE = async () => {
         'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
     }
     const code = new URL(document.location.toString()).searchParams.get('code')
-    console.log('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr ', code)
     const redirect_uri = new URL(document.location.origin ) +'/sign-up'
     await $fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
