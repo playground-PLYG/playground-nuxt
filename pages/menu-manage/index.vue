@@ -5,10 +5,10 @@
       @submit="onSubmitSelect"
       @reset="onResetSelect"
     >
-      <q-select v-model="selected" :options="searchOptions" label="선택" class="select" />
-      <q-input v-model="inputText" label="검색어를 입력하세요" class="input" />
+      <q-input outlined v-model="searchParam.menuNm" label="메뉴명" round dense flat class="input" />
+      <q-input outlined v-model="searchParam.menuUrl" label="메뉴URL" round dense flat class="input" />
       (사용여부<q-checkbox v-model="useYnSelected" val="Y" label="Y" /><q-checkbox v-model="useYnSelected" val="N" label="N" />)
-      <q-btn color="primary" label="검색" type="submit" class="button" /><q-btn color="white" text-color="black" label="초기화" type="reset" class="button" />
+      <q-btn color="primary" label="조회" type="submit" class="button" /><q-btn color="white" text-color="black" label="초기화" type="reset" class="button" />
     </q-form>
   </div>
   <div class="table">
@@ -16,28 +16,62 @@
       title="Menu"
       :rows="resData"
       :columns="columns"
-      :rows-per-page-options="[10]"
+      :rows-per-page-options="[0]"
       @row-click="clickRow"
     />
+    <q-btn color="primary" label="등록" style="margin-top: 1rem;" @click="showInsertDialog = true"/>
   </div>
-  <div class="form">
-    <h3>메뉴 등록/수정</h3>
-    <q-form
-      ref="insertForm"
-      @submit="onSubmit"
-      @reset="onReset"
+  <div>
+    <q-dialog
+      v-model="showInsertDialog"
+      @hide="onReset"
     >
-      <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
-      <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
-      <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
-      <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
-      <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
-      <q-select outlined v-model="param.useYn" :options="useOptions" label="사용여부" class="select" />
-      <div class="buttons">
-        <q-btn color="primary" label="등록하기" type="submit" class="button" />
-        <q-btn color="white" text-color="black" label="초기화" type="reset" class="button" />
-      </div>
-    </q-form>
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">메뉴 등록</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-form ref="insertForm">
+            <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
+            <q-select outlined v-model="param.useYn" :options="useOptions" label="사용여부" class="select" />
+          </q-form>
+        </q-card-section>
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="등록" @click="onSubmit" />
+          <q-btn flat text-color="black" label="닫기" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
+  <div>
+    <q-dialog
+      v-model="showUpdateDialog"
+      @hide="onReset"
+    >
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">메뉴 수정</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-form ref="insertForm">
+            <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
+            <q-select outlined v-model="param.useYn" :options="useOptions" label="사용여부" class="select" />
+          </q-form>
+        </q-card-section>
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="수정" @click="onSubmit" />
+          <q-btn flat text-color="black" label="닫기" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -105,6 +139,10 @@ let inputText = ref<any>();
 
 let useYnSelected = ref<any>(['Y', 'N']);
 
+let showInsertDialog = ref<boolean>(false);
+
+let showUpdateDialog = ref<boolean>(false);
+
 const useOptions = ['Y', 'N']
 
 const searchOptions = [
@@ -146,6 +184,8 @@ const selectAllMenu = async () => {
 
 const clickRow = (evt: any, row: any, index: any) => {
   param.value = { ...row }
+  console.log("evt: ", evt, " row: ", row, " index: ", index)
+  showUpdateDialog.value = true
 }
 
 const onSubmit = async () => {
@@ -184,31 +224,17 @@ const onReset = () => {
 
 const onSubmitSelect = async () => {
   // validation
-  if (selected.value != undefined && (inputText.value == '' || inputText.value == undefined)) {
-    alert('검색어를 입력 해 주세요.')
+  if (isEmpty(searchParam.value.menuNm) && isEmpty(searchParam.value.menuUrl)) {
+    alert('검색어를 적어도 하나 이상 입력 해 주세요.')
     return
   }
-  if (!Array.isArray(useYnSelected.value) || useYnSelected.value?.length == 0) {
+  if (isEmpty(useYnSelected.value)) {
     alert('사용여부를 적어도 하나 이상 선택 해 주세요.')
     return
   }
 
   // 사용여부 선택 시 param 에 값 할당
   searchParam.value.useYn = (useYnSelected.value.length == 1) ? useYnSelected.value[0] : ''
-
-  // 선택한 검색 항목에 입력값 넣기
-  if (selected.value != undefined) {
-    const selectedItem = selected.value.value
-    switch (selectedItem) {
-      case 'menuNm':
-      default:
-        searchParam.value.menuNm = inputText.value
-        break
-      case 'menuUrl':
-        searchParam.value.menuUrl = inputText.value
-        break
-    }
-  }
 
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/menu/select-by-condition", 
@@ -238,6 +264,12 @@ const onResetSelect = () => {
   inputText.value = undefined
   useYnSelected.value = ['Y', 'N']
 }
+
+const isEmpty = (val: any) => val == null || !(Object.keys(val) || val).length;
+
+// If typescript compiler is yelling because of the type `any`
+// const isEmpty = (val: Record<string, unknown> | null | undefined) =>
+//   val == null || !(Object.keys(val) || val).length;
 
 onMounted(() => {
   selectAllMenu()
