@@ -3,11 +3,19 @@
         <div class="q-gutter-md row items-start">
             <q-input outlined v-model="param.cdId" label="코드ID" round dense flat />
             <q-input outlined v-model="param.cdNm" label="코드명" round dense flat />
-            <q-input outlined v-model="param.upCdId" label="상위코드ID" round dense flat />
+            <q-input outlined v-model="param.upCdId" label="상위코드명" round dense flat />
+            <!-- <q-select filled round dense flat v-model="param.upCdId" :options="arr" stack-label label="상위코드ID"
+                :display-value="`${param.upCdId ? param.upCdId : '코드선택'}`" style="width: 200px">
+                <template v-slot:append>
+                    <q-icon v-if="param.upCdId !== null" class="cursor-pointer" name="clear"
+                        @click.stop.prevent="param.upCdId = ''" />
+                </template>
+            </q-select> -->
+
             <q-select outlined v-model="param.groupCdYn" :options="groupCdOptions" label="그룹코드여부" style="width: 200px" round
                 dense flat>
                 <template v-if="param.groupCdYn" v-slot:append>
-                    <q-icon name="cancel" @click.stop.prevent="param.groupCdYn = ''" class="cursor-pointer" />
+                    <q-icon name="clear" @click.stop.prevent="param.groupCdYn = ''" class="cursor-pointer" />
                 </template>
             </q-select>
             <q-btn color="primary" label="조회" @click="codeSearch" value="codeSearch"></q-btn>
@@ -15,10 +23,10 @@
     </div>
 
     <div class="q-pa-md">
+        <!-- <q-table title="코드관리" :rows="resData" :columns="columns" @row-click="clickRow"> -->
 
-
-        <q-table flat bordered title="코드관리" :rows="resData" row-key="sn" :columns="columns" selection="single"
-            v-model:selected="selected" class="my-sticky-header-table">
+        <q-table flat bordered title="코드관리" :rows="resData" row-key="sn" :columns="columns" v-model:selected="selected"
+            class="my-sticky-header-table" selection="single">
 
             <template v-slot:top-right>
                 <q-btn color="primary" label="등록/수정" @click="insert" />
@@ -48,13 +56,13 @@
                                 :rules="[codeNm_rules]" />
                             <q-checkbox left-label v-model="groupCdCheck" label="상위코드 선택" />
                             <q-select v-if="groupCdCheck" filled v-model="insertParam.upCdId" :options="arr"
-                                hint="상위코드를 선택하세요" :readonly="readonly">
+                                hint="상위코드를 선택하세요">
                             </q-select>
                             <q-input dense type="number" v-model="insertParam.sortSn" autofocus label="정렬순번" filled
                                 :rules="[sortSn_rules]" />
                         </q-card-section>
                         <q-card-actions align="right" class="text-primary">
-                            <q-btn flat label="종료" type="reset" v-close-popup @click="codeReset" />
+                            <q-btn flat label="닫기" type="reset" v-close-popup @click="codeReset" />
                             <q-btn flat label="등록" type="submit" />
                         </q-card-actions>
                     </q-form>
@@ -92,6 +100,14 @@ let groupCdCheck = ref(false);
 var arr = new Array();
 let readonly = ref(false);
 
+
+
+
+// const clickRow = (evt: any, row: any, index: any) => {
+//     updateParam.value = { ...row }
+//     console.log("###", updateParam.value)
+//     insert()
+// }
 
 
 //그룹코드여부
@@ -231,7 +247,7 @@ const SearchAll = async () => {
     searchData.value.forEach((item) => {
 
         if (item.groupCdYn == 'Y') {
-            const upcodeid = item.cdId
+            const upcodeid = item.cdNm
             arr.push(upcodeid)
         }
     })
@@ -242,6 +258,7 @@ const SearchAll = async () => {
     //정렬
     arr = uniqueArr.sort();
 }
+
 
 
 
@@ -296,7 +313,24 @@ const insert = async () => {
             readonly.value = false
         }
     }
+
+
+    // if (updateParam.value.cdId !== '') {
+    //     readonly.value = true
+
+    //     insertParam.value = updateParam.value
+
+    //     //상위코드값이 저장되어 있으면 코드 값 보이게 
+    //     if (updateParam.value.upCdId !== '') {
+    //         groupCdCheck.value = true
+    //     }
+    //     else { groupCdCheck.value = false }
+    // } else {
+    //     readonly.value = false
+    // }
 }
+
+
 
 
 //코드 등록
@@ -327,12 +361,12 @@ const insertCode = async () => {
             }
             // }
         } else {
-            //readonly.value = true 일시, cdid 중복 체크 X
+            // readonly.value = true 일시, cdid 중복 체크 X
             selected.value?.forEach((item) => {
                 updateParam.value = { ...item }
             })
 
-            if (updateParam.value.cdNm == insertParam.value.cdNm && updateParam.value.sortSn == insertParam.value.sortSn) {
+            if (updateParam.value.cdNm == insertParam.value.cdNm && updateParam.value.sortSn == insertParam.value.sortSn && updateParam.value.upCdId == insertParam.value.upCdId) {
                 alert('변경된 내용이 없습니다.')
                 return
             }
@@ -416,26 +450,3 @@ onMounted(() => {
 </script>
 
 
-<style lang="sass">
-.my-sticky-header-table
-  .q-table__top,
-  .q-table__bottom,
-  thead tr:first-child th
-
-    background-color: #dcdcdc
-
-  thead tr th
-    position: sticky
-    z-index: 1
-  thead tr:first-child th
-    top: 0
-
-
-  &.q-table--loading thead tr:last-child th
-
-    top: 48px
-
-
-  tbody
-    scroll-margin-top: 48px
-</style>
