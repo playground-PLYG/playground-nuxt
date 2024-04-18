@@ -7,16 +7,16 @@
                 <div class="text-h6" style="margin-bottom: 30px;">회원가입</div>
                 <div class="q-gutter-y-md column" style="max-width: 300px;">
     
-                <q-input outlined  v-model="param.mbrEmlAddr" label="이메일" :dense="dense" readonly :rules="[defaultRules]"/>
+                <q-input outlined  v-model="param.mberEmailAdres" label="이메일" :dense="dense" readonly :rules="[defaultRules]"/>
     
-                <q-input outlined  v-model="param.mbrNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
+                <q-input outlined  v-model="param.mberNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
     
-                <q-input outlined  v-model="param.mbrBrdt" label="생년월일" :dense="dense" type="tel" maxlength="8" :rules="[brdtRules]" placeholder="예)19881225"/>
+                <q-input outlined  v-model="param.mberBymd" label="생년월일" :dense="dense" type="tel" maxlength="8" :rules="[brdtRules]" placeholder="예)19881225"/>
     
-                <q-btn-toggle v-model="param.mbrGndrCd" spread no-caps toggle-color="primary" color="grey-2" text-color="black" unelevated size="sm" 
+                <q-btn-toggle v-model="param.mberSexdstnCode" spread no-caps toggle-color="primary" color="grey-2" text-color="black" unelevated size="sm" 
                     :options="[ {label: '남자', value: 'M'},{label: '여자', value: 'F'} ]" padding="11px" style="margin-bottom: 20px;"/>
     
-                <q-input outlined  v-model="param.mbrTelno" label="전화번호" :dense="dense" type="tel" maxlength="11" :rules="[telNoRules]" placeholder="예)01012345678"/>
+                <q-input outlined  v-model="param.mberTelno" label="전화번호" :dense="dense" type="tel" maxlength="11" :rules="[telNoRules]" placeholder="예)01012345678"/>
     
                 <br>
                 <br>
@@ -41,26 +41,26 @@ const store = useAuthStore();
 const show = ref(false)
 const dense = ref(true)
 let token = ref<any>('')
-let snsLogin = ref<any>('')
+let snsLogin = ref<string>("")
 const loginForm = ref<any>(null)
 
 interface Data {
-  mbrNo: string
-  mbrNm:string
-  mbrBrdt: string
-  mbrGndrCd: string
-  mbrEmlAddr:string
-  ciVl:string
-  diVl:string
-  mbrTelno: string
+  mberId: string
+  mberNm: string
+  mberBymd: string
+  mberSexdstnCode: string
+  mberEmailAdres:string
+  ciCn:string
+  diCn:string
+  mberTelno: string
 }
 
 interface Param {
-  mbrNm:string
-  mbrBrdt: string
-  mbrGndrCd: string
-  mbrEmlAddr:string
-  mbrTelno: string
+  mberNm:string
+  mberBymd: string
+  mberSexdstnCode: string
+  mberEmailAdres:string
+  mberTelno: string
 }
 interface Token {
 FetchResponse(FetchResponse: any): unknown;
@@ -69,11 +69,11 @@ FetchResponse(FetchResponse: any): unknown;
 }
 
 let param = ref<Param>({
-    mbrNm: '',
-    mbrBrdt: '',
-    mbrGndrCd: 'M',
-    mbrEmlAddr: '',
-    mbrTelno: ''
+    mberNm: '',
+    mberBymd: '',
+    mberSexdstnCode: 'M',
+    mberEmailAdres: '',
+    mberTelno: ''
 });
 
 interface KakaoUser {
@@ -97,6 +97,7 @@ interface NaverUser {
 
 onMounted(() => {
     loading.show()
+
     snsLogin = localStorage.getItem('snsLogin')
     if(snsLogin == 'KAKAO') {
         getTokenKAKAO()
@@ -210,14 +211,14 @@ const getEmail = async (email:string) => {
     const resData = result.data
     loading.hide()
     console.log('getEmail - resData.mbrNm ::::: ', resData.mbrNm)
-    if(resData.mbrNo == '0' || resData.mbrNo == null){ //회원가입 필요
+    if(resData.mberId == '0' || resData.mberId == null){ //회원가입 필요
         window.alert("회원가입이 필요합니다.")
-        param.value.mbrEmlAddr = email;
+        param.value.mberEmailAdres = email;
         show.value = true
     }else { //로그인 완료 
         localStorage.setItem('access_token', token)
         store.accessToken = token
-        store.userName = resData.mbrNm
+        store.userName = resData.mberNm
         window.alert("로그인 완료되었습니다.")
         console.log('getEmail - store.name ::: ', store.userName)
         store.snsLogin = snsLogin
@@ -236,8 +237,8 @@ const onSubmit = async () => {
         body: JSON.stringify(param.value) 
     })
     const resData = result.data
-    console.log('signUp - resData.mbrNm ::::: ', resData.mbrNm)
-    store.userName = resData.mbrNm
+    console.log('signUp - resData.mbrNm ::::: ', resData.mberNm)
+    store.userName = resData.mberNm
     console.log('onSubmit - store.name ::: ', store.userName)
     localStorage.setItem('access_token', token)
     store.accessToken = token
