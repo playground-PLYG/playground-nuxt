@@ -23,7 +23,7 @@
     "eslint-plugin-nuxt": "^4.0.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-vue": "^9.15.1",
-    "nuxt": "^3.8.1",
+    "nuxt": "^3.11.2",
     "nuxt-quasar-ui": "^2.0.6",
     "prettier": "^2.8.8",
     "sass": "^1.69.5",
@@ -35,6 +35,8 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
     "@quasar/extras": "^1.16.7",
+    "@vercel/analytics": "^1.2.2",
+    "@vercel/speed-insights": "^1.0.10",
     "dayjs-nuxt": "^2.1.9",
     "pinia": "^2.1.7",
     "quasar": "^2.13.0"

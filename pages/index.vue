@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
 import type { QBtnProps, QNotifyOptions } from 'quasar'
+import { SpeedInsights } from "@vercel/speed-insights/nuxt"
 
 const { dialog, fullscreen, bottomSheet, loading, loadingBar, notify, dark } = useQuasar()
 
@@ -94,6 +95,7 @@ const buttons: QBtnProps[] = [
 </script>
 <template>
   <q-page class="q-pl-lg">
+    <SpeedInsights/>
     <p class="text-h6 q-pt-md">
       Plugin Showcase
     </p>
