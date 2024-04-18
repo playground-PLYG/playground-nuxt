@@ -35,6 +35,7 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
     "@quasar/extras": "^1.16.7",
+    "@vercel/analytics": "^1.2.2",
     "dayjs-nuxt": "^2.1.9",
     "pinia": "^2.1.7",
     "quasar": "^2.13.0"
