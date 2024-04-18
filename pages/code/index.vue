@@ -1,9 +1,9 @@
 <template>
     <div class="q-pa-md">
         <div class="q-gutter-md row items-start">
-            <q-input outlined v-model="param.cdId" label="코드ID" round dense flat />
-            <q-input outlined v-model="param.cdNm" label="코드명" round dense flat />
-            <q-input outlined v-model="param.upCdId" label="상위코드명" round dense flat />
+            <q-input outlined v-model="param.codeId" label="코드ID" round dense flat />
+            <q-input outlined v-model="param.codeNm" label="코드명" round dense flat />
+            <q-input outlined v-model="param.upperCodeId" label="상위코드명" round dense flat />
             <!-- <q-select filled round dense flat v-model="param.upCdId" :options="arr" stack-label label="상위코드ID"
                 :display-value="`${param.upCdId ? param.upCdId : '코드선택'}`" style="width: 200px">
                 <template v-slot:append>
@@ -12,10 +12,10 @@
                 </template>
             </q-select> -->
 
-            <q-select outlined v-model="param.groupCdYn" :options="groupCdOptions" label="그룹코드여부" style="width: 200px" round
+            <q-select outlined v-model="param.groupCodeAt" :options="groupCdOptions" label="그룹코드여부" style="width: 200px" round
                 dense flat>
-                <template v-if="param.groupCdYn" v-slot:append>
-                    <q-icon name="clear" @click.stop.prevent="param.groupCdYn = ''" class="cursor-pointer" />
+                <template v-if="param.groupCodeAt" v-slot:append>
+                    <q-icon name="clear" @click.stop.prevent="param.groupCodeAt = ''" class="cursor-pointer" />
                 </template>
             </q-select>
             <q-btn color="primary" label="조회" @click="codeSearch" value="codeSearch"></q-btn>
@@ -50,15 +50,15 @@
 
                         </div>
                         <q-card-section class="q-pt-none">
-                            <q-input dense v-model="insertParam.cdId" autofocus label="코드ID" filled :rules="[codeid_rules]"
+                            <q-input dense v-model="insertParam.codeId" autofocus label="코드ID" filled :rules="[codeid_rules]"
                                 :readonly="readonly" />
-                            <q-input dense v-model="insertParam.cdNm" autofocus label="코드명" filled
+                            <q-input dense v-model="insertParam.codeNm" autofocus label="코드명" filled
                                 :rules="[codeNm_rules]" />
                             <q-checkbox left-label v-model="groupCdCheck" label="상위코드 선택" />
-                            <q-select v-if="groupCdCheck" filled v-model="insertParam.upCdId" :options="arr"
+                            <q-select v-if="groupCdCheck" filled v-model="insertParam.upperCodeId" :options="arr"
                                 hint="상위코드를 선택하세요">
                             </q-select>
-                            <q-input dense type="number" v-model="insertParam.sortSn" autofocus label="정렬순번" filled
+                            <q-input dense type="number" v-model="insertParam.sortOrdr" autofocus label="정렬순번" filled
                                 :rules="[sortSn_rules]" />
                         </q-card-section>
                         <q-card-actions align="right" class="text-primary">
@@ -79,21 +79,21 @@ import { type ApiResponse } from '../../interface/server';
 import { date, type QTableProps } from 'quasar';
 
 const columns = ref<QTableProps["columns"]>([
-    { name: 'cdId', align: 'left', label: '코드ID', field: 'cdId', sortable: true },
-    { name: 'cdNm', align: 'center', label: '코드명', field: 'cdNm' },
-    { name: 'upCdId', align: 'center', label: '상위코드ID', field: 'upCdId', sortable: true },
-    { name: 'groupCdYn', align: 'center', label: '그룹코드사용여부', field: 'groupCdYn' },
-    { name: 'sortSn', align: 'center', label: '정렬순번', field: 'sortSn', sortable: true },
-    { name: 'regMbrNo', align: 'center', label: '등록자', field: 'regMbrNo' },
-    { name: 'regDt', align: 'center', label: '등록일시', field: 'regDt' },
-    { name: 'mdfcnMbrNo', align: 'center', label: '수정자', field: 'mdfcnMbrNo' },
-    { name: 'dfcnDt', align: 'center', label: '수정일시', field: 'dfcnDt' },
+    { name: 'codeId', align: 'left', label: '코드ID', field: 'codeId', sortable: true },
+    { name: 'codeNm', align: 'center', label: '코드명', field: 'codeNm' },
+    { name: 'upperCodeId', align: 'center', label: '상위코드ID', field: 'upperCodeId', sortable: true },
+    { name: 'groupCodeAt', align: 'center', label: '그룹코드사용여부', field: 'groupCodeAt' },
+    { name: 'sortOrdr', align: 'center', label: '정렬순번', field: 'sortOrdr', sortable: true },
+    { name: 'registUsrId', align: 'center', label: '등록자', field: 'registUsrId' },
+    { name: 'registDt', align: 'center', label: '등록일시', field: 'registDt' },
+    { name: 'updtUsrId', align: 'center', label: '수정자', field: 'updtUsrId' },
+    { name: 'updtDt', align: 'center', label: '수정일시', field: 'updtDt' },
 ])
 
 
 //let insertForm = ref<any>(null);
 let prompt = ref(false);
-let resData = ref<Data[]>();
+let resData = ref<Data[]>([]);
 let searchData = ref<Data[]>();
 let selected = ref<Data[]>();
 let groupCdCheck = ref(false);
@@ -118,70 +118,66 @@ const groupCdOptions = [
 
 // api로 조회할 검색 조건 데이터 구조
 interface Search {
-    cdId: string
-    cdNm: string
-    upCdId: string
-    groupCdYn: string
-    sortSn: string
-    regMbrNo: string
-    mdfcnMbrNo: string
+    codeId: string
+    codeNm: string
+    upperCodeId: string
+    groupCodeAt: string
+    sortOrdr?: number
+    registUsrId: string
+    updtUsrId: string
 }
 
 
 // api로 조회할 데이터 구조
 interface Data {
-    sn: string
-    cdId: string
-    cdNm: string
-    upCdId: string
-    groupCdYn: string
-    sortSn: string
-    regMbrNo: string
-    mdfcnMbrNo: string
-    regDt: string
-    dfcnDt: string
+    codesn: string
+    codeId: string
+    codeNm: string
+    upperCodeId: string
+    groupCodeAt: string
+    sortOrdr?: number
+    registUsrId: string
+    updtUsrId: string
+    registDt: string
+    updtDt: string
 }
 
 
 let param = ref<Search>({
-    cdId: '',
-    cdNm: '',
-    upCdId: '',
-    groupCdYn: '',
-    sortSn: '',
-    regMbrNo: '',
-    mdfcnMbrNo: ''
+    codeId: '',
+    codeNm: '',
+    upperCodeId: '',
+    groupCodeAt: '',
+    registUsrId: '',
+    updtUsrId: ''
 });
 
 let deleteData = ref<Search>({
-    cdId: '',
-    cdNm: '',
-    upCdId: '',
-    groupCdYn: '',
-    sortSn: '',
-    regMbrNo: '',
-    mdfcnMbrNo: ''
+    codeId: '',
+    codeNm: '',
+    upperCodeId: '',
+    groupCodeAt: '',
+    registUsrId: '',
+    updtUsrId: ''
 });
 
 
 let insertParam = ref<Search>({
-    cdId: '',
-    cdNm: '',
-    upCdId: '',
-    groupCdYn: '',
-    sortSn: '',
-    regMbrNo: '',
-    mdfcnMbrNo: ''
+    codeId: '',
+    codeNm: '',
+    upperCodeId: '',
+    groupCodeAt: '',
+    registUsrId: '',
+    updtUsrId: ''
 });
 
 let updateParam = ref<Search>({
-    cdId: '',
-    cdNm: '',
-    upCdId: '',
-    groupCdYn: '',
-    sortSn: '',
-    regMbrNo: '',
-    mdfcnMbrNo: ''
+    codeId: '',
+    codeNm: '',
+    upperCodeId: '',
+    groupCodeAt: '',
+    registUsrId: '',
+    updtUsrId: ''
 });
 
 
@@ -246,8 +242,8 @@ const SearchAll = async () => {
 
     searchData.value.forEach((item) => {
 
-        if (item.groupCdYn == 'Y') {
-            const upcodeid = item.cdNm
+        if (item.groupCodeAt == 'Y') {
+            const upcodeid = item.codeNm
             arr.push(upcodeid)
         }
     })
@@ -270,7 +266,7 @@ const codeDelete = async () => {
     selected.value?.forEach(async (item) => {
         deleteData.value = { ...item }
     })
-    codeId = deleteData.value.cdId
+    codeId = deleteData.value.codeId
 
     if (codeId == "" || codeId == null || codeId == undefined) {
         alert('삭제할 코드를 선택하세요.')
@@ -298,14 +294,14 @@ const insert = async () => {
     if (selected.value !== null) {
         selected.value?.forEach((item) => {
             updateParam.value = { ...item }
-            findSn = item.sn
+            findSn = item.codesn
         })
         if (findSn !== '') {
             readonly.value = true
             insertParam.value = updateParam.value
 
             //상위코드값이 저장되어 있으면 코드 값 보이게 
-            if (updateParam.value.upCdId !== '') {
+            if (updateParam.value.upperCodeId !== '') {
                 groupCdCheck.value = true
             }
             else { groupCdCheck.value = false }
@@ -342,9 +338,9 @@ const insertCode = async () => {
 
     if (insertParam.value !== null) {
         resData.value?.forEach((item) => {
-            if (item.cdId == insertParam.value.cdId && item.upCdId == insertParam.value.upCdId) {
-                findId = item.cdId
-                findUpCdId = item.upCdId
+            if (item.codeId == insertParam.value.codeId && item.upperCodeId == insertParam.value.upperCodeId) {
+                findId = item.codeId
+                findUpCdId = item.upperCodeId
             }
         })
         if (readonly.value != true) {
@@ -352,7 +348,7 @@ const insertCode = async () => {
             //     alert('필수 항목을 모두 입력해주세요')
             //     return
             // } else {
-            if (insertParam.value.cdId == findId && insertParam.value.upCdId == findUpCdId) {
+            if (insertParam.value.codeId == findId && insertParam.value.upperCodeId == findUpCdId) {
                 alert('이미 등록된 코드입니다.')
                 return
             }
@@ -366,7 +362,7 @@ const insertCode = async () => {
                 updateParam.value = { ...item }
             })
 
-            if (updateParam.value.cdNm == insertParam.value.cdNm && updateParam.value.sortSn == insertParam.value.sortSn && updateParam.value.upCdId == insertParam.value.upCdId) {
+            if (updateParam.value.codeNm == insertParam.value.codeNm && updateParam.value.sortOrdr == insertParam.value.sortOrdr && updateParam.value.upperCodeId == insertParam.value.upperCodeId) {
                 alert('변경된 내용이 없습니다.')
                 return
             }
@@ -382,13 +378,13 @@ const submit = async () => {
     //그룹코드사용여부 
     const bool = groupCdCheck.value
     if (bool === true) {
-        insertParam.value.groupCdYn = 'N'
-        if (insertParam.value.upCdId == '') {
-            insertParam.value.groupCdYn = 'Y'
+        insertParam.value.groupCodeAt = 'N'
+        if (insertParam.value.upperCodeId == '') {
+            insertParam.value.groupCodeAt = 'Y'
         }
     } else {
-        insertParam.value.groupCdYn = 'Y'
-        insertParam.value.upCdId = ''
+        insertParam.value.groupCodeAt = 'Y'
+        insertParam.value.upperCodeId = ''
     }
 
     const result = await $fetch<ApiResponse<Data[]>>("/playground/public/code/codeSave", {
@@ -411,32 +407,32 @@ const codeReset = () => {
 
 
     deleteData.value = {
-        cdId: '',
-        cdNm: '',
-        upCdId: '',
-        groupCdYn: '',
-        sortSn: '',
-        regMbrNo: '',
-        mdfcnMbrNo: ''
+        codeId: '',
+        codeNm: '',
+        upperCodeId: '',
+        groupCodeAt: '',
+        sortOrdr: 0,
+        registUsrId: '',
+        updtUsrId: ''
     }
     insertParam.value = {
-        cdId: '',
-        cdNm: '',
-        upCdId: '',
-        groupCdYn: '',
-        sortSn: '',
-        regMbrNo: '',
-        mdfcnMbrNo: ''
+        codeId: '',
+        codeNm: '',
+        upperCodeId: '',
+        groupCodeAt: '',
+        sortOrdr: 0,
+        registUsrId: '',
+        updtUsrId: ''
     }
 
     updateParam.value = {
-        cdId: '',
-        cdNm: '',
-        upCdId: '',
-        groupCdYn: '',
-        sortSn: '',
-        regMbrNo: '',
-        mdfcnMbrNo: ''
+        codeId: '',
+        codeNm: '',
+        upperCodeId: '',
+        groupCodeAt: '',
+        sortOrdr: 0,
+        registUsrId: '',
+        updtUsrId: ''
     }
     codeSearch()
     SearchAll()

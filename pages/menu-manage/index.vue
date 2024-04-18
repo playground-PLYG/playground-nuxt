@@ -32,12 +32,12 @@
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-form ref="insertForm">
-            <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
-            <q-select outlined v-model="param.useYn" :options="useOptions" label="사용여부" class="select" />
+            <q-input v-model="param.menuNm" label="메뉴명" :rules="[(val: string) => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[(val: string) => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuDepth" label="메뉴레벨" :rules="[(val: string) => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuSortOrdr" label="정렬순서" :rules="[(val: string) => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.upperMenuSn" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
+            <q-select outlined v-model="param.useAt" :options="useOptions" label="사용여부" class="select" />
           </q-form>
         </q-card-section>
         <q-card-actions align="right" class="bg-white text-teal">
@@ -58,12 +58,12 @@
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-form ref="insertForm">
-            <q-input v-model="param.menuNm" label="메뉴명" :rules="[val => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[val => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuLvl" label="메뉴레벨" :rules="[val => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuSortOrder" label="정렬순서" :rules="[val => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.parentMenuId" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
-            <q-select outlined v-model="param.useYn" :options="useOptions" label="사용여부" class="select" />
+            <q-input v-model="param.menuNm" label="메뉴명" :rules="[(val: string) => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[(val: string) => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuDepth" label="메뉴레벨" :rules="[(val: string) => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.menuSortOrdr" label="정렬순서" :rules="[(val: string) => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
+            <q-input v-model="param.upperMenuSn" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
+            <q-select outlined v-model="param.useAt" :options="useOptions" label="사용여부" class="select" />
           </q-form>
         </q-card-section>
         <q-card-actions align="right" class="bg-white text-teal">
@@ -88,49 +88,46 @@ const searchForm = ref<any>();
 const ERROR_FIELD_EMPTY = "(은)는 필수값입니다.";
 
 interface Data {
-  menuId: string,
+  menuSn: number,
   menuNm: string,
   menuUrl: string,
-  menuLvl: string,
-  menuSortOrder: string,
-  parentMenuId: string,
-  regMbrNo: string,
-  regDt: string,
-  mdfcnMbrNo: string,
-  mdfcnDt: string,
-  useYn: string
+  menuDepth?: number,
+  menuSortOrdr?: number,
+  upperMenuSn: number,
+  useAt: string,
+  registUsrId: string,
+  registDt: string,
+  updtUsrId: string,
+  updtDt: string
 }
 
 interface Form {
-  menuId: string,
+  menuSn: string,
   menuNm: string,
   menuUrl: string,
-  menuLvl: string,
-  menuSortOrder: string,
-  parentMenuId: string,
-  useYn: string
+  menuDepth?: number,
+  menuSortOrdr?: number,
+  upperMenuSn: string,
+  useAt: string
 }
 
-let resData = ref<Data[]>();
+let resData = ref<Data[]>([]);
 
 let param = ref<Form>({
-  menuId: '',
+  menuSn: '',
   menuNm: '',
   menuUrl: '',
-  menuLvl: '',
-  menuSortOrder: '',
-  parentMenuId: '',
-  useYn: ''
+  upperMenuSn: '',
+  useAt: ''
 })
 
 let searchParam = ref<any>({
-  menuId: '',
+  menuSn: '',
   menuNm: '',
   menuUrl: '',
-  menuLvl: '',
-  menuSortOrder: '',
-  parentMenuId: '',
-  useYn: ''
+  menuSortOrdr: '',
+  upperMenuSn: '',
+  useAt: ''
 })
 
 let selected = ref<any>();
@@ -158,21 +155,21 @@ const searchOptions = [
 
 const columns = ref<QTableProps["columns"]>([
   {
-    name: 'menuId',
+    name: 'menuSn',
     label: '메뉴ID',
-    field: 'menuId',
+    field: 'menuSn',
     align: 'center'
   },
   { name: 'menuNm', label: '메뉴명', field: 'menuNm', align: 'left' },
   { name: 'menuUrl', label: '메뉴URL', field: 'menuUrl', align: 'left' },
-  { name: 'menuLvl', label: '메뉴레벨', field: 'menuLvl', align: 'center' },
-  { name: 'menuSortOrder', label: '정렬순서', field: 'menuSortOrder', align: 'center' },
-  { name: 'parentMenuId', label: '상위메뉴ID', field: 'parentMenuId', align: 'left' },
-  { name: 'useYn', label: '사용여부', field: 'useYn', align: 'center' },
-  { name: 'regMbrNo', label: '등록자', field: 'regMbrNo', align: 'left' },
-  { name: 'regDt', label: '등록일시', field: 'regDt', align: 'left' },
-  { name: 'mdfcnMbrNo', label: '수정자', field: 'mdfcnMbrNo', align: 'left' },
-  { name: 'mdfcnDt', label: '수정일시', field: 'mdfcnDt', align: 'left' }
+  { name: 'menuDepth', label: '메뉴레벨', field: 'menuDepth', align: 'center' },
+  { name: 'menuSortOrdr', label: '정렬순서', field: 'menuSortOrdr', align: 'center' },
+  { name: 'upperMenuSn', label: '상위메뉴ID', field: 'upperMenuSn', align: 'left' },
+  { name: 'useAt', label: '사용여부', field: 'useAt', align: 'center' },
+  { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'left' },
+  { name: 'registDt', label: '등록일시', field: 'registDt', align: 'left' },
+  { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'left' },
+  { name: 'updtDt', label: '수정일시', field: 'updtDt', align: 'left' }
 ])
 
 const selectAllMenu = async () => {
@@ -212,13 +209,11 @@ const onSubmit = async () => {
 
 const onReset = () => {
   param.value = {
-    menuId: '',
+    menuSn: '',
     menuNm: '',
     menuUrl: '',
-    menuLvl: '',
-    menuSortOrder: '',
-    parentMenuId: '',
-    useYn: ''
+    upperMenuSn: '',
+    useAt: ''
   }
 }
 
