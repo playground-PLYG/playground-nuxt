@@ -6,8 +6,12 @@
                 
                 <div class="text-h6" style="margin-bottom: 30px;">회원가입</div>
                 <div class="q-gutter-y-md column" style="max-width: 300px;">
+
+                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[defaultRules]"/>
     
-                <q-input outlined  v-model="param.mberEmailAdres" label="이메일" :dense="dense" readonly :rules="[defaultRules]"/>
+                <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[defaultRules]"/>
+
+                <q-btn unelevated color="primary" text-color="white" label="중복체크" @click="dupCheck"  />
     
                 <q-input outlined  v-model="param.mberNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
     
@@ -38,10 +42,10 @@ const { loading } = useQuasar()
 
 const router = useRouter();
 const store = useAuthStore();
-const show = ref(false)
+const show = ref(true)
 const dense = ref(true)
-let token = ref<any>('')
-let snsLogin = ref<string>("")
+let token:string = ''
+let snsLogin:string = ''
 const loginForm = ref<any>(null)
 
 interface Data {
@@ -53,10 +57,12 @@ interface Data {
   ciCn:string
   diCn:string
   mberTelno: string
+  dupCheckYn: string
 }
 
 interface Param {
-  mberNm:string
+  mberId: string
+  mberNm: string
   mberBymd: string
   mberSexdstnCode: string
   mberEmailAdres:string
@@ -68,7 +74,10 @@ FetchResponse(FetchResponse: any): unknown;
   refresh_token: string
 }
 
+let dupCheckYn = '';
+
 let param = ref<Param>({
+    mberId: '',
     mberNm: '',
     mberBymd: '',
     mberSexdstnCode: 'M',
@@ -98,7 +107,7 @@ interface NaverUser {
 onMounted(() => {
     loading.show()
 
-    snsLogin = localStorage.getItem('snsLogin')
+    snsLogin = localStorage.getItem('snsLogin') || ''
     if(snsLogin == 'KAKAO') {
         getTokenKAKAO()
     }else if(snsLogin == 'NAVER') {
@@ -210,7 +219,7 @@ const getEmail = async (email:string) => {
     })
     const resData = result.data
     loading.hide()
-    console.log('getEmail - resData.mbrNm ::::: ', resData.mbrNm)
+    console.log('getEmail - resData.mbrNm ::::: ', resData.mberNm)
     if(resData.mberId == '0' || resData.mberId == null){ //회원가입 필요
         window.alert("회원가입이 필요합니다.")
         param.value.mberEmailAdres = email;
@@ -250,6 +259,36 @@ const onSubmit = async () => {
 
 const cancel = () => {
     router.push({ path: "/" });
+}
+
+const dupCheck = async () => {
+    console.log(param.value.mberId)
+    console.log(param.value.mberEmailAdres)
+
+    if(param.value.mberId == ''){
+        window.alert('회원ID를 입력해 주세요.')
+        return;
+    }
+
+    if(param.value.mberEmailAdres == ''){
+        window.alert('회원이메일을 입력해 주세요.')
+        return;
+    }
+
+    loading.show()
+    const result = await $fetch<ApiResponse<Data>>('/playground/public/member/memberDupCheck', {
+        method: 'POST',
+        body: JSON.stringify(param.value) 
+    })
+    loading.hide()
+
+    if(result.data.dupCheckYn == "Y"){
+        window.alert('중복된 회원으로  가입하실 수 없습니다.')
+        return;
+    }else{
+        dupCheckYn = 'N'
+    }
+    
 }
 
 const nameRules = (val: string) => {
