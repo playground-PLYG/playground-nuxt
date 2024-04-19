@@ -12,8 +12,8 @@
                 </template>
             </q-select> -->
 
-            <q-select outlined v-model="param.groupCodeAt" :options="groupCdOptions" label="그룹코드여부" style="width: 200px" round
-                dense flat>
+            <q-select outlined v-model="param.groupCodeAt" :options="groupCdOptions" label="그룹코드여부" style="width: 200px"
+                round dense flat>
                 <template v-if="param.groupCodeAt" v-slot:append>
                     <q-icon name="clear" @click.stop.prevent="param.groupCodeAt = ''" class="cursor-pointer" />
                 </template>
@@ -25,7 +25,7 @@
     <div class="q-pa-md">
         <!-- <q-table title="코드관리" :rows="resData" :columns="columns" @row-click="clickRow"> -->
 
-        <q-table flat bordered title="코드관리" :rows="resData" row-key="sn" :columns="columns" v-model:selected="selected"
+        <q-table flat bordered title="코드관리" :rows="resData" row-key="codeSn" :columns="columns" v-model:selected="selected"
             class="my-sticky-header-table" selection="single">
 
             <template v-slot:top-right>
@@ -50,8 +50,8 @@
 
                         </div>
                         <q-card-section class="q-pt-none">
-                            <q-input dense v-model="insertParam.codeId" autofocus label="코드ID" filled :rules="[codeid_rules]"
-                                :readonly="readonly" />
+                            <q-input dense v-model="insertParam.codeId" autofocus label="코드ID" filled
+                                :rules="[codeid_rules]" :readonly="readonly" />
                             <q-input dense v-model="insertParam.codeNm" autofocus label="코드명" filled
                                 :rules="[codeNm_rules]" />
                             <q-checkbox left-label v-model="groupCdCheck" label="상위코드 선택" />
