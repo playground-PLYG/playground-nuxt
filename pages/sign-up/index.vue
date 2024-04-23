@@ -11,9 +11,11 @@
     
                 <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[emailRules]"/>
                 
-                <q-btn unelevated color="primary" text-color="white" label="중복체크" @click="dupCheck"  />
+                <q-btn unelevated color="primary" text-color="white" label="중복체크" style="margin-bottom: 20px;" @click="dupCheck"  />
                 
                 <q-input outlined  v-model="param.mberPassword" label="비밀번호" :dense="dense" type="password" :rules="[passwordRules]" />
+
+                <q-input outlined  v-model="param.mberPasswordCheck" label="비밀번호 확인" :dense="dense" type="password" :rules="[passwordCheckRules]" />
 
                 <q-input outlined  v-model="param.mberNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
     
@@ -65,6 +67,7 @@ interface Data {
 interface Param {
   mberId: string
   mberPassword:string
+  mberPasswordCheck:string
   mberNm: string
   mberBymd: string
   mberSexdstnCode: string
@@ -82,6 +85,7 @@ let dupCheckYn = '';
 let param = ref<Param>({
     mberId: '',
     mberPassword:'',
+    mberPasswordCheck:'',
     mberNm: '',
     mberBymd: '',
     mberSexdstnCode: 'M',
@@ -279,10 +283,11 @@ const dupCheck = async () => {
     loading.hide()
 
     if(result.data == 'Y'){
-        window.alert('중복된 회원으로  가입하실 수 없습니다.')
+        window.alert('중복된 회원으로 가입하실 수 없습니다.')
         dupCheckYn = 'Y'
         return;
     }else{
+        window.alert('회원가입 가능한 ID입니다.')
         dupCheckYn = 'N'
     }
     
@@ -320,15 +325,26 @@ const emailRules = (val: string) => {
 
 const defaultRules = (val: string) => {
     if(!val){
-        return '비밀번호를 입력해주세요.'
+        cancel
     }
     return true
 } 
 
 const passwordRules = (val: string) => {
     if(!val){
-        cancel
+        return '비밀번호를 입력해주세요.'
     }
+    return true
+} 
+
+const passwordCheckRules = (val: string) => {
+    if(!val){
+        return '비밀번호를 다시 입력해주세요.'
+    }
+    if(val != param.value.mberPassword) {
+        return '비밀번호가 일치하지 않습니다.'
+    }
+
     return true
 } 
 
