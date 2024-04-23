@@ -7,12 +7,14 @@
                 <div class="text-h6" style="margin-bottom: 30px;">회원가입</div>
                 <div class="q-gutter-y-md column" style="max-width: 300px;">
 
-                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[defaultRules]"/>
+                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[idRules]"/>
     
-                <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[defaultRules]"/>
-
+                <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[emailRules]"/>
+                
                 <q-btn unelevated color="primary" text-color="white" label="중복체크" @click="dupCheck"  />
-    
+                
+                <q-input outlined  v-model="param.mberPassword" label="비밀번호" :dense="dense" type="password" :rules="[passwordRules]" />
+
                 <q-input outlined  v-model="param.mberNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
     
                 <q-input outlined  v-model="param.mberBymd" label="생년월일" :dense="dense" type="tel" maxlength="8" :rules="[brdtRules]" placeholder="예)19881225"/>
@@ -24,7 +26,7 @@
     
                 <br>
                 <br>
-                <q-btn unelevated color="primary" text-color="white" label="회원가입" type="submit"  />
+                <q-btn unelevated color="primary" text-color="white" label="회원가입" type="submit" />
                 <q-btn outline color="primary" label="취소" @click="cancel" />
     
                 </div>
@@ -62,6 +64,7 @@ interface Data {
 
 interface Param {
   mberId: string
+  mberPassword:string
   mberNm: string
   mberBymd: string
   mberSexdstnCode: string
@@ -78,6 +81,7 @@ let dupCheckYn = '';
 
 let param = ref<Param>({
     mberId: '',
+    mberPassword:'',
     mberNm: '',
     mberBymd: '',
     mberSexdstnCode: 'M',
@@ -105,16 +109,16 @@ interface NaverUser {
 
 
 onMounted(() => {
-    loading.show()
+    // loading.show()
 
-    snsLogin = localStorage.getItem('snsLogin') || ''
-    if(snsLogin == 'KAKAO') {
-        getTokenKAKAO()
-    }else if(snsLogin == 'NAVER') {
-        getTokenNAVER()
-    }else if(snsLogin == 'GOOGLE') {
-        getTokenGOOGLE()
-    }
+    // snsLogin = localStorage.getItem('snsLogin') || ''
+    // if(snsLogin == 'KAKAO') {
+    //     getTokenKAKAO()
+    // }else if(snsLogin == 'NAVER') {
+    //     getTokenNAVER()
+    // }else if(snsLogin == 'GOOGLE') {
+    //     getTokenGOOGLE()
+    // }
     //getToken();
 })
 
@@ -240,21 +244,23 @@ const onSubmit = async () => {
 
     // const validateResult = loginForm.value?.validate()
     // console.log('validateResult ::: ', validateResult)
-    loading.show()
-    const result = await $fetch<ApiResponse<Data>>('/playground/public/pgMember/sign-up', {
-        method: 'POST',
-        body: JSON.stringify(param.value) 
-    })
-    const resData = result.data
-    console.log('signUp - resData.mbrNm ::::: ', resData.mberNm)
-    store.userName = resData.mberNm
-    console.log('onSubmit - store.name ::: ', store.userName)
-    localStorage.setItem('access_token', token)
-    store.accessToken = token
-    loading.hide()
-    window.alert("회원가입 완료되었습니다.")
-    store.snsLogin = snsLogin
-    router.push({ path: "/" });
+    if(dupCheckYn != 'N') {
+        window.alert('중복 체크를 해주세요.')
+    }else {
+        loading.show()
+        const result = await $fetch<ApiResponse<Data>>('/playground/public/member/sign-up', {
+            method: 'POST',
+            body: JSON.stringify(param.value) 
+        })
+        const resData = result.data
+        //store.userName = resData.mberNm
+        //localStorage.setItem('access_token', token)
+        //store.accessToken = token
+        loading.hide()
+        window.alert("회원가입 완료되었습니다.")
+        //store.snsLogin = snsLogin
+        router.push({ path: "/" });
+    }
 }
 
 const cancel = () => {
@@ -265,25 +271,16 @@ const dupCheck = async () => {
     console.log(param.value.mberId)
     console.log(param.value.mberEmailAdres)
 
-    if(param.value.mberId == ''){
-        window.alert('회원ID를 입력해 주세요.')
-        return;
-    }
-
-    if(param.value.mberEmailAdres == ''){
-        window.alert('회원이메일을 입력해 주세요.')
-        return;
-    }
-
     loading.show()
-    const result = await $fetch<ApiResponse<Data>>('/playground/public/member/memberDupCheck', {
+    const result = await $fetch<ApiResponse<String>>('/playground/public/member/memberDupCheck', {
         method: 'POST',
         body: JSON.stringify(param.value) 
     })
     loading.hide()
 
-    if(result.data.dupCheckYn == "Y"){
+    if(result.data == 'Y'){
         window.alert('중복된 회원으로  가입하실 수 없습니다.')
+        dupCheckYn = 'Y'
         return;
     }else{
         dupCheckYn = 'N'
@@ -304,7 +301,31 @@ const nameRules = (val: string) => {
     return true
 }
 
+const idRules = (val: string) => {
+    if(!val){
+        return 'ID을 입력해주세요.'
+    }
+    return true
+}
+
+const emailRules = (val: string) => {
+    if(!val){
+        return '이메일을 입력해주세요.'
+    }
+    if(emailCheck(val)){
+        return '유효하지 않은 이메일입니다.'
+    }
+    return true
+}
+
 const defaultRules = (val: string) => {
+    if(!val){
+        return '비밀번호를 입력해주세요.'
+    }
+    return true
+} 
+
+const passwordRules = (val: string) => {
     if(!val){
         cancel
     }
@@ -356,4 +377,12 @@ const checkNumber = (val: string) => {
     return !val.match(/[0-9]/g);
 }
 
+function emailCheck(email_address : string){     
+	var email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+	if(email_regex.test(email_address)){ 
+		return false; 
+	}else{
+		return true;
+	}
+}
 </script>
