@@ -18,6 +18,7 @@
 import { ref } from 'vue';
 import { date, type QTableProps } from 'quasar';
 import { type ApiResponse } from '../../interface/server';
+const { loading } = useQuasar();
 
 const columns = ref<QTableProps["columns"]>([
     { name: 'mberId', align: 'center', label: '회원아이디', field: 'mberId', sortable: false },
@@ -56,15 +57,17 @@ const memberSearch = async () => {
     console.log("mberNo:::::" + param.value.mberId);
     console.log("mberNm:::::" + param.value.mberNm);
 
+    loading.show()
     const result = await $fetch<ApiResponse<Data[]>>("/playground/public/member/getMberList", {
         method: 'POST',
         body: JSON.stringify(param.value)
     })
     resData.value = result.data;
+    loading.hide()
 };
 
 onMounted(() => {
     memberSearch()
 })
 
-</script>z
+</script>

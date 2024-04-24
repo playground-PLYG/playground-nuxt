@@ -9,9 +9,9 @@ export const useAuthStore = defineStore('auth', () => {
   const isLogin = computed(() => accessToken?.value == ''? false : true)
 
   function resetAuth() {
-    accessToken = ''
-    userName = ''
-    snsLogin = ''
+    accessToken.value = ''
+    userName.value = ''
+    snsLogin.value = ''
   }
 
   return { accessToken, userName, snsLogin, isLogin, resetAuth}
