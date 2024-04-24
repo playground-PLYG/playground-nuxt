@@ -7,7 +7,7 @@
                 <div class="text-h6" style="margin-bottom: 30px;">회원가입</div>
                 <div class="q-gutter-y-md column" style="max-width: 300px;">
 
-                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[idRules]"/>
+                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[idRules]" />
     
                 <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[emailRules]"/>
                 
@@ -41,13 +41,14 @@ import { useRouter } from "vue-router";
 import { onMounted } from 'vue'
 import { useAuthStore } from '../../stores/useAuthStore' 
 import { type ApiResponse } from '../../interface/server';
-import type { FetchResponse } from "ofetch";
-const { loading } = useQuasar()
+const { loading } = useQuasar();
 
 const router = useRouter();
 const store = useAuthStore();
 const show = ref(true)
 const dense = ref(true)
+const inpMberId = ref<any>(null)
+const inpMberEmail = ref<any>(null)
 let token:string = ''
 let snsLogin:string = ''
 const loginForm = ref<any>(null)
@@ -252,7 +253,7 @@ const onSubmit = async () => {
         window.alert('중복 체크를 해주세요.')
     }else {
         loading.show()
-        const result = await $fetch<ApiResponse<Data>>('/playground/public/member/sign-up', {
+        const result = await $fetch<ApiResponse<Data>>('/playground/public/member/addMber', {
             method: 'POST',
             body: JSON.stringify(param.value) 
         })
@@ -275,8 +276,18 @@ const dupCheck = async () => {
     console.log(param.value.mberId)
     console.log(param.value.mberEmailAdres)
 
+    if(idRules(param.value.mberId) != true) {
+        inpMberId.value?.focus()
+        return;
+    }
+
+    if(emailRules(param.value.mberEmailAdres) != true) {
+        inpMberEmail.value?.focus()
+        return;
+    }
+
     loading.show()
-    const result = await $fetch<ApiResponse<String>>('/playground/public/member/memberDupCheck', {
+    const result = await $fetch<ApiResponse<String>>('/playground/public/member/getMberDupCeck', {
         method: 'POST',
         body: JSON.stringify(param.value) 
     })
