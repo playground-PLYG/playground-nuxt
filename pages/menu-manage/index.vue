@@ -1,53 +1,79 @@
 <template>
-  <div class="search">
-    <q-form
-      ref="searchForm"
-      @submit="onSubmitSelect"
-      @reset="onResetSelect"
-    >
-      <q-input outlined v-model="searchParam.menuNm" label="메뉴명" round dense flat class="input" />
-      <q-input outlined v-model="searchParam.menuUrl" label="메뉴URL" round dense flat class="input" />
-      (사용여부<q-checkbox v-model="useYnSelected" val="Y" label="Y" /><q-checkbox v-model="useYnSelected" val="N" label="N" />)
-      <q-btn color="primary" label="조회" type="submit" class="button" /><q-btn color="white" text-color="black" label="초기화" type="reset" class="button" />
-    </q-form>
+  <div class="content">
+    <div class="title">
+      <div class="text-h4">
+        <q-icon name="chat" /> 메뉴관리
+      </div>
+    </div>
+    <div class="search">
+      <q-form
+        ref="searchForm"
+        @submit="onSubmitSelect"
+        @reset="onResetSelect"
+      >
+        <q-input outlined v-model="searchParam.menuNm" label="메뉴명" round dense flat class="input" />
+        <q-input outlined v-model="searchParam.menuUrl" label="메뉴URL" round dense flat class="input" />
+        <q-select outlined v-model="searchParam.useAt" :options="useAtSelectedOption" label="사용여부" round dense flat class="select"/>
+        <!--(사용여부<q-checkbox v-model="useYnSelected" val="Y" label="Y" /><q-checkbox v-model="useYnSelected" val="N" label="N" />)-->
+        <q-btn push class="button" color="green-7" label="조회" type="submit" />
+        <q-btn push class="button" color="green-7" label="초기화" type="reset" />
+      </q-form>
+    </div>
+    <div class="table">
+      <q-table
+        :rows="resData"
+        :columns="columns"
+        row-key="menuSn"
+        v-model:selected="selected"
+        selection="multiple"
+        :rows-per-page-options="[0]"
+        @row-click="clickRow"
+      />
+    </div>
+    <div class="proc">
+      <q-btn push class="button" color="primary" label="등록" @click="showInsertDialog = true"/>
+      <q-btn push class="button" color="negative" label="삭제" />
+      <q-btn push class="buttonR" color="warning" label="사용여부 변경"/>
+    </div>
   </div>
-  <div class="table">
-    <q-table
-      title="Menu"
-      :rows="resData"
-      :columns="columns"
-      :rows-per-page-options="[0]"
-      @row-click="clickRow"
-    />
-    <q-btn color="primary" label="등록" style="margin-top: 1rem;" @click="showInsertDialog = true"/>
-  </div>
-  <div>
+  
+  <div class="popup">
     <q-dialog
       v-model="showInsertDialog"
       @hide="onReset"
     >
-      <q-card style="width: 700px; max-width: 80vw;">
-        <q-card-section>
-          <div class="text-h6">메뉴 등록</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-form ref="insertForm">
-            <q-input v-model="param.menuNm" label="메뉴명" :rules="[(val: string) => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[(val: string) => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuDepth" label="메뉴레벨" :rules="[(val: string) => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.menuSortOrdr" label="정렬순서" :rules="[(val: string) => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
-            <q-input v-model="param.upperMenuSn" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
-            <q-select outlined v-model="param.useAt" :options="useOptions" label="사용여부" class="select" />
-          </q-form>
-        </q-card-section>
-        <q-card-actions align="right" class="bg-white text-teal">
-          <q-btn flat label="등록" @click="onSubmit" />
-          <q-btn flat text-color="black" label="닫기" v-close-popup />
-        </q-card-actions>
-      </q-card>
+      <q-layout container>
+        <q-header >
+          <q-toolbar class="bg-primary" >
+            <q-toolbar-title>등록</q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
+        </q-header>
+        <q-page-container class="bg-white">
+          <q-card>
+            <q-card-section>
+              <q-form ref="insertForm">
+                  <q-input v-model="param.menuNm" label="메뉴명" :rules="[(val: string) => !!val || '메뉴명' + ERROR_FIELD_EMPTY]" class="input" outlined />
+                  <q-input v-model="param.menuUrl" label="메뉴URL" :rules="[(val: string) => !!val || '메뉴URL' + ERROR_FIELD_EMPTY]" class="input" outlined />
+                  <q-input v-model="param.menuDepth" label="메뉴레벨" :rules="[(val: string) => !!val || '메뉴레벨' + ERROR_FIELD_EMPTY]" class="input" outlined />
+                  <q-input v-model="param.menuSortOrdr" label="정렬순서" :rules="[(val: string) => !!val || '정렬순서' + ERROR_FIELD_EMPTY]" class="input" outlined />
+                  <q-input v-model="param.upperMenuSn" label="상위메뉴ID" style="padding-bottom: 20px;" class="input" outlined />
+                  <q-select outlined v-model="param.useAt" :options="useOptions" label="사용여부" class="select" />
+              </q-form>
+            </q-card-section>
+          </q-card>
+        </q-page-container>
+        <q-footer>
+          <q-toolbar class="bg-white">
+            <q-toolbar-title></q-toolbar-title>
+            <q-btn push color="primary" label="저장" @click="onSubmit" />
+          </q-toolbar>
+        </q-footer>
+      </q-layout>
     </q-dialog>
   </div>
-  <div>
+
+  <div class="popup">
     <q-dialog
       v-model="showUpdateDialog"
       @hide="onReset"
@@ -130,17 +156,21 @@ let searchParam = ref<any>({
   useAt: ''
 })
 
+let useAtSelectedOption = [
+    '전체', 'Y', 'N'
+]
+
 let selected = ref<any>();
 
 let inputText = ref<any>();
 
-let useYnSelected = ref<any>(['Y', 'N']);
+let useYnSelected = ref<any>(['전체', 'Y', 'N']);
 
 let showInsertDialog = ref<boolean>(false);
 
 let showUpdateDialog = ref<boolean>(false);
 
-const useOptions = ['Y', 'N']
+const useOptions = ['','Y', 'N']
 
 const searchOptions = [
   {
@@ -272,51 +302,53 @@ onMounted(() => {
 
 </script>
 <style>
-.search {
+.content {
   margin-top: 3rem;
   margin-left: 5rem;
+  margin-right: 5rem;
+}
+
+.title {
+  margin-top: 3rem;
+}
+
+.search {
+  margin-top: 2rem;
 }
 
 .search .select {
   display: inline-block;
   vertical-align: middle;
-  width: 10%;
-  padding-right: 1rem;
+  width: 15%;
+  padding-right: 0.5rem;
 }
 
 .search .input {
   display: inline-block;
   vertical-align: middle;
-  width: 20%;
-  padding-right: 1rem;
+  width: 15%;
+  padding-right: 0.5rem;
 }
 
-.button {
-  display: inline-block;
-  margin-left: 1rem;
+.search .button {
+  margin-right: 0.5rem;
 }
 
 .table {
-  margin-left: 5rem;
-  margin-right: 5rem;
   margin-top: 1rem;
 }
 
-.form {
-  margin-top: 7rem;
-  margin-left: 5rem;
+.proc {
+  margin-top: 1rem;
 }
 
-.form .input
-, .form .select
-{
-  width: 20rem;
-  padding-top: 5px;
+.proc .button {
+  margin-right: 0.5rem;
 }
 
-.buttons {
-  margin-top: 5rem;
-  width: 100%;
-  text-align: center;
+.proc .buttonR {
+  margin-left: 0.5rem;
+  float: right;
 }
+
 </style>
