@@ -9,7 +9,7 @@
             <div class="q-gutter-md row items-start">
                 <q-input outlined v-model="param.mberId" label="회원아이디" round dense flat class="input"/>
                 <q-input outlined v-model="param.mberNm" label="회원명" round dense flat class="input"/>
-                <q-btn push color="green-7" label="조회" @click="memberSearch" value="memberSearch"></q-btn>
+                <q-btn push color="green-7" class="button" label="조회" @click="memberSearch" value="memberSearch"></q-btn>
                 <q-btn push color="green-7" class="button" label="초기화" @click="reset" />
             </div>
         </div>
@@ -36,7 +36,8 @@ const columns = ref<QTableProps["columns"]>([
     {
       name: 'index',
       label: '순번',
-      field: 'index'
+      field: 'index',
+      align: 'center'
     },
     { name: 'mberId', align: 'center', label: '회원아이디', field: 'mberId', sortable: false },
     { name: 'mberNm', align: 'center', label: '회원명', field: 'mberNm', sortable: false },
@@ -89,9 +90,6 @@ const reset = () => {
 }
 
 const memberSearch = async () => {
-
-    console.log("mberNo:::::" + param.value.mberId);
-    console.log("mberNm:::::" + param.value.mberNm);
 
     loading.show()
     const result = await $fetch<ApiResponse<Data[]>>("/playground/public/member/getMberList", {

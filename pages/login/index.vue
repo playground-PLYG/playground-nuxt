@@ -1,22 +1,37 @@
 <template>
-  <q-page class="q-pl-lg">
-    <p class="text-h6 q-pt-md">
-      Login
-    </p>
-    <q-btn flat padding="none" @click="kakao">
-      <img style="width: 180px;" src="../../assets/kakao_login.png">
-    </q-btn>
-    <br>
-    <!-- <br>
-    <q-btn flat padding="none" @click="google">
-      <img style="width: 180px;" src="../../assets/google_login.png">
-    </q-btn>
-    <br> -->
-    <br>
-    <q-btn flat padding="none" @click="naver">
-      <img style="width: 180px;" src="../../assets/naver_login.png">
-    </q-btn>
-  </q-page>
+    <div class="content">
+      <div class="title">
+        <div class="text-h4">
+          <q-icon name="login" /> LOGIN
+        </div>
+      </div>
+      <div class="search">
+        <q-form ref="loginForm"  @submit="login">
+          <q-input outlined label="ID"  v-model="param.mberId" :dense="dense" class="input" :rules="[idRules]" style="width: 175px;"/>
+          <br>
+          <q-input outlined label="PASSWORD"  v-model="param.mberPassword"  type="password" :dense="dense" class="input" :rules="[passwordRules]"  style="width: 175px;"/>
+          <br>
+          <q-btn push class="button" color="green-7" label="로그인" type="submit"/>
+          <q-btn push class="button" color="green-7" label="회원가입" type="submit" to="/sign-up"/>
+        </q-form>
+      </div>
+      <div class="search">
+        <q-btn flat padding="none" @click="kakao">
+          <img style="width: 180px;" src="../../assets/kakao_login.png">
+        </q-btn>
+        <br>
+        <!-- <br>
+        <q-btn flat padding="none" @click="google">
+          <img style="width: 180px;" src="../../assets/google_login.png">
+        </q-btn>
+        <br> -->
+        <br>
+        <q-btn flat padding="none" @click="naver">
+          <img style="width: 180px;" src="../../assets/naver_login.png">
+        </q-btn>
+      </div>
+    </div>
+
 </template>
 
 
@@ -24,6 +39,28 @@
 import { useAuthStore } from '../../stores/useAuthStore' 
 const store = useAuthStore()
 const router = useRouter()
+import { type ApiResponse } from '../../interface/server';
+const { loading } = useQuasar();
+const dense = ref(true)
+const loginForm = ref<any>(null)
+
+interface Param {
+  mberId: string
+  mberPassword:string
+}
+
+interface ResData {
+  token: string
+}
+
+let param = ref<Param>({
+    mberId: '',
+    mberPassword:''
+});
+
+let resData = ref<ResData>({
+  token: ''
+});
 
 async function kakao() {
   const client_id = '68ae4b196239138e24e76a6664659155'
@@ -57,5 +94,85 @@ async function google() {
   })
 }
 
+const login = async () => {
+  loading.show()
+  const result = await $fetch<ApiResponse<ResData>>('/playground/public/member/signIn', {
+      method: 'POST',
+      body: JSON.stringify(param.value) 
+  })
+  .then(result => {
+    loading.hide()
+    router.push({ path: "/" });
+  })
+  .catch(err => {
+    loading.hide()
+    return
+  })
+}
+
+const idRules = (val: string) => {
+  if(!val){
+        return 'ID를 입력해주세요.'
+    }
+    return true
+}
+
+const passwordRules = (val: string) => {
+  if(!val){
+        return 'PASSWORD를 입력해주세요.'
+    }
+    return true
+}
 </script>
+<style>
+.content {
+  margin-top: 3rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
+}
+
+.title {
+  margin-top: 3rem;
+}
+
+.search {
+  margin-top: 2rem;
+}
+
+.search .select {
+  display: inline-block;
+  vertical-align: middle;
+  width: 15%;
+  padding-right: 0.5rem;
+}
+
+.search .input {
+  display: inline-block;
+  vertical-align: middle;
+  width: 15%;
+  padding-right: 0.5rem;
+}
+
+.search .button {
+  margin-right: 0.5rem;
+}
+
+.table {
+  margin-top: 1rem;
+}
+
+.proc {
+  margin-top: 1rem;
+}
+
+.proc .button {
+  margin-right: 0.5rem;
+}
+
+.proc .buttonR {
+  margin-left: 0.5rem;
+  float: right;
+}
+</style>
+
 
