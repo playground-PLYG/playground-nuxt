@@ -30,6 +30,9 @@
         @row-click="clickRow"
       />
     </div>
+    <div>
+      <paginationLayout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset"/>
+    </div>
     <div class="proc">
       <q-btn push class="button" color="primary" label="등록" @click="showInsertDialog = true"/>
       <q-btn push class="button" color="negative" label="삭제" />
@@ -106,10 +109,17 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { type ApiResponse } from '../../interface/server';
 import { type QTableProps } from 'quasar';
+import paginationLayout from '../../components/Pagination.vue';
 
 const router = useRouter();
 const insertForm = ref<any>();
 const searchForm = ref<any>();
+
+// 페이징을 위한 파라미터
+const currentPage = ref<number>(1)
+const totalPages = ref<number>(0)
+const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
+let totalItems = ref<number | undefined>() // 데이터의 개수에 따라 페이지네이션 UI에 그려지는 숫자 리스트
 
 const ERROR_FIELD_EMPTY = "(은)는 필수값입니다.";
 
@@ -134,7 +144,9 @@ interface Form {
   menuDepth?: number,
   menuSortOrdr?: number,
   upperMenuSn: string,
-  useAt: string
+  useAt: string,
+  page?: number,
+  size?: number
 }
 
 let resData = ref<Data[]>([]);
@@ -144,7 +156,9 @@ let param = ref<Form>({
   menuNm: '',
   menuUrl: '',
   upperMenuSn: '',
-  useAt: ''
+  useAt: '',
+  page: currentPage.value - 1,
+  size: itemsPerPage.value
 })
 
 let searchParam = ref<any>({
@@ -204,10 +218,26 @@ const columns = ref<QTableProps["columns"]>([
 
 const selectAllMenu = async () => {
   const result = await $fetch<ApiResponse<Data[]>>("/playground/public/menu/select-all", {
-            method: 'GET'
+            method: 'POST',
+            body: JSON.stringify(param.value)
         })
-  resData.value = result.data
+  resData.value = result.data.content
+  totalItems.value = result.data.totalElements !== undefined ? result.data.totalElements : 0
+  totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value !== 0 ? Math.ceil(totalItems.value / itemsPerPage.value) : 1)
 }
+
+const reset = (pageIdx: number) => {
+  if(pageIdx == 0) {
+    currentPage.value = 1
+  } else {
+    currentPage.value = pageIdx
+  }
+  param.value.page = currentPage.value - 1
+}
+
+watch(currentPage, () => {
+  selectAllMenu()
+})
 
 const clickRow = (evt: any, row: any, index: any) => {
   param.value = { ...row }
