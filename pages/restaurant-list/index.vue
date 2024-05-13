@@ -2,13 +2,13 @@
   <div class="content">
     <div class="title">
       <div class="text-h4">
-        <q-icon name="chat" /> 식당 리스트
+        <q-icon name="rss_feed" /> 식당 리스트
       </div>
     </div>
     <div class="search">
-      <q-form ref="searchForm" @submit="onSubmitSelect" @reset="onResetSelect">
+      <q-form ref="searchForm" @submit="getRstrntList" @reset="onResetSelect">
         <q-select outlined v-model="searchParam.rstrntKndCode" :options="searchOptions" label="식당종류" round dense flat
-          class="select" />
+          class="select" map-options />
         <q-input outlined v-model="searchParam.rstrntNm" label="식당명" round dense flat class="input" />
         <q-btn push class="button" color="green-7" label="조회" type="submit" />
         <q-btn push class="button" color="green-7" label="초기화" type="reset" />
@@ -16,15 +16,14 @@
     </div>
     <div class="table">
       <q-table :rows="resData" :columns="columns" row-key="rstrntNm" v-model:selected="selected" selection="multiple"
-        :rows-per-page-options="[0]" />
+        :rows-per-page-options="[0]" @row-click="clickRow" />
     </div>
     <div class="proc">
       <q-btn push class="button" color="primary" label="등록" @click="showInsertDialog = true" />
-      <q-btn push class="button" color="negative" label="삭제" />
+      <q-btn push class="button" color="negative" label="삭제" @click="removeRstrnt" />
       <q-btn push class="buttonR" color="warning" label="사용여부 변경" />
     </div>
   </div>
-
 
   <div class="popup">
     <q-dialog v-model="showInsertDialog" @hide="onReset">
@@ -38,20 +37,99 @@
         <q-page-container class="bg-white">
           <q-card>
             <q-card-section>
-              <q-form ref="insertForm">
-                <q-input v-model="param.rstrntNm" label="식당명" class="input" outlined />
-                <q-select outlined v-model="param.rstrntKndCode" :options="searchOptions" label="식당종류" class="select" />
-                <q-input v-model="param.rstrntDstnc" label="식당거리" class="input" outlined />
+              <q-form @submit="onSubmit">
+                <q-input v-model="param.rstrntNm" label="식당명" class="input" outlined :rules="[nm_rules]" />
+                <q-select outlined v-model="param.rstrntKndCode" :options="searchOptions" map-options label="식당종류"
+                  class="select" :rules="[select_rules]" />
+                <q-input v-model="param.rstrntDstnc" label="식당거리" class="input" outlined :rules="[num_rules]" />
+                <q-toolbar class="bg-white">
+                  <q-toolbar-title></q-toolbar-title>
+                  <q-btn push color="primary" label="등록" type="submit" />
+                </q-toolbar>
               </q-form>
             </q-card-section>
           </q-card>
         </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title></q-toolbar-title>
-            <q-btn push color="primary" label="저장" @click="onSubmit" />
+      </q-layout>
+    </q-dialog>
+  </div>
+
+  <div class="q-pa-md q-gutter-sm">
+    <q-dialog v-model="showUpdateDialog" @hide="onReset">
+      <q-card style="width: 800px; max-width: 100vw; ">
+        <q-toolbar class="bg-primary">
+          <q-toolbar-title style="color: white;">식당</q-toolbar-title>
+          <q-btn flat v-close-popup round dense icon=" close" style="color: white;" />
+        </q-toolbar>
+        <q-card-section>
+          <q-form @submit="onSubmit">
+            <q-input v-model="param.rstrntNm" label="식당명" class="input" :rules="[nm_rules]" outlined
+              :readonly="readonly" />
+            <q-select outlined v-model="param.rstrntKndCode" map-options :options="searchOptions" label="식당종류"
+              class="select" :rules="[select_rules]" :readonly="readonly" />
+            <q-input v-model="param.rstrntDstnc" label="식당거리" class="input" outlined :readonly="readonly"
+              :rules="[num_rules]" />
+            <q-toolbar class="search">
+              <q-toolbar-title></q-toolbar-title>
+              <q-btn push color="primary" class="button" label="수정" @click="modifyRstrnt" />
+              <q-btn v-bind:disabled="modifyClick == ''" push color="primary" class="button" label="등록" type="submit" />
+            </q-toolbar>
+          </q-form>
+        </q-card-section>
+        <q-card-section>
+          <div class="q-pa-md">
+            <q-toolbar class="bg-white">
+              <q-toolbar-title><q-icon name="restaurant_menu" />{{ restaurantNm }} 메뉴</q-toolbar-title>
+              <q-btn push color="primary" class="button" label="메뉴등록" @click="addMenu" />
+            </q-toolbar>
+            <div v-show="noMenu == true" class='text-negative' style="text-align: center;"> 등록되어 있는 메뉴가 없어요 메뉴를 등록해주세요.
+            </div>
+            <div class="row justify-center q-gutter-sm">
+              <q-intersection v-for="(item, index) in menuData" :key="index" class="example-item">
+                <q-card flat bordered class="q-ma-sm" clickable v-ripple @click="modifyMenu(item)">
+                  <!-- <img :src=item.menuName @click="modifyMenu(item)">  -->
+                  <img src="https://cdn.quasar.dev/img/parallax2.jpg">
+                  <q-card-section>
+                    <div class="text-subtitle2">메뉴명 : {{ item.menuName }}</div>
+                    <div class="text-subtitle2">가격 : {{ Number(item.menuPrice).toLocaleString() }}원</div>
+                  </q-card-section>
+                </q-card>
+              </q-intersection>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </div>
+
+  <div class="popup">
+    <q-dialog v-model="showMenuDialog">
+      <q-layout container style="height: 400px">
+        <q-header>
+          <q-toolbar class="bg-primary">
+            <q-toolbar-title>메뉴등록</q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
           </q-toolbar>
-        </q-footer>
+        </q-header>
+        <q-page-container class="bg-white">
+          <q-card>
+            <q-card-section>
+              <q-form @submit="menuSubmit">
+                <q-input v-model="menuParam.menuName" label="메뉴명" class="input" outlined :rules="[nm_rules]" />
+                <q-input mask="###,###,###" unmasked-value reverse-fill-mask input-class="text-right"
+                  v-model="menuParam.menuPrice" label="메뉴가격" class="input" :rules="[num_rules]" outlined />
+                <q-toolbar class="bg-white">
+                  <q-toolbar-title></q-toolbar-title>
+                  <div class="proc">
+                    <q-btn push class="button" color="primary" label="등록" type="submit" />
+                    <q-btn push class="button" color="negative" label="삭제" @click="removeMenu"
+                      v-show="showMenuBtn == true" />
+                  </div>
+                </q-toolbar>
+              </q-form>
+            </q-card-section>
+          </q-card>
+        </q-page-container>
       </q-layout>
     </q-dialog>
   </div>
@@ -61,7 +139,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { type ApiResponse } from '../../interface/server';
-import { type QTableProps } from 'quasar';
+import { colors, type QTableProps } from 'quasar';
+import type { NuxtAnalyzeMeta } from 'nuxt/schema';
 
 const router = useRouter();
 const searchForm = ref<any>();
@@ -69,18 +148,22 @@ const searchForm = ref<any>();
 interface Data {
   rstrntSn: number,
   rstrntNm: string,
-  rstrntKndCode: String,
+  rstrntKndCode: string,
   rstrntDstnc: string,
   recentChoiseDt: string
 }
 
-
-let resData = ref<Data[]>([]);
+interface MenuData {
+  restaurantSerialNo: number,
+  restaurantMenuSerialNo: string,
+  menuName: string,
+  menuPrice: number
+}
 
 let param = ref<any>({
   rstrntNm: '',
   rstrntKndCode: '',
-  rstrntDstnc: '',
+  rstrntDstnc: 0,
 })
 
 let searchParam = ref<any>({
@@ -88,34 +171,58 @@ let searchParam = ref<any>({
   rstrntNm: ''
 })
 
+let menuParam = ref<any>({
+  restaurantSerialNo: '',
+  restaurantMenuSerialNo: '',
+  menuName: '',
+  menuPrice: ''
+})
 
-//let selected = ref<any>();
+
+let resData = ref<Data[]>([]);
 let selected = ref<Data[]>();
+let menuData = ref<MenuData[]>([]);
+
 
 let showInsertDialog = ref<boolean>(false);
+let showUpdateDialog = ref<boolean>(false);
+let showMenuDialog = ref<boolean>(false);
+let showMenuBtn = ref<boolean>(false);
+let noMenu = ref<boolean>(false);
+let readonly = ref(true);
+let modifyClick = '';
+let restaurantNm = '';
 
 let searchOptions = [
-  {
-    label: '전체',
-    value: ''
-  },
-  {
-    label: '한식',
-    value: '001'
-  },
-  {
-    label: '중식',
-    value: '002'
-  },
-  {
-    label: '일식',
-    value: '003'
-  },
-  {
-    label: '양식',
-    value: '004'
-  }
+  { label: '전체', value: '' },
+  { label: '한식', value: '001' },
+  { label: '중식', value: '002' },
+  { label: '일식', value: '003' },
+  { label: '양식', value: '004' }
 ]
+
+
+const nm_rules = (val: string) => {
+  if (!val) {
+    return '값을 입력해주세요.';
+  }
+  return true;
+}
+
+const num_rules = (val: number) => {
+  if (!val) {
+    return '거리를 입력해주세요.';
+  }
+  return true;
+}
+
+const select_rules = (val: string) => {
+  if (!val) {
+    return '값을 선택해주세요.';
+  }
+  return true;
+}
+
 
 const columns = ref<QTableProps["columns"]>([
   {
@@ -124,16 +231,26 @@ const columns = ref<QTableProps["columns"]>([
     field: 'rstrntSn',
     align: 'center'
   },
-  { name: 'rstrntKndCode', label: '식당종류', field: 'rstrntKndCode', align: 'left' },
+  { name: 'rstrntKndCode', label: '식당종류', field: 'rstrntKndCode', align: 'left', format: val => val == '001' ? '한식' : val == '002' ? '중식' : val == '003' ? '일식' : '양식' },
   { name: 'rstrntNm', label: '식당명', field: 'rstrntNm', align: 'left' }
 ])
 
 
+const clickRow = (evt: any, row: any, index: any) => {
+  param.value = { ...row }
+  restaurantNm = param.value.rstrntNm
+  console.log("upDateParam: ", param.value)
+  getRstrntMenuList()
+
+}
 
 const onResetSelect = () => {
   searchParam.value = {
     rstrntKndCode: '',
     rstrntNm: ''
+  }
+  menuParam.value = {
+    restaurantSerialNo: ''
   }
   selected.value = undefined
 }
@@ -145,9 +262,12 @@ const onReset = () => {
     rstrntDstnc: '',
     recentChoiseDt: ''
   }
+  readonly.value = true;
+  modifyClick = '';
 }
 
-const onSubmitSelect = async () => {
+
+const getRstrntList = async () => {
 
   if (searchParam.value.rstrntKndCode !== '') {
     console.log("searchOptions: ", searchParam.value.rstrntKndCode.value)
@@ -163,25 +283,8 @@ const onSubmitSelect = async () => {
       body: JSON.stringify(searchParam.value)
     })
     .then((result) => {
-
       resData.value = result.data
-
-      resData.value?.forEach((item) => {
-        if (item.rstrntKndCode == '001') {
-          item.rstrntKndCode = '한식'
-        }
-        if (item.rstrntKndCode == '002') {
-          item.rstrntKndCode = '중식'
-        }
-        if (item.rstrntKndCode == '003') {
-          item.rstrntKndCode = '일식'
-        }
-        if (item.rstrntKndCode == '004') {
-          item.rstrntKndCode = '양식'
-        }
-      })
-
-      console.log("리스트조회~~~: ", resData.value)
+      console.log("리스트조회 : ", resData.value)
     })
     .catch((error) => {
       console.error(error)
@@ -190,9 +293,12 @@ const onSubmitSelect = async () => {
 
 const onSubmit = async () => {
 
-  param.value.rstrntKndCode = param.value.rstrntKndCode.value;
-  console.log("Param: ", param.value.rstrntKndCode)
   console.log("Param: ", param.value)
+
+  if (param.value.rstrntKndCode.value != null) {
+    param.value.rstrntKndCode = param.value.rstrntKndCode.value;
+    console.log("rstrntKndCode: ", param.value)
+  }
 
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/addRstrnt",
@@ -201,23 +307,173 @@ const onSubmit = async () => {
       body: JSON.stringify(param.value)
     })
     .then(() => {
-      alert('저장이 완료되었습니다.')
+      alert('등록되었습니다.')
       router.go(0)
     })
     .catch((error) => {
       console.error(error)
-      alert('저장되지 않았습니다.')
+      alert('등록되지 않았습니다.')
+    })
+
+}
+
+
+const removeRstrnt = async () => {
+
+  console.log("removeParam: ", selected.value)
+
+  await $fetch<ApiResponse<Data[]>>(
+    "/playground/public/restaurant/removeRstrnt",
+    {
+      method: 'POST',
+      body: JSON.stringify(selected.value)
+    })
+    .then(() => {
+      alert('삭제되었습니다.')
+      router.go(0)
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('삭제되지 않았습니다.')
+    })
+}
+
+
+const getRstrntMenuList = async () => {
+
+  menuParam.value.restaurantSerialNo = param.value.rstrntSn;
+  menuParam.value.restaurantMenuSerialNo = '';
+  menuParam.value.menuName = '';
+  menuParam.value.menuPrice = '';
+
+  console.log("menuParam: ", menuParam.value)
+
+  await $fetch<ApiResponse<MenuData[]>>(
+    "/playground/public/restaurant/getRstrntMenuList",
+    {
+      method: 'POST',
+      body: JSON.stringify(menuParam.value)
+    })
+    .then((result) => {
+      menuData.value = result.data
+      console.log("메뉴 리스트조회 : ", menuData.value)
+
+      if (result.data.length <= 0) {
+        noMenu.value = true;
+      } else {
+        noMenu.value = false;
+      }
+
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+
+  showUpdateDialog.value = true
+}
+
+const modifyRstrnt = async () => {
+  readonly.value = false;
+  modifyClick = '수정!';
+}
+
+const addMenu = async () => {
+  showMenuBtn.value = false;
+  showMenuDialog.value = true;
+
+  menuParam.value.restaurantMenuSerialNo = '';
+  menuParam.value.menuName = '';
+  menuParam.value.menuPrice = '';
+}
+
+const menuSubmit = async () => {
+
+  console.log("Param: ", menuParam.value)
+
+  if (menuParam.value.restaurantMenuSerialNo !== '') {
+
+    await $fetch<ApiResponse<MenuData[]>>(
+      "/playground/public/restaurant/modifyRstrntMenu",
+      {
+        method: 'POST',
+        body: JSON.stringify(menuParam.value)
+      })
+      .then(() => {
+        alert('수정되었습니다.')
+        getRstrntMenuList()
+        showMenuDialog.value = false;
+      })
+      .catch((error) => {
+        console.error(error)
+        alert('수정되지 않았습니다.')
+      })
+  } else {
+    await $fetch<ApiResponse<MenuData[]>>(
+      "/playground/public/restaurant/addRstrntMenu",
+      {
+        method: 'POST',
+        body: JSON.stringify(menuParam.value)
+      })
+      .then(() => {
+        alert('등록되었습니다.')
+        getRstrntMenuList()
+        showMenuDialog.value = false;
+      })
+      .catch((error) => {
+        console.error(error)
+        alert('등록되지 않았습니다.')
+      })
+  }
+}
+
+const modifyMenu = async (item?: { restaurantSerialNo: number; restaurantMenuSerialNo: string; menuName: string; menuPrice: number; }, index?: number) => {
+
+  console.log("item :", item)
+
+  menuParam.value = { ...item }
+
+  showMenuDialog.value = true;
+  showMenuBtn.value = true;
+
+}
+
+const removeMenu = async () => {
+
+  console.log("removeMenu : ", menuParam.value)
+
+  await $fetch<ApiResponse<MenuData[]>>(
+    "/playground/public/restaurant/removeRstrntMenu",
+    {
+      method: 'POST',
+      body: JSON.stringify(menuParam.value)
+    })
+    .then(() => {
+      alert('삭제되었습니다.')
+      getRstrntMenuList()
+      showMenuDialog.value = false;
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('삭제되지 않았습니다.')
     })
 }
 
 
 
 onMounted(() => {
-  onSubmitSelect()
+  getRstrntList()
 })
 
 </script>
 <style>
+.example-item {
+  height: 200px;
+  width: 200px;
+  margin-top: 1rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 .content {
   margin-top: 3rem;
   margin-left: 5rem;
