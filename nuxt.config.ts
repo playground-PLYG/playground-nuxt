@@ -2,7 +2,7 @@
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: [ "dayjs-nuxt", "@pinia/nuxt", "nuxt-quasar-ui", "@nuxt/devtools"],
+  modules: [ "dayjs-nuxt", "@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "nuxt-quasar-ui", "@nuxt/devtools"],
   quasar: {
     plugins: [
       'AppFullscreen',
@@ -23,5 +23,8 @@ export default defineNuxtConfig({
       svgIcons: [],
       animations: "all"
     }
-  }
+  },
+  piniaPersistedstate: {
+    storage: 'sessionStorage'
+  },
 })
