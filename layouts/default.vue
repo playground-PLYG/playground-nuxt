@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import { ref } from 'vue';
 import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
 import { type ApiResponse } from '../interface/server';
-import { useAuthStore } from '../stores/useAuthStore' 
-
-const router = useRouter();
-const store = useAuthStore();
 const { loading } = useQuasar()
 
 // api로 조회할 데이터 구조
@@ -17,108 +12,6 @@ interface MenuData {
 }
 
 let essentialLinks = ref<EssentialLinkProps[]>([])
-
-// const essentialLinks: EssentialLinkProps[] = [
-  // {
-  //   title: 'Docs',
-  //   caption: 'quasar.dev',
-  //   icon: 'school',
-  //   link: 'https://quasar.dev'
-  // },
-  // {
-  //   title: 'Github',
-  //   caption: 'github.com/quasarframework',
-  //   icon: 'code',
-  //   link: 'https://github.com/quasarframework'
-  // },
-  // {
-  //   title: 'Discord Chat Channel',
-  //   caption: 'chat.quasar.dev',
-  //   icon: 'chat',
-  //   link: 'https://chat.quasar.dev'
-  // },
-  // {
-  //   title: 'Forum',
-  //   caption: 'forum.quasar.dev',
-  //   icon: 'record_voice_over',
-  //   link: 'https://forum.quasar.dev'
-  // },
-  // {
-  //   title: 'Twitter',
-  //   caption: '@quasarframework',
-  //   icon: 'rss_feed',
-  //   link: 'https://twitter.quasar.dev'
-  // },
-  // {
-  //   title: 'Facebook',
-  //   caption: '@QuasarFramework',
-  //   icon: 'public',
-  //   link: 'https://facebook.quasar.dev'
-  // },
-  // {
-  //   title: 'Quasar Awesome',
-  //   caption: 'Community Quasar projects',
-  //   icon: 'favorite',
-  //   link: 'https://awesome.quasar.dev',
-  //   target: '_blank'
-  // },
-  // {
-  //   title: 'pinia store 샘플',
-  //   icon: 'favorite',
-  //   link: '/counter',
-  // },
-  // {
-  //   title: 'api 샘플',
-  //   icon: 'favorite',
-  //   link: '/api-test',
-  // }
-// ];
-
-const defaultMenus = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-    target: '_blank'
-  }
-]
 
 const iconList = ['school', 'code', 'chat', 'record_voice_over', 'rss_feed', 'public', 'favorite']
 
@@ -158,29 +51,6 @@ const setMenu = (arr: object) => {
     }
     essentialLinks.value.push(menuItem)
   })
-} 
-
-const logout = () => {
-  const access_token = localStorage.getItem('access_token')
-  const snsLogin = localStorage.getItem('snsLogin')
-
-  if(access_token) {
-    store.resetAuth()
-    if(snsLogin == 'KAKAO') {
-      const CLIENT_ID = '68ae4b196239138e24e76a6664659155'
-      const LOGOUT_REDIRECT_URI = new URL(document.location.origin)      
-      const kakaoURL = `https://kauth.kakao.com/oauth/logout?client_id=${CLIENT_ID}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}`
-      window.location.href = kakaoURL;
-    } else if (snsLogin == 'NAVER') {
-      localStorage.setItem('snsLogin', '')
-      localStorage.setItem('access_token','')
-      router.go(0)
-    }else {
-      localStorage.setItem('snsLogin', '')
-      localStorage.setItem('access_token','')
-      router.go(0)
-    }
-  }
 }
 
 onMounted(() => {
@@ -215,31 +85,21 @@ onMounted(() => {
       bordered
     >
       <q-list>
+        <template v-for="(menuItem, index) in essentialLinks" :key="index">
+          <q-item clickable :to="menuItem.link">
+            <q-item-section avatar>
+              <q-icon :name="menuItem.icon" />
+            </q-item-section>
+            <q-item-section>
+              {{ menuItem.title }}
+            </q-item-section>
 
-        <q-item-label header v-if="store.userName" class="text-subtitle1">
-          {{store.userName}}님
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-
-        <q-item v-if="store.isLogin" clickable @click="logout" exact style="color: black;">
-          <q-item-section avatar>
-            <q-icon name="logout" />
-          </q-item-section>
-
-          <q-item-section>
-            Logout
-          </q-item-section>
-        </q-item>
-        <q-item v-else to="/login" exact style="color: black;">
+          </q-item>
+        </template>
+        <q-item to="/login" exact >
           <q-item-section avatar>
             <q-icon name="login" />
           </q-item-section>
-
           <q-item-section>
             Login
           </q-item-section>
