@@ -6,9 +6,9 @@
       </div>
     </div>
     <div class="search">
-      <q-form ref="searchForm" @submit="getRstrntList" @reset="onResetSelect">
+      <q-form @submit="getRstrntList" @reset="onResetSelect">
         <q-select outlined v-model="searchParam.rstrntKndCode" :options="searchOptions" label="식당종류" round dense flat
-          class="select" map-options />
+          class="select" emit-value map-options />
         <q-input outlined v-model="searchParam.rstrntNm" label="식당명" round dense flat class="input" />
         <q-btn push class="button" color="green-7" label="조회" type="submit" />
         <q-btn push class="button" color="green-7" label="초기화" type="reset" />
@@ -39,9 +39,10 @@
             <q-card-section>
               <q-form @submit="onSubmit">
                 <q-input v-model="param.rstrntNm" label="식당명" class="input" outlined :rules="[nm_rules]" />
-                <q-select outlined v-model="param.rstrntKndCode" :options="searchOptions" map-options label="식당종류"
-                  class="select" :rules="[select_rules]" />
-                <q-input v-model="param.rstrntDstnc" label="식당거리" class="input" outlined :rules="[num_rules]" />
+                <q-select outlined v-model="param.rstrntKndCode" :options="searchOptions" emit-value map-options
+                  label="식당종류" class="select" :rules="[select_rules]" />
+                <q-input type="number" v-model="param.rstrntDstnc" label="식당거리" class="input" outlined
+                  :rules="[num_rules]" />
                 <q-toolbar class="bg-white">
                   <q-toolbar-title></q-toolbar-title>
                   <q-btn push color="primary" label="등록" type="submit" />
@@ -65,9 +66,9 @@
           <q-form @submit="onSubmit">
             <q-input v-model="param.rstrntNm" label="식당명" class="input" :rules="[nm_rules]" outlined
               :readonly="readonly" />
-            <q-select outlined v-model="param.rstrntKndCode" map-options :options="searchOptions" label="식당종류"
+            <q-select outlined v-model="param.rstrntKndCode" emit-value map-options :options="searchOptions" label="식당종류"
               class="select" :rules="[select_rules]" :readonly="readonly" />
-            <q-input v-model="param.rstrntDstnc" label="식당거리" class="input" outlined :readonly="readonly"
+            <q-input type="number" v-model="param.rstrntDstnc" label="식당거리" class="input" outlined :readonly="readonly"
               :rules="[num_rules]" />
             <q-toolbar class="search">
               <q-toolbar-title></q-toolbar-title>
@@ -139,40 +140,46 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { type ApiResponse } from '../../interface/server';
-import { colors, type QTableProps } from 'quasar';
-import type { NuxtAnalyzeMeta } from 'nuxt/schema';
+import { type QTableProps } from 'quasar';
 
 const router = useRouter();
-const searchForm = ref<any>();
 
 interface Data {
   rstrntSn: number,
   rstrntNm: string,
   rstrntKndCode: string,
-  rstrntDstnc: string,
+  rstrntDstnc: number,
   recentChoiseDt: string
 }
 
 interface MenuData {
-  restaurantSerialNo: number,
-  restaurantMenuSerialNo: string,
-  menuName: string,
-  menuPrice: number
+  restaurantSerialNo?: number,
+  restaurantMenuSerialNo?: string,
+  menuName?: string,
+  menuPrice?: string
 }
 
-let param = ref<any>({
+interface rstrntData {
+  rstrntSn?: number,
+  rstrntNm: string,
+  rstrntKndCode: string,
+  rstrntDstnc?: number | undefined
+  recentChoiseDt?: string | undefined
+}
+
+let param = ref<rstrntData>({
   rstrntNm: '',
   rstrntKndCode: '',
   rstrntDstnc: 0,
 })
 
-let searchParam = ref<any>({
+let searchParam = ref<rstrntData>({
   rstrntKndCode: '',
   rstrntNm: ''
 })
 
-let menuParam = ref<any>({
-  restaurantSerialNo: '',
+let menuParam = ref<MenuData>({
+  restaurantSerialNo: 0,
   restaurantMenuSerialNo: '',
   menuName: '',
   menuPrice: ''
@@ -211,7 +218,7 @@ const nm_rules = (val: string) => {
 
 const num_rules = (val: number) => {
   if (!val) {
-    return '거리를 입력해주세요.';
+    return '값을 입력해주세요.';
   }
   return true;
 }
@@ -236,10 +243,10 @@ const columns = ref<QTableProps["columns"]>([
 ])
 
 
-const clickRow = (evt: any, row: any, index: any) => {
+const clickRow = (evt: Event, row: any, index: number) => {
+
   param.value = { ...row }
   restaurantNm = param.value.rstrntNm
-  console.log("upDateParam: ", param.value)
   getRstrntMenuList()
 
 }
@@ -250,7 +257,10 @@ const onResetSelect = () => {
     rstrntNm: ''
   }
   menuParam.value = {
-    restaurantSerialNo: ''
+    restaurantSerialNo: 0,
+    restaurantMenuSerialNo: '',
+    menuName: '',
+    menuPrice: ''
   }
   selected.value = undefined
 }
@@ -259,7 +269,7 @@ const onReset = () => {
   param.value = {
     rstrntNm: '',
     rstrntKndCode: '',
-    rstrntDstnc: '',
+    rstrntDstnc: 0,
     recentChoiseDt: ''
   }
   readonly.value = true;
@@ -268,13 +278,6 @@ const onReset = () => {
 
 
 const getRstrntList = async () => {
-
-  if (searchParam.value.rstrntKndCode !== '') {
-    console.log("searchOptions: ", searchParam.value.rstrntKndCode.value)
-    searchParam.value.rstrntKndCode = searchParam.value.rstrntKndCode.value;
-  }
-
-  console.log("searchParam: ", searchParam.value)
 
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/getRstrntList",
@@ -292,13 +295,6 @@ const getRstrntList = async () => {
 }
 
 const onSubmit = async () => {
-
-  console.log("Param: ", param.value)
-
-  if (param.value.rstrntKndCode.value != null) {
-    param.value.rstrntKndCode = param.value.rstrntKndCode.value;
-    console.log("rstrntKndCode: ", param.value)
-  }
 
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/addRstrnt",
@@ -319,8 +315,6 @@ const onSubmit = async () => {
 
 
 const removeRstrnt = async () => {
-
-  console.log("removeParam: ", selected.value)
 
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/removeRstrnt",
@@ -346,8 +340,6 @@ const getRstrntMenuList = async () => {
   menuParam.value.menuName = '';
   menuParam.value.menuPrice = '';
 
-  console.log("menuParam: ", menuParam.value)
-
   await $fetch<ApiResponse<MenuData[]>>(
     "/playground/public/restaurant/getRstrntMenuList",
     {
@@ -356,7 +348,6 @@ const getRstrntMenuList = async () => {
     })
     .then((result) => {
       menuData.value = result.data
-      console.log("메뉴 리스트조회 : ", menuData.value)
 
       if (result.data.length <= 0) {
         noMenu.value = true;
@@ -387,8 +378,6 @@ const addMenu = async () => {
 }
 
 const menuSubmit = async () => {
-
-  console.log("Param: ", menuParam.value)
 
   if (menuParam.value.restaurantMenuSerialNo !== '') {
 
@@ -426,20 +415,15 @@ const menuSubmit = async () => {
   }
 }
 
-const modifyMenu = async (item?: { restaurantSerialNo: number; restaurantMenuSerialNo: string; menuName: string; menuPrice: number; }, index?: number) => {
-
-  console.log("item :", item)
+const modifyMenu = async (item?: { restaurantSerialNo?: number; restaurantMenuSerialNo?: string; menuName?: string; menuPrice?: string; }, index?: number) => {
 
   menuParam.value = { ...item }
-
   showMenuDialog.value = true;
   showMenuBtn.value = true;
 
 }
 
 const removeMenu = async () => {
-
-  console.log("removeMenu : ", menuParam.value)
 
   await $fetch<ApiResponse<MenuData[]>>(
     "/playground/public/restaurant/removeRstrntMenu",
@@ -457,8 +441,6 @@ const removeMenu = async () => {
       alert('삭제되지 않았습니다.')
     })
 }
-
-
 
 onMounted(() => {
   getRstrntList()
