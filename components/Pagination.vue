@@ -1,13 +1,21 @@
 <template>
-    <div class="q-pa-lg flex flex-center">
-      <q-pagination
-        v-model="currentPage"
-        :max="totalPage"
-        direction-links
-        boundary-links
-        @update:model-value="movePage"
-      />
-    </div>
+  <div class="q-pa-lg flex flex-center">
+    <q-select class="q-pa-lg flex flex-left"
+      default="5"
+      outlined v-model="pageSizeModel"
+      :options="pageSizeOptions"
+      rounded="true"
+      stack-label color="secondary" 
+      @update:model-value="pageSizeUpdate"
+    />
+    <q-pagination
+      v-model="currentPage"
+      :max="totalPage"
+      direction-links
+      boundary-links
+      @update:model-value="movePage"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -22,11 +30,21 @@ const props = defineProps<Props>()
 const { totalPage, currentPage } = toRefs(props)
 
 const page = ref<number>(1)
+const pageSize = ref<number>(5)
 const emit = defineEmits(['send-event'])
 
+const pageSizeModel = ref({label:5})
+const pageSizeOptions = [5, 10, 15, 20, 25, 30]
+
 const movePage = (evt: any) => {
-  emit("send-event", evt)
+  emit("send-event", evt, "pageNum")
   page.value = evt
+}
+
+const pageSizeUpdate = (evt: any) => {
+  console.log(evt)
+  emit("send-event", evt, "pageSize")
+  pageSize.value = evt
 }
 
 </script>

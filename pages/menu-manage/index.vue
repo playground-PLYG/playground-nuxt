@@ -144,9 +144,7 @@ interface Form {
   menuDepth?: number,
   menuSortOrdr?: number,
   upperMenuSn: string,
-  useAt: string,
-  page?: number,
-  size?: number
+  useAt: string
 }
 
 let resData = ref<Data[]>([]);
@@ -156,9 +154,7 @@ let param = ref<Form>({
   menuNm: '',
   menuUrl: '',
   upperMenuSn: '',
-  useAt: '',
-  page: currentPage.value - 1,
-  size: itemsPerPage.value
+  useAt: ''
 })
 
 let searchParam = ref<any>({
@@ -217,7 +213,7 @@ const columns = ref<QTableProps["columns"]>([
 ])
 
 const selectAllMenu = async () => {
-  const result = await $fetch<ApiResponse<Data[]>>("/playground/public/menu/select-all", {
+  const result = await $fetch<ApiResponse<Data[]>>("/playground/public/menu/select-all?page=" + (currentPage.value - 1) + "&size=" + itemsPerPage.value, {
             method: 'POST',
             body: JSON.stringify(param.value)
         })
@@ -226,16 +222,19 @@ const selectAllMenu = async () => {
   totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value !== 0 ? Math.ceil(totalItems.value / itemsPerPage.value) : 1)
 }
 
-const reset = (pageIdx: number) => {
-  if(pageIdx == 0) {
-    currentPage.value = 1
+const reset = (pageIdx: number, idx: string) => {
+  if(idx == "pageNum"){
+    if(pageIdx == 0) {
+      currentPage.value = 1
+    } else {
+      currentPage.value = pageIdx
+    }
   } else {
-    currentPage.value = pageIdx
+    itemsPerPage.value = pageIdx
   }
-  param.value.page = currentPage.value - 1
 }
 
-watch(currentPage, () => {
+watch([currentPage, itemsPerPage], () => {
   selectAllMenu()
 })
 
