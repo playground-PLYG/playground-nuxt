@@ -232,6 +232,7 @@ const reset = (pageIdx: number, idx: string) => {
   } else {
     itemsPerPage.value = pageIdx
   }
+
 }
 
 watch([currentPage, itemsPerPage], () => {

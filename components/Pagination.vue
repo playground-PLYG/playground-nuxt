@@ -46,7 +46,6 @@ const pageSizeUpdate = (evt: any) => {
   emit("send-event", evt, "pageSize")
   pageSize.value = evt
 }
-
 </script>
 
 <style>
