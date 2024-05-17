@@ -79,25 +79,41 @@
         </q-card-section>
         <q-card-section>
           <div class="q-pa-md">
-            <q-toolbar class="bg-white">
-              <q-toolbar-title><q-icon name="restaurant_menu" />{{ restaurantNm }} 메뉴</q-toolbar-title>
-              <q-btn push color="primary" class="button" label="메뉴등록" @click="addMenu" />
-            </q-toolbar>
-            <div v-show="noMenu == true" class='text-negative' style="text-align: center;"> 등록되어 있는 메뉴가 없어요 메뉴를 등록해주세요.
+            <div class="text-h5">
+              <q-icon name="restaurant_menu" />{{ restaurantNm }} 메뉴
             </div>
-            <div class="row justify-center q-gutter-sm">
-              <q-intersection v-for="(item, index) in menuData" :key="index" class="example-item">
-                <q-card flat bordered class="q-ma-sm" clickable v-ripple @click="modifyMenu(item)">
-                  <!-- <img :src=item.menuName @click="modifyMenu(item)">  -->
-                  <img src="https://cdn.quasar.dev/img/parallax2.jpg">
-                  <q-card-section>
-                    <div class="text-subtitle2">메뉴명 : {{ item.menuName }}</div>
-                    <div class="text-subtitle2">가격 : {{ Number(item.menuPrice).toLocaleString() }}원</div>
-                  </q-card-section>
-                </q-card>
-              </q-intersection>
-            </div>
+            <!-- <q-card-actions>
+              <div class="search">
+                <q-form @submit="getRstrntMenuDetail" @reset="onMenuReset">
+                  <q-input outlined class="input" v-model="menuParam.menuName" label="메뉴명" round dense flat
+                    style="width: fit-content;" />
+                  <q-btn push class="button" color="green-7" label="조회" type="submit" />
+                  <q-btn push class="button" color="green-7" label="초기화" type="reset" />
+                </q-form>
+              </div>
+            </q-card-actions> -->
+            <q-scroll-area style="height: 400px; max-width: 800px;">
+              <div class="row justify-center q-gutter-sm">
+                <q-intersection v-for="(item, index) in menuData" :key="index" class="example-item">
+                  <q-card flat bordered class="q-ma-sm" clickable v-ripple @click="modifyMenu(item)">
+                    <!-- <img :src=item.menuName @click="modifyMenu(item)">  -->
+                    <img src="https://cdn.quasar.dev/img/parallax2.jpg">
+                    <q-card-section>
+                      <div class="text-subtitle2">메뉴명 : {{ item.menuName }}</div>
+                      <div class="text-subtitle2">가격 : {{ Number(item.menuPrice).toLocaleString() }}원</div>
+                    </q-card-section>
+                  </q-card>
+                </q-intersection>
+                <div v-show="noMenu == true" class='text-negative' style="text-align: center;"> 등록되어 있는 메뉴가 없어요 메뉴를
+                  등록해주세요.
+                </div>
+              </div>
+            </q-scroll-area>
           </div>
+          <q-toolbar class="search">
+            <q-toolbar-title></q-toolbar-title>
+            <q-btn push color="primary" class="button" label="메뉴등록" @click="addMenu" />
+          </q-toolbar>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -109,7 +125,7 @@
         <q-header>
           <q-toolbar class="bg-primary">
             <q-toolbar-title>메뉴등록</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
+            <q-btn flat v-close-popup round dense icon="close" @click="onMenuReset" />
           </q-toolbar>
         </q-header>
         <q-page-container class="bg-white">
@@ -141,8 +157,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { type ApiResponse } from '../../interface/server';
 import { type QTableProps } from 'quasar';
+import type { PiniaVuePlugin } from 'pinia';
 
 const router = useRouter();
+const { loading } = useQuasar();
 
 interface Data {
   rstrntSn: number,
@@ -276,9 +294,17 @@ const onReset = () => {
   modifyClick = '';
 }
 
+const onMenuReset = () => {
+  menuParam.value = {
+    restaurantMenuSerialNo: '',
+    menuName: '',
+    menuPrice: ''
+  }
+}
 
 const getRstrntList = async () => {
 
+  loading.show()
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/getRstrntList",
     {
@@ -292,10 +318,11 @@ const getRstrntList = async () => {
     .catch((error) => {
       console.error(error)
     })
+  loading.hide()
 }
 
 const onSubmit = async () => {
-
+  loading.show()
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/addRstrnt",
     {
@@ -310,12 +337,12 @@ const onSubmit = async () => {
       console.error(error)
       alert('등록되지 않았습니다.')
     })
-
+  loading.hide()
 }
 
 
 const removeRstrnt = async () => {
-
+  loading.show()
   await $fetch<ApiResponse<Data[]>>(
     "/playground/public/restaurant/removeRstrnt",
     {
@@ -330,6 +357,7 @@ const removeRstrnt = async () => {
       console.error(error)
       alert('삭제되지 않았습니다.')
     })
+  loading.hide()
 }
 
 
@@ -340,6 +368,7 @@ const getRstrntMenuList = async () => {
   menuParam.value.menuName = '';
   menuParam.value.menuPrice = '';
 
+  loading.show()
   await $fetch<ApiResponse<MenuData[]>>(
     "/playground/public/restaurant/getRstrntMenuList",
     {
@@ -359,7 +388,7 @@ const getRstrntMenuList = async () => {
     .catch((error) => {
       console.error(error)
     })
-
+  loading.hide()
   showUpdateDialog.value = true
 }
 
@@ -378,7 +407,7 @@ const addMenu = async () => {
 }
 
 const menuSubmit = async () => {
-
+  loading.show()
   if (menuParam.value.restaurantMenuSerialNo !== '') {
 
     await $fetch<ApiResponse<MenuData[]>>(
@@ -413,6 +442,7 @@ const menuSubmit = async () => {
         alert('등록되지 않았습니다.')
       })
   }
+  loading.hide()
 }
 
 const modifyMenu = async (item?: { restaurantSerialNo?: number; restaurantMenuSerialNo?: string; menuName?: string; menuPrice?: string; }, index?: number) => {
@@ -424,7 +454,7 @@ const modifyMenu = async (item?: { restaurantSerialNo?: number; restaurantMenuSe
 }
 
 const removeMenu = async () => {
-
+  loading.show()
   await $fetch<ApiResponse<MenuData[]>>(
     "/playground/public/restaurant/removeRstrntMenu",
     {
@@ -440,7 +470,30 @@ const removeMenu = async () => {
       console.error(error)
       alert('삭제되지 않았습니다.')
     })
+  loading.hide()
 }
+
+
+const getRstrntMenuDetail = async () => {
+
+  menuParam.value.restaurantSerialNo = param.value.rstrntSn;
+
+  loading.show()
+  await $fetch<ApiResponse<MenuData[]>>(
+    "/playground/public/restaurant/getRstrntMenuList",
+    {
+      method: 'POST',
+      body: JSON.stringify(menuParam.value)
+    })
+    .then((result) => {
+      menuData.value = result.data
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+  loading.hide()
+}
+
 
 onMounted(() => {
   getRstrntList()
