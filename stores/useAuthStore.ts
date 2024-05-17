@@ -1,18 +1,24 @@
 import { defineStore } from "pinia"
+import { useRouter } from 'vue-router'
 
 export const useAuthStore = defineStore('auth', () => {
 
-  let accessToken = ref<any>("")
-  let userName = ref<any>("")
-  let snsLogin = ref<any>("")
+  const router = useRouter()
 
-  const isLogin = computed(() => accessToken?.value == ''? false : true)
+  const mberId = ref('')
+  const token = ref('')
 
-  function resetAuth() {
-    accessToken.value = ''
-    userName.value = ''
-    snsLogin.value = ''
+  const isLogin = computed(() => token.value == ''? false : true)
+
+  function logout() {
+    mberId.value = ''
+    token.value = ''
+    alert("로그아웃되었습니다.")
+    return router.push('/login')
   }
 
-  return { accessToken, userName, snsLogin, isLogin, resetAuth}
+  return { mberId, token, isLogin, logout }
+}, {
+  persist: true
 })
+

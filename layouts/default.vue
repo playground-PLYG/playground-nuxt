@@ -2,7 +2,9 @@
 import { ref } from 'vue';
 import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
 import { type ApiResponse } from '../interface/server';
+import { useAuthStore } from '../stores/useAuthStore' 
 const { loading } = useQuasar()
+const authStore = useAuthStore();
 
 // api로 조회할 데이터 구조
 interface MenuData {
@@ -85,6 +87,9 @@ onMounted(() => {
       bordered
     >
       <q-list>
+        <q-item-label header v-if="authStore.mberId">
+          {{authStore.mberId}}님 반가워요! 
+        </q-item-label>
         <template v-for="(menuItem, index) in essentialLinks" :key="index">
           <q-item clickable :to="menuItem.link">
             <q-item-section avatar>
@@ -96,7 +101,15 @@ onMounted(() => {
 
           </q-item>
         </template>
-        <q-item to="/login" exact >
+        <q-item clickable v-if="authStore.isLogin" exact @click="authStore.logout()">
+          <q-item-section avatar>
+            <q-icon name="logout" />
+          </q-item-section>
+          <q-item-section>
+            Logout
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-else to="/login" exact >
           <q-item-section avatar>
             <q-icon name="login" />
           </q-item-section>

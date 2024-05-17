@@ -20,11 +20,6 @@
           <img style="width: 180px;" src="../../assets/kakao_login.png">
         </q-btn>
         <br>
-        <!-- <br>
-        <q-btn flat padding="none" @click="google">
-          <img style="width: 180px;" src="../../assets/google_login.png">
-        </q-btn>
-        <br> -->
         <br>
         <q-btn flat padding="none" @click="naver">
           <img style="width: 180px;" src="../../assets/naver_login.png">
@@ -36,10 +31,12 @@
 
 
 <script setup lang="ts">
+import { useRouter } from "vue-router";
 import { useAuthStore } from '../../stores/useAuthStore' 
-const store = useAuthStore()
-const router = useRouter()
 import { type ApiResponse } from '../../interface/server';
+
+const router = useRouter();
+const authStore = useAuthStore();
 const { loading } = useQuasar();
 const dense = ref(true)
 const loginForm = ref<any>(null)
@@ -50,7 +47,8 @@ interface Param {
 }
 
 interface ResData {
-  token: string
+  token: string,
+  mberId:string
 }
 
 let param = ref<Param>({
@@ -59,7 +57,8 @@ let param = ref<Param>({
 });
 
 let resData = ref<ResData>({
-  token: ''
+  token: '',
+  mberId:''
 });
 
 async function kakao() {
@@ -102,6 +101,9 @@ const login = async () => {
   })
   .then(result => {
     loading.hide()
+
+    authStore.mberId = result.data.mberId
+    authStore.token = result.data.token
     router.push({ path: "/" });
   })
   .catch(err => {
