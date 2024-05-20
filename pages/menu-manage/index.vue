@@ -62,7 +62,7 @@
                   <q-input outlined stack-label v-model="param.upperMenuSn" label="상위메뉴ID" :rules="[ parentMenuId_rules ]" />
                   <q-input outlined stack-label v-model="param.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" style="padding-bottom: 20px;"/>
                   <q-input outlined stack-label v-model="param.menuDepth" label="메뉴레벨" style="padding-bottom: 20px;" />
-                  <q-select outlined stack-label v-model="param.useAt" :options="inputOptions" label="사용여부" />
+                  <q-select outlined stack-label v-model="param.useAt" :options="inputOptions" emit-value map-options label="사용여부" />
               </q-form>
             </q-card-section>
           </q-card>
@@ -304,7 +304,10 @@ let showUpdateDialog = ref<boolean>(false);
 
 let  showDetailDialog = ref<boolean>(false);
 
-const inputOptions = ['사용', '미사용']
+const inputOptions = [
+  { label: '사용', value: 'Y' },
+  { label: '미사용', value: 'N' }
+]
 
 const searchOptions = [
   {
@@ -329,7 +332,7 @@ const columns = ref<QTableProps["columns"]>([
   { name: 'menuDepth', label: '메뉴레벨', field: 'menuDepth', align: 'center' },
   { name: 'menuSortOrdr', label: '정렬순서', field: 'menuSortOrdr', align: 'center' },
   { name: 'upperMenuSn', label: '상위메뉴ID', field: 'upperMenuSn', align: 'left' },
-  { name: 'useAt', label: '사용여부', field: 'useAt', align: 'center' },
+  { name: 'useAt', label: '사용여부', field: 'useAt', align: 'center', format: val => val == 'Y' ? '사용' : '미사용' },
   { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'left' },
   { name: 'registDt', label: '등록일시', field: 'registDt', align: 'left' },
   { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'left' },
