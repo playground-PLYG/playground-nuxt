@@ -1,0 +1,3 @@
+<template>
+    <KakaoMap></KakaoMap>
+</template>
