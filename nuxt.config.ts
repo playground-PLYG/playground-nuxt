@@ -10,6 +10,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_URL,
+      kakaoApiKey: process.env.KAKAO_API_KEY
     } 
   },
   modules: [ "dayjs-nuxt", "@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "nuxt-quasar-ui", "@nuxt/devtools"],
