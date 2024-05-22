@@ -1,27 +1,34 @@
 <template>
-  <div class="q-pa-md">
-    <div class="q-gutter-y-md column" style="max-width: 300px">
-      <q-input outlined type="text" v-model="param.zonecode" placeholder="우편번호" />
-      <q-btn color="primary" type="button" @click="execDaumPostcode" label="우편번호 찾기" :disabled="!isScriptLoaded" />
-      <q-input outlined type="text" v-model="param.roadAddress" placeholder="도로명주소" />
-      <q-input outlined type="text" v-model="param.jibunAddress" placeholder="지번주소" />
-      <q-input outlined type="text" v-model="param.detailAddress" placeholder="상세주소" />
-      <q-input outlined type="text" v-model="param.extraAddress" placeholder="참고항목" />
+  <div class="q-gutter-y-md column" style="max-width: 450px">
+    <div class="q-gutter-md row">
+      <q-input outlined type="text" v-model="param.zonecode" label="우편번호" style="width: 250px" />
+      <q-btn color="primary" type="button" @click="execDaumPostcode" label="우편번호 찾기" style="width: 150px" />
     </div>
+    <q-input outlined type="text" v-model="param.roadAddress" label="도로명주소" />
+    <q-input outlined type="text" v-model="param.jibunAddress" label="지번주소" />
+    <q-input outlined type="text" v-model="param.detailAddress" label="상세주소" ref="inputEl" />
   </div>
 </template>
+
 
 
 <script setup lang="ts">
 
 import { ref } from 'vue'
 
-interface Data {
+
+/** 주소 정보 */
+interface addressData {
+  /** 우편번호 */
   zonecode: string,
+  /** 도로명 주소 */
   roadAddress: string,
+  /** 지번 주소 */
   jibunAddress: string,
+  /** 상세 주소 */
   detailAddress: string,
-  extraAddress: string
+  /** 선택여부 항목 */
+  userSelectedType: string
 }
 
 declare global {
@@ -30,15 +37,16 @@ declare global {
   }
 }
 
-let param = ref<Data>({
+let param = ref<addressData>({
   zonecode: '',
   roadAddress: '',
   jibunAddress: '',
   detailAddress: '',
-  extraAddress: ''
+  userSelectedType: ''
 })
 
 let isScriptLoaded = ref<boolean>(false);
+const inputEl = ref<HTMLInputElement | null>(null);
 
 const loadScript = () => {
   const script = document.createElement("script");
@@ -47,25 +55,36 @@ const loadScript = () => {
     isScriptLoaded.value = true;
   };
   document.head.appendChild(script);
-
 }
 
-
 const execDaumPostcode = () => {
+
   var width = 500;
   var height = 600;
+
   if (window.daum && window.daum.Postcode) {
+
     new window.daum.Postcode({
       width: width,
       height: height,
-      oncomplete: (data: any) => {
+
+      oncomplete: (data: addressData) => {
         console.log("d a t a :", data);
+        // 지번 주소를 선택했을 경우
+        if (data.userSelectedType === 'J') {
+          return alert("도로명주소를 선택하세요.")
+        }
+
         param.value = data
+        console.log("p a r a m:", param.value);
+        //상세주소 입력 focus
+        inputEl.value?.focus();
       }
     }).open({
       left: (window.screen.width / 2) - (width / 2),
-      top: (window.screen.height / 2) - (height / 2)
+      top: (window.screen.height / 2) - (height / 2),
     });
+
   } else {
     console.error("Daum Postcode 스크립트가 로드되지 않았습니다.");
   }
