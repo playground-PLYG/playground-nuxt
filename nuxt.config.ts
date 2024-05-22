@@ -1,7 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
-  devtools: { enabled: true },
+  devtools: { 
+    enabled: true,
+    timeline: {
+      enabled: true,
+    } 
+  },
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.API_URL,
+      kakaoApiKey: process.env.KAKAO_API_KEY
+    } 
+  },
   modules: [ "dayjs-nuxt", "@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "nuxt-quasar-ui", "@nuxt/devtools"],
   quasar: {
     plugins: [
