@@ -74,7 +74,7 @@ onMounted(() => {
         />
 
         <q-toolbar-title>
-          Quasar App
+          Playground
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>

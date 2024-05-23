@@ -32,13 +32,13 @@
       "@nuxt/types",
       "@types/node",
     ], // 사용할 타입 정의 설정
-    "exclude": [
-      "node_modules"
-    ], // 컴파일 제외할 파일 및 폴더 설정
-    "include": [
-      "/**/*.ts",
-      "**/*.vue"
-    ] // 컴파일에 포함할 파일 및 폴더 설정
   },
+  "exclude": [
+    "node_modules"
+  ], // 컴파일 제외할 파일 및 폴더 설정
+  "include": [
+    "/**/*.ts",
+    "**/*.vue"
+  ], // 컴파일에 포함할 파일 및 폴더 설정
   "extends": "./.nuxt/tsconfig.json" // 다른 tsconfig 파일을 확장하여 사용
 }
