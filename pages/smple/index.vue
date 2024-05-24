@@ -178,7 +178,7 @@ let detailParam = ref<DetailForm>({
 })
 
 // 다중 선택을 위한 selected
-let selected = ref<any>();
+let selected = ref<Data[]>();
 
 // 디테일 팝업 true, false 값
 let showDetailDialog = ref<boolean>(false);
@@ -214,7 +214,7 @@ const selectList = async () => {
     {
         method: 'GET'
     })
-    
+
     resData.value = result.data.content
     totalItems.value = result.data.totalElements !== undefined ? result.data.totalElements : 0
     totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value !== 0 ? Math.ceil(totalItems.value / itemsPerPage.value) : 1)
@@ -231,13 +231,12 @@ onMounted(() => {
 })
 
 // 목록에서 상세조회 할 때 
-const clickRow = (evt: any, row: any, index: any) => {
-  console.log("evt: ", evt, " row: ", row, " index: ", index)
+const clickRow = (evt: Event, row: Data) => {
   param.value = { ...row }
   showDetailDialog.value = true
 }
 
-const clickBtnDetailList = async (row: any) => {
+const clickBtnDetailList = async () => {
     console.log(selected.value)
     if(selected.value == undefined || selected.value.length > 1){
         $q.dialog({
