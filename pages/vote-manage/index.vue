@@ -1,490 +1,508 @@
 <template>
-    <div class="content">
-      <div class="title">
-        <div class="text-h4">
-          <q-icon name="chat" /> 투표관리
-        </div>
-      </div>
-      <div class="search">
-        <q-form
-          ref="searchForm"
-          @submit="selectVoteList"
-          @reset="onReset"
-        >
-          <q-input outlined clearable v-model="searchParam.voteSubject" label="투표제목" round dense flat class="input" />
-          <q-select outlined clearable  v-model="searchParam.voteKindCode" :options="kindCodeNm" label="투표종류" round dense flat class="select"/>
-          <q-checkbox v-model="searchParam.anonymityVoteAlternativeBoo" label="익명투표여부" class="checkbox" />
-          <q-input outlined readonly v-model="searchParam.voteBeginDate" label="투표시작일자" round dense flat class="calendar" >
-            <template v-slot:append>
-              <q-icon name="close" @click="searchParam.voteBeginDate = ''" class="cursor-pointer" />
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="searchParam.voteBeginDate">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-          ~
-          <q-input outlined readonly v-model="searchParam.voteEndDate" label="투표종료일자" round dense flat class="calendar" >
-            <template v-slot:append>
-              <q-icon name="close" @click="searchParam.voteEndDate = ''" class="cursor-pointer" />
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="searchParam.voteEndDate">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-          <q-btn push class="button" color="green-7" label="조회" type="submit" />
-          <q-btn push class="button" color="green-7" label="초기화" type="reset" />
-        </q-form>
-      </div>
-      <div class="table">
-        <q-table
-          :rows="voteList"
-          :columns="columns"
-          row-key="voteSsno"
-          v-model:selected="selected"
-          selection="multiple"
-          :rows-per-page-options="[0]"
-          @row-click="onClickVote"
-        />
-      </div>
-      <div class="proc">
-        <q-btn push class="button" color="primary" label="등록" @click=""/>
+  <div class="content">
+    <div class="title">
+      <div class="text-h4">
+        <q-icon name="chat" /> 투표관리
       </div>
     </div>
-  
-  <voteDetail 
-    ref="voteDetailComponent"
-    v-model="showVoteDetail" 
-    :vote-data="selectedVote"
-    :question-data = "selectedQestn"
-    :code-data = "kindCode"
-    :code-name = "kindCodeNm"
-    @chgShowVoteDetail="chgShowVoteDetail"
-  />
-  
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from 'vue';
-  import { type ApiResponse } from '../../interface/server';
-  import { type QTableProps } from 'quasar';
-  import voteDetail  from './vote-detail/voteDetail.vue'
-  import { useRouter } from "vue-router";
-  const { loading } = useQuasar()
-  
-  interface kindCodeType {
-    codeId: string,
-    codeNm:string,
-    upperCodeId: string
-  }
-  
-  let kindCode = ref<kindCodeType[]>([]);
-  let kindCodeNm = ref<String[]>([]);
-  
-  const setKindCode = () => { 
-    $fetch<ApiResponse<kindCodeType[]>>(
-      "/playground/public/code/codeSearch", 
-      {
-          method: 'POST',
-          body: JSON.stringify(
-            ref<kindCodeType>({
-              codeId: '',
-              codeNm: '',
-              upperCodeId: ''
-            })
-          )
-      })
-    .then((result) => {
-      let resData = result.data;
-      resData.forEach((item) =>{
-        if(item.upperCodeId == '003'){
-          const kindItem: kindCodeType = {
-            codeId: item.codeId,
-            codeNm:item.codeNm,
-            upperCodeId: item.upperCodeId
-          }
-          kindCode.value.push(kindItem);
-          kindCodeNm.value.push(item.codeNm);
+    <div class="search">
+      <q-form
+        ref="searchForm"
+        @submit="selectVoteList"
+        @reset="onReset"
+      >
+        <q-input outlined clearable v-model="searchParam.voteSubject" label="투표제목" round dense flat class="input" />
+        <q-select outlined clearable  v-model="searchParam.voteKindCode" :options="kindCodeNm" label="투표종류" round dense flat class="select"/>
+        <q-checkbox v-model="searchParam.anonymityVoteAlternativeBoo" label="익명투표여부" class="checkbox" />
+        <q-input outlined readonly v-model="searchParam.voteBeginDate" label="투표시작일자" round dense flat class="calendar" >
+          <template v-slot:append>
+            <q-icon name="close" @click="searchParam.voteBeginDate = ''" class="cursor-pointer" />
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="searchParam.voteBeginDate">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Close" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
+        ~
+        <q-input outlined readonly v-model="searchParam.voteEndDate" label="투표종료일자" round dense flat class="calendar" >
+          <template v-slot:append>
+            <q-icon name="close" @click="searchParam.voteEndDate = ''" class="cursor-pointer" />
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="searchParam.voteEndDate">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Close" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
+        <q-btn push class="button" color="green-7" label="조회" type="submit" />
+        <q-btn push class="button" color="green-7" label="초기화" type="reset" />
+      </q-form>
+    </div>
+    <div class="table">
+      <q-table
+        :rows="voteList"
+        :columns="columns"
+        row-key="voteSsno"
+        v-model:selected="selected"
+        selection="multiple"
+        :rows-per-page-options="[0]"
+        @row-click="onClickVote"
+      />
+    </div>
+    <div class="proc">
+      <q-btn push class="button" color="primary" label="등록" @click="showVoteRegistForm = true"/>
+    </div>
+  </div>
+
+<voteDetail 
+  ref="voteDetailComponent"
+  v-model="showVoteDetail" 
+  :vote-data="selectedVote"
+  :question-data = "selectedQestn"
+  :code-data = "kindCode"
+  :code-name = "kindCodeNm"
+  @chgShowVoteDetail="chgShowVoteDetail"
+/>
+
+<voteRegistForm
+  ref="registForm"
+  v-model="showVoteRegistForm"
+  :code-data = "kindCode"
+  :code-name = "kindCodeNm"
+  @chgShowVoteRegist = "chgShowVoteRegist"
+/>
+
+</template>
+
+<script setup lang="ts">
+import {onMounted, ref } from 'vue';
+import { type ApiResponse } from '../../interface/server';
+import {useQuasar, type QTableProps } from 'quasar';
+import voteDetail  from './vote-detail/voteDetail.vue'
+import voteRegistForm  from './vote-detail/voteRegistForm.vue'
+import { useRouter } from "vue-router";
+const { loading } = useQuasar()
+
+interface kindCodeType {
+  codeId: string,
+  codeNm:string,
+  upperCodeId: string
+}
+
+let kindCode = ref<kindCodeType[]>([]);
+let kindCodeNm = ref<String[]>([]);
+
+const setKindCode = () => { 
+  $fetch<ApiResponse<kindCodeType[]>>(
+    "/playground/public/code/codeSearch", 
+    {
+        method: 'POST',
+        body: JSON.stringify(
+          ref<kindCodeType>({
+            codeId: '',
+            codeNm: '',
+            upperCodeId: ''
+          })
+        )
+    })
+  .then((result) => {
+    let resData = result.data;
+    resData.forEach((item) =>{
+      if(item.upperCodeId == '003'){
+        const kindItem: kindCodeType = {
+          codeId: item.codeId,
+          codeNm:item.codeNm,
+          upperCodeId: item.upperCodeId
         }
-      });
-  
-      selectAllVote();
+        kindCode.value.push(kindItem);
+        kindCodeNm.value.push(item.codeNm);
+      }
+    });
+
+    selectAllVote();
+  })
+  .catch((error) => {
+    console.error(error)
+  })
+}
+
+interface ResponseData{
+  voteIndex: number,
+  voteSsno: number,
+  voteKindCode: string,
+  voteSubject: string,
+  anonymityVoteAlternative: string,
+  voteBeginDate: string,
+  voteEndDate: string,
+  voteDeleteAlternative: string,
+  registUsrId: string,
+  registDt: string,
+  updtUsrId: string,
+  updtDt: string
+}
+
+interface pageableData {
+  content : ResponseData[],
+  number : number,
+  numberOfElements : number,
+  pageable : pageableDataType[],
+  size : number,
+  totalElements: number,
+  totalPages : number
+}
+
+interface pageableDataType {
+  offset: number,
+  pageNumber : number,
+  pageSize : number
+}
+
+interface Form {
+  voteKindCode: string,
+  voteSubject: string,
+  anonymityVoteAlternative: string,
+  voteBeginDate: string,
+  voteEndDate: string,
+  voteDeleteAlternative: string
+}
+
+let param = ref<Form>({
+  voteKindCode: '',
+  voteSubject: '',
+  anonymityVoteAlternative: '',
+  voteBeginDate: '',
+  voteEndDate: '',
+  voteDeleteAlternative: ''
+})
+
+let voteList = ref<ResponseData[]>([]);
+
+const selectAllVote = async () => {
+  await $fetch<ApiResponse<pageableData>>(
+    "/playground/api/vote/getVotePageList", 
+    {
+      method: 'POST',
+      body: JSON.stringify(param.value)
+    }
+  ).then((res)=>{
+    let resData = res.data.content;
+    resData.forEach((item:ResponseData, index:number) =>{
+      let kindNm:string = '';
+      kindCode.value.forEach((code) => {
+        if(item.voteKindCode == code.codeId){
+          kindNm =  code.codeNm;
+        }
+      })
+
+      const voteItem: ResponseData = {
+          voteIndex : index + 1,
+          voteSsno: item.voteSsno,
+          voteKindCode: kindNm == '' ? item.voteKindCode : kindNm,
+          voteSubject: item.voteSubject,
+          anonymityVoteAlternative: item.anonymityVoteAlternative,
+          voteBeginDate: settingDate(item.voteBeginDate),
+          voteEndDate: settingDate(item.voteEndDate),
+          voteDeleteAlternative: item.voteDeleteAlternative,
+          registUsrId: item.registUsrId,
+          registDt: settingDate(item.registDt),
+          updtUsrId: item.updtUsrId,
+          updtDt: settingDate(item.updtDt)
+       }
+       voteList.value.push(voteItem)
     })
-    .catch((error) => {
-      console.error(error)
-    })
-  }
-  
-  interface ResponseData{
-    voteIndex: number,
-    voteSsno: number,
-    voteKindCode: string,
-    voteSubject: string,
-    anonymityVoteAlternative: string,
-    voteBeginDate: string,
-    voteEndDate: string,
-    voteDeleteAlternative: string,
-    registUsrId: string,
-    registDt: string,
-    updtUsrId: string,
-    updtDt: string
-  }
-  
-  interface Form {
-    voteKindCode: string,
-    voteSubject: string,
-    anonymityVoteAlternative: string,
-    voteBeginDate: string,
-    voteEndDate: string,
-    voteDeleteAlternative: string
-  }
-  
-  let param = ref<Form>({
-    voteKindCode: '',
-    voteSubject: '',
-    anonymityVoteAlternative: '',
-    voteBeginDate: '',
-    voteEndDate: '',
-    voteDeleteAlternative: ''
+  }).catch((error)=>{
+    console.error(error);
+  })
+
+}
+
+const settingDate = (el:string) => {
+  return el.toString().split('T')[0] + ' ' + el.toString().split('T')[1].split('.')[0];
+}
+
+interface searchParamType{
+  voteSubject: string,
+  voteKindCode: string,
+  anonymityVoteAlternativeBoo: boolean,
+  anonymityVoteAlternative: string,
+  voteBeginDate: string,
+  voteEndDate: string,
+}
+let searchParam = ref<searchParamType>({
+  voteSubject: '',
+  voteKindCode: '',
+  anonymityVoteAlternativeBoo: false,
+  anonymityVoteAlternative: '',
+  voteBeginDate: '',
+  voteEndDate: ''
+})
+
+let selected = ref<any>();
+
+const columns = ref<QTableProps["columns"]>([
+  { name: 'voteIndex', label: '번호', field: 'voteIndex', align: 'center'  },
+//  { name: 'voteSsno', label: '투표번호', field: 'voteSsno', align: 'center', style: 'display:none'  },
+  { name: 'voteKindCode', label: '투표종류', field: 'voteKindCode', align: 'center' },
+  { name: 'voteSubject', label: '투표제목', field: 'voteSubject', align: 'center' },
+  { name: 'anonymityVoteAlternative', label: '익명투표여부', field: 'anonymityVoteAlternative', align: 'center' },
+  { name: 'voteBeginDate', label: '투표시작일시', field: 'voteBeginDate', align: 'center' },
+  { name: 'voteEndDate', label: '투표종료일시', field: 'voteEndDate', align: 'center' },
+  { name: 'voteDeleteAlternative', label: '투표삭제여부', field: 'voteDeleteAlternative', align: 'center' },
+  { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'center' },
+  { name: 'registDt', label: '등록일시', field: 'registDt', align: 'center' },
+  { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'center' },
+  { name: 'updtDt', label: '수정일시', field: 'updtDt', align: 'center' }
+])
+
+onMounted(() => {
+  setKindCode();
+})
+
+const selectVoteList = async () => {
+  let kindId:string = '';
+  kindCode.value.forEach((code) => {
+    if(searchParam.value.voteKindCode == code.codeNm){
+      kindId =  code.codeId;
+    }
   })
   
-  let voteList = ref<ResponseData[]>([]);
-  
-  const selectAllVote = async () => {
-    await $fetch<ApiResponse<ResponseData[]>>(
-      "/playground/api/vote/getVotePageList", 
-      {
-        method: 'POST',
-        body: JSON.stringify(param.value)
-      }
-    ).then((res)=>{
-      let resData = res.data.content;
-      resData.forEach((item:ResponseData, index:number) =>{
-        let kindNm:string = '';
-        kindCode.value.forEach((code) => {
-          if(item.voteKindCode == code.codeId){
-            kindNm =  code.codeNm;
-          }
-        })
-  
-        const voteItem: ResponseData = {
-            voteIndex : index + 1,
-            voteSsno: item.voteSsno,
-            voteKindCode: kindNm == '' ? item.voteKindCode : kindNm,
-            voteSubject: item.voteSubject,
-            anonymityVoteAlternative: item.anonymityVoteAlternative,
-            voteBeginDate: settingDate(item.voteBeginDate),
-            voteEndDate: settingDate(item.voteEndDate),
-            voteDeleteAlternative: item.voteDeleteAlternative,
-            registUsrId: item.registUsrId,
-            registDt: settingDate(item.registDt),
-            updtUsrId: item.updtUsrId,
-            updtDt: settingDate(item.updtDt)
-         }
-         voteList.value.push(voteItem)
+  let srchParam = ref<Form>({
+    voteKindCode: kindId,
+    voteSubject: searchParam.value.voteSubject,
+    anonymityVoteAlternative: searchParam.value.anonymityVoteAlternativeBoo ? 'Y': 'N',
+    voteBeginDate: searchParam.value.voteBeginDate.replaceAll('/','-'),
+    voteEndDate: searchParam.value.voteEndDate.replaceAll('/','-'),
+    voteDeleteAlternative: ''
+  })
+  await $fetch<ApiResponse<pageableData>>(
+    "/playground/api/vote/getVotePageList", 
+    {
+      method: 'POST',
+      body: JSON.stringify(srchParam.value)
+    }
+
+  ).then((res) => {
+    loading.show()
+    voteList.value = [];
+    let resData = res.data.content;
+    resData.forEach((item:ResponseData, index:number) =>{
+      let kindNm:string = '';
+      kindCode.value.forEach((code) => {
+        if(item.voteKindCode == code.codeId){
+          kindNm =  code.codeNm;
+        }
       })
-    }).catch((error)=>{
-      console.log(error);
+
+      const voteItem: ResponseData = {
+          voteIndex : index + 1,
+          voteSsno: item.voteSsno,
+          voteKindCode: kindNm == '' ? item.voteKindCode : kindNm,
+          voteSubject: item.voteSubject,
+          anonymityVoteAlternative: item.anonymityVoteAlternative,
+          voteBeginDate: settingDate(item.voteBeginDate),
+          voteEndDate: settingDate(item.voteEndDate),
+          voteDeleteAlternative: item.voteDeleteAlternative,
+          registUsrId: item.registUsrId,
+          registDt: settingDate(item.registDt),
+          updtUsrId: item.updtUsrId,
+          updtDt: settingDate(item.updtDt)
+       }
+       voteList.value.push(voteItem)
     })
-  
-  }
-  
-  const settingDate = (el:string) => {
-    return el.toString().split('T')[0] + ' ' + el.toString().split('T')[1].split('.')[0];
-  }
-  
-  interface searchParamType{
-    voteSubject: string,
-    voteKindCode: string,
-    anonymityVoteAlternativeBoo: boolean,
-    anonymityVoteAlternative: string,
-    voteBeginDate: string,
-    voteEndDate: string,
-  }
-  let searchParam = ref<searchParamType>({
+
+  }).catch((error) => {
+    console.error(error);
+  })
+  loading.hide()
+}
+
+const onReset = () => {
+  searchParam.value = {
     voteSubject: '',
     voteKindCode: '',
     anonymityVoteAlternativeBoo: false,
     anonymityVoteAlternative: '',
     voteBeginDate: '',
     voteEndDate: ''
-  })
-  
-  let selected = ref<any>();
-  
-  const columns = ref<QTableProps["columns"]>([
-    { name: 'voteIndex', label: '번호', field: 'voteIndex', align: 'center'  },
-  //  { name: 'voteSsno', label: '투표번호', field: 'voteSsno', align: 'center', style: 'display:none'  },
-    { name: 'voteKindCode', label: '투표종류', field: 'voteKindCode', align: 'center' },
-    { name: 'voteSubject', label: '투표제목', field: 'voteSubject', align: 'center' },
-    { name: 'anonymityVoteAlternative', label: '익명투표여부', field: 'anonymityVoteAlternative', align: 'center' },
-    { name: 'voteBeginDate', label: '투표시작일시', field: 'voteBeginDate', align: 'center' },
-    { name: 'voteEndDate', label: '투표종료일시', field: 'voteEndDate', align: 'center' },
-    { name: 'voteDeleteAlternative', label: '투표삭제여부', field: 'voteDeleteAlternative', align: 'center' },
-    { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'center' },
-    { name: 'registDt', label: '등록일시', field: 'registDt', align: 'center' },
-    { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'center' },
-    { name: 'updtDt', label: '수정일시', field: 'updtDt', align: 'center' }
-  ])
-  
-  onMounted(() => {
-    setKindCode();
-  })
-  
-  const selectVoteList = async () => {
-    console.log('selectVoteList :::::::::::::::: ', searchParam.value);
-    let kindId:string = '';
-    kindCode.value.forEach((code) => {
-      if(searchParam.value.voteKindCode == code.codeNm){
-        kindId =  code.codeId;
-      }
-    })
-    
-    let srchParam = ref<Form>({
-      voteKindCode: kindId,
-      voteSubject: searchParam.value.voteSubject,
-      anonymityVoteAlternative: searchParam.value.anonymityVoteAlternativeBoo ? 'Y': 'N',
-      voteBeginDate: searchParam.value.voteBeginDate.replaceAll('/','-'),
-      voteEndDate: searchParam.value.voteEndDate.replaceAll('/','-'),
-      voteDeleteAlternative: ''
-    })
-    await $fetch<ApiResponse<ResponseData[]>>(
-      "/playground/api/vote/getVotePageList", 
-      {
-        method: 'POST',
-        body: JSON.stringify(srchParam.value)
-      }
-  
-    ).then((res) => {
-      loading.show()
-      console.log('selectVoteList ######## res : ', res);
-      voteList.value = [];
-      let resData = res.data.content;
-      resData.forEach((item:ResponseData, index:number) =>{
-        let kindNm:string = '';
-        kindCode.value.forEach((code) => {
-          if(item.voteKindCode == code.codeId){
-            kindNm =  code.codeNm;
-          }
-        })
-  
-        console.log('selectVoteList ######## kindNm : ', kindNm);
-        const voteItem: ResponseData = {
-            voteIndex : index + 1,
-            voteSsno: item.voteSsno,
-            voteKindCode: kindNm == '' ? item.voteKindCode : kindNm,
-            voteSubject: item.voteSubject,
-            anonymityVoteAlternative: item.anonymityVoteAlternative,
-            voteBeginDate: settingDate(item.voteBeginDate),
-            voteEndDate: settingDate(item.voteEndDate),
-            voteDeleteAlternative: item.voteDeleteAlternative,
-            registUsrId: item.registUsrId,
-            registDt: settingDate(item.registDt),
-            updtUsrId: item.updtUsrId,
-            updtDt: settingDate(item.updtDt)
-         }
-         voteList.value.push(voteItem)
+  }
+}
+
+interface VoteDetailDataType {
+  voteSsno: number,
+  voteKindCode: string,
+  voteKindName: string,
+  voteSubject: string,
+  anonymityVoteAlternative: string,
+  anonymityVoteAlternativeBoo: boolean,
+  voteBeginDate: string,
+  voteEndDate: string,
+  voteDeleteAlternative: string,
+  registUsrId: string,
+  registDt: string,
+  updtUsrId: string,
+  updtDt: string,
+  excuteResult?:string,
+  qestnResponseList : QuestionDetailDataType[]
+}
+
+interface QuestionDetailDataType  {
+  questionSsno : number,
+  voteSsno : number,
+  questionContents : string,
+  compoundNumberChoiceAlternative : string,
+  voteIemResponseList: VoteItemDetailDataType[]
+}
+
+interface VoteItemDetailDataType {
+  itemId : string
+  itemName : string,
+  questionSsno? : number,
+  voteSsno? : number
+}
+
+let showVoteDetail = ref<boolean>(false);
+let selectedVote = ref<VoteDetailDataType>(
+  {  
+    voteSsno: 0,
+    voteKindCode: '',
+    voteKindName: '',
+    voteSubject: '',
+    anonymityVoteAlternative: '',
+    anonymityVoteAlternativeBoo: false,
+    voteBeginDate: '',
+    voteEndDate: '',
+    voteDeleteAlternative: '',
+    registUsrId: '',
+    registDt: '',
+    updtUsrId: '',
+    updtDt: '',
+    excuteResult:'',
+    qestnResponseList: []
+  }
+)
+
+let selectedQestn = ref<QuestionDetailDataType[]>([]);
+
+
+const onClickVote = (evt: Object, row: ResponseData, index: number) => {
+  getVoteDetail(row.voteSsno, row.voteKindCode)
+}
+
+const voteDetailComponent= ref();
+
+const getVoteDetail =  async (ssno:number, kindCdNm:string) => {
+   await $fetch<ApiResponse<VoteDetailDataType>>(
+    "/playground/api/vote/getVoteDetail", 
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        voteSsno : ssno
       })
-  
-    }).catch((error) => {
-      console.log(error);
-    })
-    loading.hide()
-  }
-  
-  const onReset = () => {
-    searchParam.value = {
-      voteSubject: '',
-      voteKindCode: '',
-      anonymityVoteAlternativeBoo: false,
-      anonymityVoteAlternative: '',
-      voteBeginDate: '',
-      voteEndDate: ''
     }
-  }
-  
-  interface VoteDetailDataType {
-    voteSsno: number,
-    voteKindCode: string,
-    voteKindName: string,
-    voteSubject: string,
-    anonymityVoteAlternative: string,
-    anonymityVoteAlternativeBoo: boolean,
-    voteBeginDate: string,
-    voteEndDate: string,
-    voteDeleteAlternative: string,
-    registUsrId: string,
-    registDt: string,
-    updtUsrId: string,
-    updtDt: string,
-    excuteResult?:string,
-    qestnResponseList : QuestionDetailDataType[]
-  }
-  
-  interface QuestionDetailDataType  {
-    questionSsno : number,
-    voteSsno : number,
-    questionContents : string,
-    compoundNumberChoiceAlternative : string,
-    voteIemResponseList: VoteItemDetailDataType[]
-  }
-  
-  interface VoteItemDetailDataType {
-    itemId : string
-    itemName : string,
-    questionSsno? : number,
-    voteSsno? : number
-  }
-  
-  let showVoteDetail = ref<boolean>(false);
-  let selectedVote = ref<VoteDetailDataType>(
-    {  
-      voteSsno: 0,
-      voteKindCode: '',
-      voteKindName: '',
-      voteSubject: '',
-      anonymityVoteAlternative: '',
-      anonymityVoteAlternativeBoo: false,
-      voteBeginDate: '',
-      voteEndDate: '',
-      voteDeleteAlternative: '',
-      registUsrId: '',
-      registDt: '',
-      updtUsrId: '',
-      updtDt: '',
-      excuteResult:'',
-      qestnResponseList: []
+  ).then((res) => {
+    let resData = res.data
+
+    selectedVote.value = {
+      voteSsno: resData.voteSsno,
+      voteKindCode: resData.voteKindCode,
+      voteKindName: kindCdNm, // 투표종류 한글명
+      voteSubject: resData.voteSubject,
+      anonymityVoteAlternative: resData.anonymityVoteAlternative,
+      anonymityVoteAlternativeBoo: resData.anonymityVoteAlternative == 'N' ? false: true,// 익명여부 checkBox true, false 사용
+      voteBeginDate: resData.voteBeginDate,
+      voteEndDate: resData.voteEndDate,
+      voteDeleteAlternative: resData.voteDeleteAlternative,
+      registUsrId: resData.registUsrId,
+      registDt: resData.registDt,
+      updtUsrId: resData.updtUsrId,
+      updtDt: resData.updtDt,
+      excuteResult:resData.excuteResult,
+      qestnResponseList: resData.qestnResponseList
     }
-  )
-  
-  let selectedQestn = ref<QuestionDetailDataType[]>([]);
-  
-  
-  const onClickVote = (evt: Object, row: ResponseData, index: number) => {
-    getVoteDetail(row.voteSsno, row.voteKindCode)
-  }
-  
-  const voteDetailComponent= ref();
-  
-  const getVoteDetail =  async (ssno:number, kindCdNm:string) => {
-     await $fetch<ApiResponse<VoteDetailDataType>>(
-      "/playground/api/vote/getVoteDetail", 
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          voteSsno : ssno
-        })
-      }
-    ).then((res) => {
-      let resData = res.data
-  
-      selectedVote.value = {
-        voteSsno: resData.voteSsno,
-        voteKindCode: resData.voteKindCode,
-        voteKindName: kindCdNm, // 투표종류 한글명
-        voteSubject: resData.voteSubject,
-        anonymityVoteAlternative: resData.anonymityVoteAlternative,
-        anonymityVoteAlternativeBoo: resData.anonymityVoteAlternative == 'N' ? false: true,// 익명여부 checkBox true, false 사용
-        voteBeginDate: resData.voteBeginDate,
-        voteEndDate: resData.voteEndDate,
-        voteDeleteAlternative: resData.voteDeleteAlternative,
-        registUsrId: resData.registUsrId,
-        registDt: resData.registDt,
-        updtUsrId: resData.updtUsrId,
-        updtDt: resData.updtDt,
-        excuteResult:resData.excuteResult,
-        qestnResponseList: resData.qestnResponseList
-      }
-  
-      console.log('FIRST then :: slectedVote.value : ', selectedVote.value)
-      selectedQestn.value = selectedVote.value.qestnResponseList;
-    }).then(() => {
-      voteDetailComponent.value.initDetailFunc();
-      showVoteDetail.value = true;
-    }).catch((error) => {
-      console.log(error);
-    })
-  }
-  
-  const router = useRouter()
-  const chgShowVoteDetail = (call:boolean) => {
-    showVoteDetail.value = call;
-    router.go(0);
-  }
+    selectedQestn.value = selectedVote.value.qestnResponseList;
+  }).then(() => {
+    voteDetailComponent.value.initDetailFunc();
+    showVoteDetail.value = true;
+  }).catch((error) => {
+    console.error(error);
+  })
+}
+
+const router = useRouter()
+const chgShowVoteDetail = (call:boolean) => {
+  showVoteDetail.value = call;
+  router.go(0);
+}
+
+let showVoteRegistForm = ref<boolean>(false);
+const chgShowVoteRegist = (call:boolean) => {
+  showVoteRegistForm.value = call;
+  router.go(0);
+}
 
 
-  </script>
-  <style>
-  .content {
-    margin-top: 3rem;
-    margin-left: 5rem;
-    margin-right: 5rem;
-  }
-  
-  .title {
-    margin-top: 3rem;
-  }
-  
-  .search {
-    margin-top: 2rem;
-  }
-  
-  .search .select {
+</script>
+<style  lang="scss" scoped>
+.content {
+  margin-top: 3rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
+}
+
+.title {
+  margin-top: 3rem;
+}
+
+.search {
+  margin-top: 2rem;
+  .select {
     display: inline-block;
     vertical-align: middle;
     width: 20%;
     padding-right: 0.5rem;
   }
-  
-  .search .input {
+  .input {
     display: inline-block;
     vertical-align: middle;
     width: 15%;
     padding-right: 0.5rem;
   }
-  
-  .search .checkbox {
+  .checkbox {
     padding-right: 0.5rem;
   }
-  
-  .search .calendar {
+  .calendar {
     display: inline-block;
     vertical-align: middle;
     width: 18%;
     padding-right: 0.5rem;
     padding-left: 0.5rem;
   }
-  
-  .search .button {
+  .button {
     margin-right: 0.5rem;
   }
-  
-  .table {
-    margin-top: 1rem;
-  }
-  
-  .proc {
-    margin-top: 1rem;
-  }
-  
-  .proc .button {
+}
+
+.table {
+  margin-top: 1rem;
+}
+
+.proc {
+  margin-top: 1rem;
+  .button {
     margin-right: 0.5rem;
   }
-  
-  .proc .buttonR {
+  .buttonR {
     margin-left: 0.5rem;
     float: right;
   }
-  
-  </style>
+}
+</style>
