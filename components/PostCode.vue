@@ -1,13 +1,11 @@
 <template>
-  <div class="q-gutter-y-md column" style="max-width: 450px">
-    <div class="q-gutter-md row">
-      <q-input outlined type="text" v-model="param.zonecode" label="우편번호" style="width: 250px" />
-      <q-btn color="primary" type="button" @click="execDaumPostcode" label="우편번호 찾기" style="width: 150px" />
-    </div>
-    <q-input outlined type="text" v-model="param.roadAddress" label="도로명주소" />
-    <q-input outlined type="text" v-model="param.jibunAddress" label="지번주소" />
-    <q-input outlined type="text" v-model="param.detailAddress" label="상세주소" ref="inputEl" />
+  <div class="q-gutter-md row">
+    <q-input outlined type="text" v-model="param.zonecode" label="우편번호" style="width: 250px" readonly />
+    <q-btn color="primary" type="button" @click="execDaumPostcode" label="우편번호 찾기" style="width: 150px" />
   </div>
+  <q-input outlined type="text" v-model="param.roadAddress" label="도로명주소" readonly />
+  <q-input outlined type="text" v-model="param.jibunAddress" label="지번주소" readonly />
+  <q-input outlined type="text" v-model="param.detailAddress" label="상세주소" ref="inputEl" @keyup="changeVal" />
 </template>
 
 
@@ -15,6 +13,12 @@
 <script setup lang="ts">
 
 import { ref } from 'vue'
+
+const props = defineProps({
+  selectedType: String
+})
+
+const emit = defineEmits(['emitArgs'])
 
 
 /** 주소 정보 */
@@ -45,6 +49,12 @@ let param = ref<addressData>({
   userSelectedType: ''
 })
 
+//한글 양방향 바인딩
+const changeVal = (e: any) => {
+  console.log("e.target.value", e.target.value)
+  param.value.detailAddress = e.target.value;
+};
+
 let isScriptLoaded = ref<boolean>(false);
 const inputEl = ref<HTMLInputElement | null>(null);
 
@@ -58,6 +68,7 @@ const loadScript = () => {
 }
 
 const execDaumPostcode = () => {
+  console.log("selectedType :", props.selectedType);
 
   var width = 500;
   var height = 600;
@@ -71,14 +82,17 @@ const execDaumPostcode = () => {
       oncomplete: (data: addressData) => {
         console.log("d a t a :", data);
         // 지번 주소를 선택했을 경우
-        if (data.userSelectedType === 'J') {
-          return alert("도로명주소를 선택하세요.")
+        if (props.selectedType === 'R') {
+          if (data.userSelectedType === 'J') {
+            return alert("도로명주소를 선택하세요.")
+          }
         }
-
         param.value = data
+
         console.log("p a r a m:", param.value);
         //상세주소 입력 focus
         inputEl.value?.focus();
+        emit('emitArgs', param.value)
       }
     }).open({
       left: (window.screen.width / 2) - (width / 2),
@@ -90,8 +104,10 @@ const execDaumPostcode = () => {
   }
 }
 
+
 onMounted(() => {
   loadScript()
+
 })
 
 </script>
