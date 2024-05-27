@@ -138,3 +138,9 @@ export interface Metadata {
     apple: string
 }
 
+export interface Code {
+    code: string
+    codeName: string
+    upperCode: string
+    order: number
+}

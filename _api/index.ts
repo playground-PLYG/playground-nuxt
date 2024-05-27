@@ -1,3 +1,4 @@
+import { useCookie, useFetch } from 'nuxt/app'
 import { type IFetchOptions, type ApiResponse } from '../interface/server'
 
 export default class ApiService {
