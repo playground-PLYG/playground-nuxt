@@ -191,7 +191,7 @@ const codeid_rules = (val: string) => {
     if (kor) {
         return '한글은 입력할 수 없습니다.'
     }
-    const special = val.match(/[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/g);
+    const special = val.match(/[\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"]/g);
     if (special) {
         return '특수문자는 입력할 수 없습니다.'
     }
