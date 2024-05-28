@@ -336,7 +336,6 @@ const modifyAuthor = async () => {
 }
 
 const clickAuthorMenuAdd = async () => {
-  console.log("clickAuthorMenuAdd")
   if (typeof selected.value === 'undefined') {
     alert("메뉴 등록할 권한을 선택해주시기 바랍니다.")
     return
