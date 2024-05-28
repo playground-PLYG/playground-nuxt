@@ -74,7 +74,13 @@ const loadScript = () => {
 
 
 const execDaumPostcode = () => {
-  console.log("selectedType :", props.selectedType);
+  console.log("selectedType :", props.selectedType)
+
+  //도로명주소만 가져올때 !
+  let autoClose = true;
+  if (props.selectedType === 'R') {
+    autoClose = false;
+  }
 
   var element_layer = document.getElementById("layer") as HTMLElement;
 
@@ -85,9 +91,9 @@ const execDaumPostcode = () => {
       oncomplete: (data: addressData) => {
         console.log("d a t a :", data);
         // 지번 주소를 선택했을 경우
+
         if (props.selectedType === 'R') {
           if (data.userSelectedType === 'J') {
-            foldDaumPostcode()
             return alert("도로명주소를 선택하세요.")
           }
         }
@@ -98,12 +104,13 @@ const execDaumPostcode = () => {
         //상세주소 입력 focus
         inputEl.value?.focus();
         emit('emitArgs', param.value)
+
       },
       width: "100%",
       height: "100%",
       maxSuggestItems: 5,
     }).embed(element_layer, {
-      autoClose: true
+      autoClose: autoClose
     });
 
     // iframe을 넣은 element를 보이게 한다.
