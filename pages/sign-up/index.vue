@@ -7,24 +7,25 @@
                 <div class="text-h6" style="margin-bottom: 30px;">회원가입</div>
                 <div class="q-gutter-y-md column" style="max-width: 300px;">
 
-                <q-input outlined ref="inpMberId" v-model="param.mberId" label="ID" :dense="dense" :rules="[idRules]" />
+                <q-input ref="inpMberId" v-model="param.mberId" outlined label="ID" :dense="dense" :rules="[idRules]" />
     
-                <q-input outlined ref="inpMberEmail" v-model="param.mberEmailAdres" label="이메일" :dense="dense" :rules="[emailRules]"/>
+                <q-input ref="inpMberEmail" v-model="param.mberEmailAdres" outlined label="이메일" :dense="dense" :rules="[emailRules]"/>
                 
                 <q-btn unelevated color="primary" text-color="white" label="중복체크" style="margin-bottom: 20px;" @click="dupCheck"  />
                 
-                <q-input outlined  v-model="param.mberPassword" label="비밀번호" :dense="dense" type="password" :rules="[passwordRules]" />
+                <q-input v-model="param.mberPassword"  outlined label="비밀번호" :dense="dense" type="password" :rules="[passwordRules]" />
 
-                <q-input outlined  v-model="param.mberPasswordCheck" label="비밀번호 확인" :dense="dense" type="password" :rules="[passwordCheckRules]" />
+                <q-input v-model="param.mberPasswordCheck"  outlined label="비밀번호 확인" :dense="dense" type="password" :rules="[passwordCheckRules]" />
 
-                <q-input outlined  v-model="param.mberNm" label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
+                <q-input v-model="param.mberNm"  outlined label="이름" :dense="dense" :rules="[nameRules]" placeholder="예)홍길동"/>
     
-                <q-input outlined  v-model="param.mberBymd" label="생년월일" :dense="dense" type="tel" maxlength="8" :rules="[brdtRules]" placeholder="예)19881225"/>
+                <q-input v-model="param.mberBymd"  outlined label="생년월일" :dense="dense" type="tel" maxlength="8" :rules="[brdtRules]" placeholder="예)19881225"/>
     
-                <q-btn-toggle v-model="param.mberSexdstnCode" spread no-caps toggle-color="primary" color="grey-2" text-color="black" unelevated size="sm" 
+                <q-btn-toggle
+v-model="param.mberSexdstnCode" spread no-caps toggle-color="primary" color="grey-2" text-color="black" unelevated size="sm" 
                     :options="[ {label: '남자', value: 'M'},{label: '여자', value: 'F'} ]" padding="11px" style="margin-bottom: 20px;"/>
     
-                <q-input outlined  v-model="param.mberTelno" label="전화번호" :dense="dense" type="tel" maxlength="11" :rules="[telNoRules]" placeholder="예)01012345678"/>
+                <q-input v-model="param.mberTelno"  outlined label="전화번호" :dense="dense" type="tel" maxlength="11" :rules="[telNoRules]" placeholder="예)01012345678"/>
     
                 <br>
                 <br>
@@ -50,7 +51,7 @@ const dense = ref(true)
 const inpMberId = ref<any>(null)
 const inpMberEmail = ref<any>(null)
 let token:string = ''
-let snsLogin:string = ''
+const snsLogin:string = ''
 const loginForm = ref<any>(null)
 
 interface Data {
@@ -83,7 +84,7 @@ FetchResponse(FetchResponse: any): unknown;
 
 let dupCheckYn = '';
 
-let param = ref<Param>({
+const param = ref<Param>({
     mberId: '',
     mberPassword:'',
     mberPasswordCheck:'',
@@ -287,7 +288,7 @@ const dupCheck = async () => {
     }
 
     loading.show()
-    const result = await $fetch<ApiResponse<String>>('/playground/public/member/getMberDupCeck', {
+    const result = await $fetch<ApiResponse<string>>('/playground/public/member/getMberDupCeck', {
         method: 'POST',
         body: JSON.stringify(param.value) 
     })
@@ -392,20 +393,20 @@ const brdtRules = (val: string) => {
 }
 
 const check = (val: string) => {
-    var regExp = /\s/g;
+    const regExp = /\s/g;
     return val.replaceAll(regExp, "")
 }
 
 const checkSpecial = (val: string) => {
-    return val.match(/[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/g);
+    return val.match(/[{}[\]/?.,;:|)*~`!^\-_+<>@#$%&\\=('"]/g);
 }
 
 const checkNumber = (val: string) => { 
-    return !val.match(/[0-9]/g);
+    return !val.match(/\d/g);
 }
 
 function emailCheck(email_address : string){     
-	var email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+	const email_regex = /^[\w.-]+@[a-z0-9.-]+\.[a-z]{2,4}$/i;
 	if(email_regex.test(email_address)){ 
 		return false; 
 	}else{

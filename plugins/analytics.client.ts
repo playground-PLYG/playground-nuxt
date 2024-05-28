@@ -1,6 +1,6 @@
-import { inject } from '@vercel/analytics';
-import { defineNuxtPlugin } from 'nuxt/app';
- 
+import { inject } from '@vercel/analytics'
+import { defineNuxtPlugin } from 'nuxt/app'
+
 export default defineNuxtPlugin(() => {
-  inject();
-});
+  inject()
+})

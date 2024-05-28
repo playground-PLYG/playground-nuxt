@@ -47,7 +47,7 @@
   
           setTimeout(() => {
             // simulate loading and setting an empty node
-            if (key.indexOf('Lazy load empty') > -1) {
+            if (key.includes('Lazy load empty')) {
               done([])
               return
             }
