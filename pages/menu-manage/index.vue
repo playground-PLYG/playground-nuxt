@@ -412,8 +412,7 @@ const required_rules = (val: string) => {
   }
 
   const parentMenuId_rules = (val: string) => {
-      
-    if(val && val.trim() != "") {
+    if(val && val.trim() == "") {
       const num = val.match(/^[0-9]*$/);
       
       if(!num) {
