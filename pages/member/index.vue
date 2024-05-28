@@ -7,20 +7,20 @@
         </div>
         <div class="search">
             <div class="q-gutter-md row items-start">
-                <q-input outlined v-model="param.mberId" label="회원아이디" round dense flat class="input"/>
-                <q-input outlined v-model="param.mberNm" label="회원명" round dense flat class="input"/>
-                <q-btn push color="green-7" class="button" label="조회" @click="memberSearch" value="memberSearch"></q-btn>
+                <q-input v-model="param.mberId" outlined label="회원아이디" round dense flat class="input"/>
+                <q-input v-model="param.mberNm" outlined label="회원명" round dense flat class="input"/>
+                <q-btn push color="green-7" class="button" label="조회" value="memberSearch" @click="memberSearch"/>
                 <q-btn push color="green-7" class="button" label="초기화" @click="reset" />
             </div>
         </div>
         <div class="table">
-            <q-table flat bordered :rows="resData" row-key="mberId" :columns="columns"
-                class="my-sticky-header-table" 
-                v-model:selected="selected"
+            <q-table
+v-model:selected="selected" flat bordered :rows="resData" row-key="mberId"
+                :columns="columns" 
+                class="my-sticky-header-table"
                 selection="multiple"
                 :rows-per-page-options="[0]"
-                @row-click="">
-            </q-table>
+                @row-click=""/>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { date, type QTableProps } from 'quasar';
+import { type QTableProps, date } from 'quasar';
 import { type ApiResponse } from '../../interface/server';
 const { loading } = useQuasar();
 
@@ -72,14 +72,14 @@ interface Data {
     updtDt: string
 }
 
-let param = ref<Search>({
+const param = ref<Search>({
     mberId:'',
     mberNm: ''
 });
 
-let resData = ref<Data[]>([]);
+const resData = ref<Data[]>([]);
 
-let selected = ref<any>();
+const selected = ref<any>();
 
 const reset = () => {
   param.value = {

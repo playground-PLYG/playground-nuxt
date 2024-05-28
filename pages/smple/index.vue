@@ -8,17 +8,17 @@
       </div>
       <div class="table">
         <q-table
+          v-model:selected="selected"
           :rows="resData"
           :columns="columns"
           row-key="sampleSsno"
-          v-model:selected="selected"
           selection="multiple"
           :rows-per-page-options="[0]"
           @row-click="clickRow"
         >
         <!-- v-slot:bottom의 의미를 모르겠음 페이징이 가운데 정렬안되는 문제도 있는데.. -->
-        <template v-slot:bottom>
-            <paginationLayout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset"/>
+        <template #bottom>
+            <paginationLayout :total-page="totalPages" :current-page="currentPage" @send-event="reset"/>
         </template>
         </q-table>
       </div>
@@ -39,29 +39,29 @@
         <q-header >
           <q-toolbar class="bg-primary" >
             <q-toolbar-title>상세조회</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
+            <q-btn v-close-popup flat round dense icon="close" />
           </q-toolbar>
         </q-header>
         <q-page-container class="bg-white">
           <q-card>
             <q-card-section>
               <q-field stack-label label="샘플일련번호" style="padding-bottom: 20px;" >
-                <template v-slot:control>
+                <template #control>
                   <div class="self-center full-width no-outline">{{ param.sampleSsno }}</div>
                 </template>
               </q-field >
               <q-field stack-label label="샘플상세일차내용" style="padding-bottom: 20px;" >
-                <template v-slot:control>
+                <template #control>
                   <div class="self-center full-width no-outline">{{ param.sampleContent1 }}</div>
                 </template>
               </q-field >
               <q-field stack-label label="샘플상세이차내용" style="padding-bottom: 20px;" >
-                <template v-slot:control>
+                <template #control>
                   <div class="self-center full-width no-outline">{{ param.sampleContent2 }}</div>
                 </template>
               </q-field >
               <q-field stack-label label="샘플상세삼차내용" style="padding-bottom: 20px;" >
-                <template v-slot:control>
+                <template #control>
                   <div class="self-center full-width no-outline">{{ param.sampleContent3 }}</div>
                 </template>
               </q-field >
@@ -70,7 +70,7 @@
         </q-page-container>
         <q-footer>
           <q-toolbar class="bg-white">
-            <q-toolbar-title></q-toolbar-title>   
+            <q-toolbar-title/>   
             <div class="proc">
               <!-- <q-btn push class="button" color="primary" label="수정" @click="clickBtnModify" /> -->
               <q-btn push class="button" color="negative" label="삭제" />
@@ -91,16 +91,16 @@
             <q-header >
             <q-toolbar class="bg-primary" >
                 <q-toolbar-title>샘플 상세 목록 조회</q-toolbar-title>
-                <q-btn flat v-close-popup round dense icon="close" />
+                <q-btn v-close-popup flat round dense icon="close" />
             </q-toolbar>
             </q-header>
             <div class="table">
-                <q-table style="padding-top: 50px;"
+                <q-table
+style="padding-top: 50px;"
                 :rows="resDetailList"
                 :columns="detailColumns"
                 row-key="sampleDetailSsno"
-                >
-                </q-table>
+                />
             </div>
         </q-layout>
     </q-dialog>
@@ -111,15 +111,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { type ApiResponse, type ApiPagingResponse } from '../../interface/server';
 import { type QTableProps, useQuasar } from 'quasar';
+import { type ApiPagingResponse, type ApiResponse } from '../../interface/server';
 import paginationLayout from '../../components/Pagination.vue';
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
 const totalPages = ref<number>(0)
 const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
-let totalItems = ref<number | undefined>() // 데이터의 개수에 따라 페이지네이션 UI에 그려지는 숫자 리스트
+const totalItems = ref<number | undefined>() // 데이터의 개수에 따라 페이지네이션 UI에 그려지는 숫자 리스트
 
 const $q = useQuasar()
 
@@ -132,7 +132,7 @@ interface Data {
 }
 
 // 디테일 화면에 전송하기 위한 파라미터
-let param = ref<Data>({
+const param = ref<Data>({
     sampleSsno: 0,
     sampleContent1: '',
     sampleContent2: '',
@@ -140,7 +140,7 @@ let param = ref<Data>({
 })
 
 // 샘플 목록 조회 리스트
-let resData = ref<Data[][]>([]);
+const resData = ref<Data[][]>([]);
 
 // 샘플 목록 column 정의
 const columns = ref<QTableProps["columns"]>([
@@ -155,7 +155,7 @@ interface DetailData {
     sampleSsno: number
 }
 // 디테일 조회에 필요한 키
-let searchDetail = ref<DetailData>({
+const searchDetail = ref<DetailData>({
     sampleSsno: 0
 })
 
@@ -169,7 +169,7 @@ interface DetailForm {
 }
 
 // 디테일 화면에 전송하기 위한 파라미터
-let detailParam = ref<DetailForm>({
+const detailParam = ref<DetailForm>({
     sampleSsno: 0,
     sampleDetailSsno: 0,
     sampleDetailContent1: '',
@@ -178,10 +178,10 @@ let detailParam = ref<DetailForm>({
 })
 
 // 다중 선택을 위한 selected
-let selected = ref<Data[]>();
+const selected = ref<Data[]>();
 
 // 디테일 팝업 true, false 값
-let showDetailDialog = ref<boolean>(false);
+const showDetailDialog = ref<boolean>(false);
 
 // 샘플 상세 목록 조회 Data 영역
 interface DetailList {
@@ -193,10 +193,10 @@ interface DetailList {
 }
 
 // 디테일 목록 리스트
-let resDetailList = ref<DetailList[]>([]);
+const resDetailList = ref<DetailList[]>([]);
 
 // 디테일 목록 팝업 true, false 값
-let showDetailListDialog = ref<boolean>(false);
+const showDetailListDialog = ref<boolean>(false);
 
 // 샘플 상세 목록 column 정의
 const detailColumns = ref<QTableProps["columns"]>([

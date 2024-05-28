@@ -1,209 +1,209 @@
 <template>
-  <div class="content q-pa-md q-gutter-md">
-    <div class="title">
-      <div class="text-h4"><q-icon name="rss_feed" /> 식당 리스트</div>
-    </div>
+  <div>
+    <div class="content q-pa-md q-gutter-md">
+      <div class="title">
+        <div class="text-h4"><q-icon name="rss_feed" /> 식당 리스트</div>
+      </div>
 
-    <div class="search">
-      <q-form
-        @submit="fn_getRestaurantList"
-        @reset="fn_resetRestaurantSearchArea"
-      >
-        <q-card flat class="search-card">
+      <div class="search">
+        <q-form
+          @submit="fn_getRestaurantList"
+          @reset="fn_resetRestaurantSearchArea"
+        >
+          <q-card flat class="search-card">
+            <q-card-section class="row q-pa-none">
+              <div class="row full-width q-px-lg q-pb-lg q-pt-md">
+                <div
+                  class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
+                >
+                  <q-select
+                    v-model="restaurantSrchReq.rstrntKndCode"
+                    outlined
+                    :options="restaurantKindCodeSearchOptions"
+                    option-label="codeName"
+                    option-value="code"
+                    label="식당종류"
+                    round
+                    dense
+                    flat
+                    class="select"
+                    emit-value
+                    map-options
+                  />
+                </div>
+                <div
+                  class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
+                >
+                  <q-input
+                    v-model="restaurantSrchReq.rstrntNm"
+                    outlined
+                    label="식당명"
+                    round
+                    dense
+                    flat
+                    class="input"
+                  />
+                </div>
+
+                <div
+                  class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
+                >
+                  <div class="row full-width justify-end">
+                    <div class="q-pl-xs">
+                      <q-btn
+                        push
+                        class="button"
+                        color="green-6"
+                        label="초기화"
+                        type="reset"
+                      />
+                    </div>
+                    <div class="q-pl-xs">
+                      <q-btn
+                        push
+                        class="button"
+                        color="green-6"
+                        label="조회"
+                        type="submit"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-form>
+      </div>
+
+      <div class="toolbar-area">
+        <q-card flat>
           <q-card-section class="row q-pa-none">
-            <div class="row full-width q-px-lg q-pb-lg q-pt-md">
-              <div
-                class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
-              >
-                <q-select
-                  v-model="restaurantSrchReq.rstrntKndCode"
-                  outlined
-                  :options="restaurantKindCodeSearchOptions"
-                  option-label="codeName"
-                  option-value="code"
-                  label="식당종류"
-                  round
-                  dense
-                  flat
-                  class="select"
-                  emit-value
-                  map-options
+            <div class="row full-width q-px-md q-py-xs justify-end">
+              <div class="row q-py-xs toolbar-box">
+                <div
+                  v-show="isRestaurantSelectMode"
+                  class="q-pl-md q-py-xs flex inline"
+                >
+                  <q-btn
+                    push
+                    class="button"
+                    color="red-7"
+                    label="삭제"
+                    @click="fn_removeRestaurantList"
+                  />
+                </div>
+
+                <q-separator
+                  v-show="isRestaurantSelectMode"
+                  inset
+                  vertical
+                  class="q-ml-sm flex inline"
                 />
-              </div>
-              <div
-                class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
-              >
-                <q-input
-                  v-model="restaurantSrchReq.rstrntNm"
-                  outlined
-                  label="식당명"
-                  round
-                  dense
-                  flat
-                  class="input"
-                />
+
+                <div class="flex inline">
+                  <q-toggle
+                    v-model="isRestaurantSelectMode"
+                    checked-icon="check"
+                    color="green"
+                    unchecked-icon="clear"
+                    size="lg"
+                    left-label
+                  />
+                </div>
               </div>
 
-              <div
-                class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
-              >
-                <div class="row full-width justify-end">
-                  <div class="q-pl-xs">
-                    <q-btn
-                      push
-                      class="button"
-                      color="green-6"
-                      label="초기화"
-                      type="reset"
-                    />
-                  </div>
-                  <div class="q-pl-xs">
-                    <q-btn
-                      push
-                      class="button"
-                      color="green-6"
-                      label="조회"
-                      type="submit"
-                    />
-                  </div>
+              <q-separator inset vertical class="q-mx-sm flex inline" />
+
+              <div class="row q-py-sm">
+                <div class="flex inline">
+                  <q-btn
+                    push
+                    class="button"
+                    color="blue-6"
+                    label="추가"
+                    @click="fn_openRestaurantAddPopup"
+                  />
                 </div>
               </div>
             </div>
           </q-card-section>
         </q-card>
-      </q-form>
-    </div>
+      </div>
 
-    <div class="toolbar-area">
-      <q-card flat>
-        <q-card-section class="row q-pa-none">
-          <div class="row full-width q-px-md q-py-xs justify-end">
-            <div class="row q-py-xs toolbar-box">
-              <div
-                v-show="isRestaurantSelectMode"
-                class="q-pl-md q-py-xs flex inline"
-              >
-                <q-btn
-                  push
-                  class="button"
-                  color="red-7"
-                  label="삭제"
-                  @click="fn_removeRestaurantList"
-                />
-              </div>
-
-              <q-separator
-                v-show="isRestaurantSelectMode"
-                inset
-                vertical
-                class="q-ml-sm flex inline"
-              />
-
-              <div class="flex inline">
-                <q-toggle
-                  v-model="isRestaurantSelectMode"
-                  checked-icon="check"
-                  color="green"
-                  unchecked-icon="clear"
-                  size="lg"
-                  left-label
-                />
-              </div>
-            </div>
-
-            <q-separator inset vertical class="q-mx-sm flex inline" />
-
-            <div class="row q-py-sm">
-              <div class="flex inline">
-                <q-btn
-                  push
-                  class="button"
-                  color="blue-6"
-                  label="추가"
-                  @click="fn_openRestaurantAddPopup"
-                />
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
-    </div>
-
-    <div class="content-body">
-      <div
-        :class="[
-          'row justify-center q-gutter-sm',
-          isRestaurantSelectMode ? 'restaurant-select-mode' : ''
-        ]"
-      >
-        <q-intersection
-          v-for="(restaurant, restaurantIndex) in restaurantResList"
-          :key="restaurantIndex"
-          class="q-ma-sm card-restaurant cursor-pointer"
+      <div class="content-body">
+        <div
+          :class="[
+            'row justify-center q-gutter-sm',
+            isRestaurantSelectMode ? 'restaurant-select-mode' : ''
+          ]"
         >
-          <q-card flat bordered>
-            <q-card-section>
-              <q-img
-                src="/icon/no-image.png"
-                class="fit"
-                :rato="1"
-                sizes="(max-width: 250px) 250px, (max-height: 300) 300px"
-              >
-                <q-checkbox
-                  v-show="isRestaurantSelectMode"
-                  v-model="restaurant.isSelected"
-                  class="absolute-full text-subtitle2 flex flex-center"
-                  size="250px"
-                  checked-icon="task_alt"
-                  unchecked-icon="highlight_off"
-                />
-              </q-img>
-            </q-card-section>
+          <q-intersection
+            v-for="(restaurant, restaurantIndex) in restaurantResList"
+            :key="restaurantIndex"
+            class="q-ma-sm card-restaurant cursor-pointer"
+          >
+            <q-card flat bordered>
+              <q-card-section>
+                <q-img
+                  src="/icon/no-image.png"
+                  class="fit"
+                  :rato="1"
+                  sizes="(max-width: 250px) 250px, (max-height: 300) 300px"
+                >
+                  <q-checkbox
+                    v-show="isRestaurantSelectMode"
+                    v-model="restaurant.isSelected"
+                    class="absolute-full text-subtitle2 flex flex-center"
+                    size="250px"
+                    checked-icon="task_alt"
+                    unchecked-icon="highlight_off"
+                  />
+                </q-img>
+              </q-card-section>
 
-            <q-separator inset />
+              <q-separator inset />
 
-            <q-card-section>
-              <div class="text-subtitle1">{{ restaurant.rstrntNm }}</div>
-            </q-card-section>
+              <q-card-section>
+                <div class="text-subtitle1">{{ restaurant.rstrntNm }}</div>
+              </q-card-section>
+            </q-card>
+          </q-intersection>
+
+          <q-card flat bordered class="q-ma-sm card-restaurant add-btn-card">
+            <q-card-section> 식당 추가 버튼 </q-card-section>
+            <q-card-section> 식당 추가 정보 입력 영역 </q-card-section>
           </q-card>
-        </q-intersection>
-
-        <q-card flat bordered class="q-ma-sm card-restaurant add-btn-card">
-          <q-card-section> 식당 추가 버튼 </q-card-section>
-          <q-card-section> 식당 추가 정보 입력 영역 </q-card-section>
-        </q-card>
+        </div>
       </div>
     </div>
-  </div>
-</template>
 
-<template>
-  <div class="popup">
-    <q-dialog v-model="isShowRestaurantAddPopup">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Terms of Agreement</div>
-        </q-card-section>
+    <div class="popup">
+      <q-dialog v-model="isShowRestaurantAddPopup">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Terms of Agreement</div>
+          </q-card-section>
 
-        <q-separator />
+          <q-separator />
 
-        <q-card-section style="max-height: 50vh" class="scroll">
-          <p v-for="n in 15" :key="n">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
-            repellendus sit voluptate voluptas eveniet porro. Rerum blanditiis
-            perferendis totam, ea at omnis vel numquam exercitationem aut, natus
-            minima, porro labore.
-          </p>
-        </q-card-section>
+          <q-card-section style="max-height: 50vh" class="scroll">
+            <p v-for="n in 15" :key="n">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
+              repellendus sit voluptate voluptas eveniet porro. Rerum blanditiis
+              perferendis totam, ea at omnis vel numquam exercitationem aut,
+              natus minima, porro labore.
+            </p>
+          </q-card-section>
 
-        <q-separator />
+          <q-separator />
 
-        <q-card-actions align="right">
-          <q-btn flat label="Decline" color="primary" v-close-popup />
-          <q-btn flat label="Accept" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <q-card-actions align="right">
+            <q-btn v-close-popup flat label="Decline" color="primary" />
+            <q-btn v-close-popup flat label="Accept" color="primary" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
