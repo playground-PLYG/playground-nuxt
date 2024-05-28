@@ -6,6 +6,11 @@
   <q-input outlined type="text" v-model="param.roadAddress" label="도로명주소" readonly />
   <q-input outlined type="text" v-model="param.jibunAddress" label="지번주소" readonly />
   <q-input outlined type="text" v-model="param.detailAddress" label="상세주소" ref="inputEl" @keyup="changeVal" />
+
+  <div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
+    <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnFoldWrap"
+      style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" @click="foldDaumPostcode()" alt="접기 버튼">
+  </div>
 </template>
 
 
@@ -67,41 +72,71 @@ const loadScript = () => {
   document.head.appendChild(script);
 }
 
+
 const execDaumPostcode = () => {
   console.log("selectedType :", props.selectedType);
 
-  var width = 500;
-  var height = 600;
+  var element_layer = document.getElementById("layer") as HTMLElement;
 
   if (window.daum && window.daum.Postcode) {
 
     new window.daum.Postcode({
-      width: width,
-      height: height,
 
       oncomplete: (data: addressData) => {
         console.log("d a t a :", data);
         // 지번 주소를 선택했을 경우
         if (props.selectedType === 'R') {
           if (data.userSelectedType === 'J') {
+            foldDaumPostcode()
             return alert("도로명주소를 선택하세요.")
           }
         }
         param.value = data
 
         console.log("p a r a m:", param.value);
+        foldDaumPostcode()
         //상세주소 입력 focus
         inputEl.value?.focus();
         emit('emitArgs', param.value)
-      }
-    }).open({
-      left: (window.screen.width / 2) - (width / 2),
-      top: (window.screen.height / 2) - (height / 2),
+      },
+      width: "100%",
+      height: "100%",
+      maxSuggestItems: 5,
+    }).embed(element_layer, {
+      autoClose: true
     });
 
+    // iframe을 넣은 element를 보이게 한다.
+    element_layer.style.display = "block";
+
+    // iframe을 넣은 element의 위치를 화면의 가운데로 이동시킨다.
+    initLayerPosition(element_layer);
   } else {
     console.error("Daum Postcode 스크립트가 로드되지 않았습니다.");
   }
+}
+
+const initLayerPosition = (element_layer: any) => {
+  var width = 350;
+  var height = 500;
+  var borderWidth = 6;
+
+
+  element_layer.style.width = width + 'px';
+  element_layer.style.height = height + 'px';
+  element_layer.style.border = borderWidth + 'px solid';
+
+  // // 실행되는 순간의 화면 너비와 높이 값을 가져와서 중앙에 뜰 수 있도록 위치를 계산한다.
+  element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width) / 2 - borderWidth) + 'px';
+  element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height) / 2 - borderWidth) + 'px';
+
+}
+
+const foldDaumPostcode = () => {
+  var element_layer = document.getElementById("layer") as HTMLElement;
+  // iframe을 넣은 element를 안보이게 한다.
+  element_layer.style.display = 'none';
+
 }
 
 
