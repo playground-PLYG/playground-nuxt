@@ -144,8 +144,8 @@ let AuthorParam = ref<AuthorData>({
 let resData = ref<Data[]>([]);
 let resAuthorData = ref<AuthorData[]>([]);
 
-let selected = ref<any>();
-let authorSelected = ref<any>();
+let selected = ref<Data[]>();
+let authorSelected = ref<AuthorData>();
 
 let showAuthorMapngDialog = ref<boolean>(false);
 
@@ -176,7 +176,7 @@ const memberSearch = async () => {
 };
 
 const clickMberAuthorAdd = async () => {
-  if (typeof selected.value[0] === 'undefined') {
+  if (typeof selected.value === 'undefined') {
     alert("권한 등록할 회원을 선택해주시기 바랍니다.")
     return
   }
@@ -205,6 +205,11 @@ const clickAuthorRow = async (details: any) => {
 }
 
 const addAuthorMapng = async () => {
+  if(AuthorParam.value.authorId === ""){
+    alert("등록할 권한을 선택해 주세요.")
+    return
+  }
+
   if(AuthorParam.value.mberAuthorAddAt == "Y"){
     alert("권한 중복 매핑은 불가합니다.")
     return
@@ -217,18 +222,23 @@ const addAuthorMapng = async () => {
       body: JSON.stringify(AuthorParam.value)
     })
     .then(() => {
-      alert(AuthorParam.value.mberId + '회원의 권한이 등록되었습니다.')
+      alert(AuthorParam.value.mberId + ' 회원의 권한이 등록되었습니다.')
       router.go(0)
     })
     .catch((error) => {
       console.error(error)
-      alert(AuthorParam.value.mberId + '회원별 권한이 등록되지 않았습니다.')
+      alert(AuthorParam.value.mberId + ' 회원의 권한이 등록되지 않았습니다.')
     })
    loading.hide()
 }
 
 const removeAuthorMapng = async () => {
-  if(authorSelected.value.mberAuthorAddAt == "N"){
+  if (authorSelected.value?.authorId === "") {
+    alert("삭제할 권한을 선택해주시기 바랍니다.")
+    return
+  }
+
+  if(authorSelected.value?.mberAuthorAddAt == "N"){
     alert("매핑되지 않은 권한은 삭제 불가합니다.")
     return
   }
@@ -240,12 +250,12 @@ const removeAuthorMapng = async () => {
       body: JSON.stringify(authorSelected.value)
     })
     .then(() => {
-      alert(AuthorParam.value.mberId + '회원별 권한이 삭제되었습니다.')
+      alert(AuthorParam.value.mberId + ' 회원의 권한이 삭제되었습니다.')
       router.go(0)
     })
     .catch((error) => {
       console.error(error)
-      alert(AuthorParam.value.mberId + '회원별 권한이 삭제되지 않았습니다.')
+      alert(AuthorParam.value.mberId + ' 회원의 권한이 삭제되지 않았습니다.')
     })
   loading.hide()
 }

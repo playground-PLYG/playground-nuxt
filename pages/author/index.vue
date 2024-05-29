@@ -178,8 +178,8 @@ let MenuParam = ref<MenuData>({
 let resData = ref<Data[]>([]);
 let resMenuData = ref<MenuData[]>([]);
 
-let selected = ref<any[]>();
-let menuSelected = ref<any>();
+let selected = ref<Data[]>();
+let menuSelected = ref<MenuData>();
 
 let showInsertDialog = ref<boolean>(false);
 let showUpdateDialog = ref<boolean>(false);
@@ -363,8 +363,13 @@ const clickMenuRow = async (details: any) => {
 }
 
 const addMenuMapng = async () => {
+  if(MenuParam.value.menuSn === 0){
+    alert("등록할 메뉴를 선택해 주세요.")
+    return
+  }
+
   if(MenuParam.value.authorMenuAddAt == "Y"){
-    alert("권한 중복 매핑은 불가합니다.")
+    alert("메뉴 중복 매핑은 불가합니다.")
     return
   }
   loading.show()
@@ -375,19 +380,24 @@ const addMenuMapng = async () => {
       body: JSON.stringify(MenuParam.value)
     })
     .then(() => {
-      alert(MenuParam.value.authorId + '권한별 메뉴가 등록되었습니다.')
+      alert(MenuParam.value.authorId + ' 권한의 메뉴가 등록되었습니다.')
       clickAuthorMenuAdd()
       //router.go(0)
     })
     .catch((error) => {
       console.error(error)
-      alert(MenuParam.value.authorId + '권한별 메뉴가 등록되지 않았습니다.')
+      alert(MenuParam.value.authorId + ' 권한의 메뉴가 등록되지 않았습니다.')
     })
    loading.hide()
 }
 
 const removeMenuMapng = async () => {
-  if(menuSelected.value.authorMenuAddAt == "N"){
+  if(menuSelected.value?.menuSn === 0){
+    alert("삭제할 메뉴을 선택해주시기 바랍니다.")
+    return
+  }
+  
+  if(menuSelected.value?.authorMenuAddAt == "N"){
     alert("매핑되지 않은 권한은 삭제 불가합니다.")
     return
   }
@@ -399,13 +409,12 @@ const removeMenuMapng = async () => {
       body: JSON.stringify(menuSelected.value)
     })
     .then(() => {
-      alert(MenuParam.value.authorId + '권한별 메뉴가 삭제되었습니다.')
-      clickAuthorMenuAdd()
-      //router.go(0)
+      alert(MenuParam.value.authorId + ' 권한의 메뉴가 삭제되었습니다.')
+      router.go(0)
     })
     .catch((error) => {
       console.error(error)
-      alert(MenuParam.value.authorId + '권한별 메뉴가 삭제되지 않았습니다.')
+      alert(MenuParam.value.authorId + ' 권한의 메뉴가 삭제되지 않았습니다.')
     })
   loading.hide()
 }
