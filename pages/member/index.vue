@@ -148,6 +148,7 @@ let selected = ref<Data[]>();
 let authorSelected = ref<AuthorData>();
 
 let showAuthorMapngDialog = ref<boolean>(false);
+let authorClickYn = "N";
 
 const reset = () => {
   param.value = {
@@ -201,16 +202,21 @@ const clickMberAuthorAdd = async () => {
 }
 
 const clickAuthorRow = async (details: any) => {
-  AuthorParam.value = details.rows[0]
+  if(details.added == true){
+    AuthorParam.value = details.rows[0]
+    authorClickYn = "Y"
+  } else {
+    authorClickYn = "N"
+  }
 }
 
 const addAuthorMapng = async () => {
-  if(AuthorParam.value.authorId === ""){
+  if(authorClickYn === "N"){
     alert("등록할 권한을 선택해 주세요.")
     return
   }
 
-  if(AuthorParam.value.mberAuthorAddAt == "Y"){
+  if(AuthorParam.value?.mberAuthorAddAt == "Y"){
     alert("권한 중복 매핑은 불가합니다.")
     return
   }
@@ -233,7 +239,7 @@ const addAuthorMapng = async () => {
 }
 
 const removeAuthorMapng = async () => {
-  if (authorSelected.value?.authorId === "") {
+  if (authorClickYn === "N") {
     alert("삭제할 권한을 선택해주시기 바랍니다.")
     return
   }

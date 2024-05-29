@@ -186,6 +186,7 @@ let showUpdateDialog = ref<boolean>(false);
 let showMenuMapngDialog = ref<boolean>(false);
 let readonly = ref(true);
 let modifyClick = '';
+let menuClickYn = "N";
 
 const searchOptions = [
   { label: '전체', value: '' },
@@ -340,6 +341,8 @@ const clickAuthorMenuAdd = async () => {
     alert("메뉴 등록할 권한을 선택해주시기 바랍니다.")
     return
   }
+
+  MenuParam.value.authorId = selected.value[0].authorId
  
   loading.show()
   await $fetch<ApiResponse<MenuData[]>>(
@@ -359,16 +362,21 @@ const clickAuthorMenuAdd = async () => {
 }
 
 const clickMenuRow = async (details: any) => {
-  MenuParam.value = details.rows[0]
+  if(details.added == true){
+    MenuParam.value = details.rows[0]
+    menuClickYn = "Y"
+  } else {
+    menuClickYn = "N"
+  }
 }
 
 const addMenuMapng = async () => {
-  if(MenuParam.value.menuSn === 0){
+  if(menuClickYn === "N"){
     alert("등록할 메뉴를 선택해 주세요.")
     return
   }
 
-  if(MenuParam.value.authorMenuAddAt == "Y"){
+  if(MenuParam.value?.authorMenuAddAt == "Y"){
     alert("메뉴 중복 매핑은 불가합니다.")
     return
   }
@@ -392,7 +400,7 @@ const addMenuMapng = async () => {
 }
 
 const removeMenuMapng = async () => {
-  if(menuSelected.value?.menuSn === 0){
+  if(menuClickYn === "N"){
     alert("삭제할 메뉴을 선택해주시기 바랍니다.")
     return
   }
