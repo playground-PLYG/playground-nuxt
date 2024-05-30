@@ -64,253 +64,256 @@
       />
       <q-btn push class="buttonR" color="warning" label="사용여부 변경" />
     </div>
-  </div>
+    <div class="popup">
+      <q-dialog v-model="showInsertDialog" @hide="onReset">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>등록</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <MapSearch
+              :location="currentLocation"
+              @marker-click="selectRstrnt"
+            />
+            <q-card>
+              <q-card-section>
+                <q-form @submit="onSubmit">
+                  <q-input
+                    v-model="param.rstrntNm"
+                    label="식당명"
+                    class="input"
+                    outlined
+                    :rules="[nm_rules]"
+                  />
+                  <q-select
+                    v-model="param.rstrntKndCode"
+                    outlined
+                    :options="searchOptions"
+                    emit-value
+                    map-options
+                    label="식당종류"
+                    class="select"
+                    :rules="[select_rules]"
+                  />
+                  <q-input
+                    v-model="param.rstrntDstnc"
+                    type="number"
+                    label="식당거리(m)"
+                    class="input"
+                    outlined
+                    :rules="[num_rules]"
+                  />
+                  <q-toolbar class="bg-white">
+                    <q-toolbar-title />
+                    <q-btn push color="primary" label="등록" type="submit" />
+                  </q-toolbar>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
 
-  <div class="popup">
-    <q-dialog v-model="showInsertDialog" @hide="onReset">
-      <q-layout container>
-        <q-header>
+    <div class="q-pa-md q-gutter-sm">
+      <q-dialog v-model="showUpdateDialog" @hide="onReset">
+        <q-card style="width: 800px; max-width: 100vw">
           <q-toolbar class="bg-primary">
-            <q-toolbar-title>등록</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
+            <q-toolbar-title style="color: white">식당</q-toolbar-title>
+            <q-btn
+              v-close-popup
+              flat
+              round
+              dense
+              icon=" close"
+              style="color: white"
+            />
           </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form @submit="onSubmit">
-                <q-input
-                  v-model="param.rstrntNm"
-                  label="식당명"
-                  class="input"
-                  outlined
-                  :rules="[nm_rules]"
+          <q-card-section>
+            <q-form @submit="onSubmit">
+              <q-input
+                v-model="param.rstrntNm"
+                label="식당명"
+                class="input"
+                :rules="[nm_rules]"
+                outlined
+                :readonly="readonly"
+              />
+              <q-select
+                v-model="param.rstrntKndCode"
+                outlined
+                emit-value
+                map-options
+                :options="searchOptions"
+                label="식당종류"
+                class="select"
+                :rules="[select_rules]"
+                :readonly="readonly"
+              />
+              <q-input
+                v-model="param.rstrntDstnc"
+                type="number"
+                label="식당거리"
+                class="input"
+                outlined
+                :readonly="readonly"
+                :rules="[num_rules]"
+              />
+              <q-toolbar class="search">
+                <q-toolbar-title />
+                <q-btn
+                  push
+                  color="primary"
+                  class="button"
+                  label="수정"
+                  @click="modifyRstrnt"
                 />
-                <q-select
-                  v-model="param.rstrntKndCode"
-                  outlined
-                  :options="searchOptions"
-                  emit-value
-                  map-options
-                  label="식당종류"
-                  class="select"
-                  :rules="[select_rules]"
+                <q-btn
+                  :disabled="modifyClick == ''"
+                  push
+                  color="primary"
+                  class="button"
+                  label="등록"
+                  type="submit"
                 />
-                <q-input
-                  v-model="param.rstrntDstnc"
-                  type="number"
-                  label="식당거리"
-                  class="input"
-                  outlined
-                  :rules="[num_rules]"
-                />
-                <q-toolbar class="bg-white">
-                  <q-toolbar-title />
-                  <q-btn push color="primary" label="등록" type="submit" />
-                </q-toolbar>
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
-  </div>
-
-  <div class="q-pa-md q-gutter-sm">
-    <q-dialog v-model="showUpdateDialog" @hide="onReset">
-      <q-card style="width: 800px; max-width: 100vw">
-        <q-toolbar class="bg-primary">
-          <q-toolbar-title style="color: white">식당</q-toolbar-title>
-          <q-btn
-            v-close-popup
-            flat
-            round
-            dense
-            icon=" close"
-            style="color: white"
-          />
-        </q-toolbar>
-        <q-card-section>
-          <q-form @submit="onSubmit">
-            <q-input
-              v-model="param.rstrntNm"
-              label="식당명"
-              class="input"
-              :rules="[nm_rules]"
-              outlined
-              :readonly="readonly"
-            />
-            <q-select
-              v-model="param.rstrntKndCode"
-              outlined
-              emit-value
-              map-options
-              :options="searchOptions"
-              label="식당종류"
-              class="select"
-              :rules="[select_rules]"
-              :readonly="readonly"
-            />
-            <q-input
-              v-model="param.rstrntDstnc"
-              type="number"
-              label="식당거리"
-              class="input"
-              outlined
-              :readonly="readonly"
-              :rules="[num_rules]"
-            />
+              </q-toolbar>
+            </q-form>
+          </q-card-section>
+          <q-card-section>
+            <div class="q-pa-md">
+              <div class="text-h5">
+                <q-icon name="restaurant_menu" />{{ restaurantNm }} 메뉴
+              </div>
+              <!-- <q-card-actions>
+                <div class="search">
+                  <q-form @submit="getRstrntMenuDetail" @reset="onMenuReset">
+                    <q-input outlined class="input" v-model="menuParam.menuName" label="메뉴명" round dense flat
+                      style="width: fit-content;" />
+                    <q-btn push class="button" color="green-7" label="조회" type="submit" />
+                    <q-btn push class="button" color="green-7" label="초기화" type="reset" />
+                  </q-form>
+                </div>
+              </q-card-actions> -->
+              <q-scroll-area style="height: 400px; max-width: 800px">
+                <div class="row justify-center q-gutter-sm">
+                  <q-intersection
+                    v-for="(item, index) in menuData"
+                    :key="index"
+                    class="example-item"
+                  >
+                    <q-card
+                      v-ripple
+                      flat
+                      bordered
+                      class="q-ma-sm"
+                      clickable
+                      @click="modifyMenu(item)"
+                    >
+                      <!-- <img :src=item.menuName @click="modifyMenu(item)">  -->
+                      <img src="https://cdn.quasar.dev/img/parallax2.jpg" />
+                      <q-card-section>
+                        <div class="text-subtitle2">
+                          메뉴명 : {{ item.menuName }}
+                        </div>
+                        <div class="text-subtitle2">
+                          가격 : {{ Number(item.menuPrice).toLocaleString() }}원
+                        </div>
+                      </q-card-section>
+                    </q-card>
+                  </q-intersection>
+                  <div
+                    v-show="noMenu == true"
+                    class="text-negative"
+                    style="text-align: center"
+                  >
+                    등록되어 있는 메뉴가 없어요 메뉴를 등록해주세요.
+                  </div>
+                </div>
+              </q-scroll-area>
+            </div>
             <q-toolbar class="search">
               <q-toolbar-title />
               <q-btn
                 push
                 color="primary"
                 class="button"
-                label="수정"
-                @click="modifyRstrnt"
-              />
-              <q-btn
-                :disabled="modifyClick == ''"
-                push
-                color="primary"
-                class="button"
-                label="등록"
-                type="submit"
+                label="메뉴등록"
+                @click="addMenu"
               />
             </q-toolbar>
-          </q-form>
-        </q-card-section>
-        <q-card-section>
-          <div class="q-pa-md">
-            <div class="text-h5">
-              <q-icon name="restaurant_menu" />{{ restaurantNm }} 메뉴
-            </div>
-            <!-- <q-card-actions>
-              <div class="search">
-                <q-form @submit="getRstrntMenuDetail" @reset="onMenuReset">
-                  <q-input outlined class="input" v-model="menuParam.menuName" label="메뉴명" round dense flat
-                    style="width: fit-content;" />
-                  <q-btn push class="button" color="green-7" label="조회" type="submit" />
-                  <q-btn push class="button" color="green-7" label="초기화" type="reset" />
-                </q-form>
-              </div>
-            </q-card-actions> -->
-            <q-scroll-area style="height: 400px; max-width: 800px">
-              <div class="row justify-center q-gutter-sm">
-                <q-intersection
-                  v-for="(item, index) in menuData"
-                  :key="index"
-                  class="example-item"
-                >
-                  <q-card
-                    v-ripple
-                    flat
-                    bordered
-                    class="q-ma-sm"
-                    clickable
-                    @click="modifyMenu(item)"
-                  >
-                    <!-- <img :src=item.menuName @click="modifyMenu(item)">  -->
-                    <img src="https://cdn.quasar.dev/img/parallax2.jpg" />
-                    <q-card-section>
-                      <div class="text-subtitle2">
-                        메뉴명 : {{ item.menuName }}
-                      </div>
-                      <div class="text-subtitle2">
-                        가격 : {{ Number(item.menuPrice).toLocaleString() }}원
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </q-intersection>
-                <div
-                  v-show="noMenu == true"
-                  class="text-negative"
-                  style="text-align: center"
-                >
-                  등록되어 있는 메뉴가 없어요 메뉴를 등록해주세요.
-                </div>
-              </div>
-            </q-scroll-area>
-          </div>
-          <q-toolbar class="search">
-            <q-toolbar-title />
-            <q-btn
-              push
-              color="primary"
-              class="button"
-              label="메뉴등록"
-              @click="addMenu"
-            />
-          </q-toolbar>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-  </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+    </div>
 
-  <div class="popup">
-    <q-dialog v-model="showMenuDialog">
-      <q-layout container style="height: 400px">
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>메뉴등록</q-toolbar-title>
-            <q-btn
-              v-close-popup
-              flat
-              round
-              dense
-              icon="close"
-              @click="onMenuReset"
-            />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form @submit="menuSubmit">
-                <q-input
-                  v-model="menuParam.menuName"
-                  label="메뉴명"
-                  class="input"
-                  outlined
-                  :rules="[nm_rules]"
-                />
-                <q-input
-                  v-model="menuParam.menuPrice"
-                  mask="###,###,###"
-                  unmasked-value
-                  reverse-fill-mask
-                  input-class="text-right"
-                  label="메뉴가격"
-                  class="input"
-                  :rules="[num_rules]"
-                  outlined
-                />
-                <q-toolbar class="bg-white">
-                  <q-toolbar-title />
-                  <div class="proc">
-                    <q-btn
-                      push
-                      class="button"
-                      color="primary"
-                      label="등록"
-                      type="submit"
-                    />
-                    <q-btn
-                      v-show="showMenuBtn == true"
-                      push
-                      class="button"
-                      color="negative"
-                      label="삭제"
-                      @click="removeMenu"
-                    />
-                  </div>
-                </q-toolbar>
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
+    <div class="popup">
+      <q-dialog v-model="showMenuDialog">
+        <q-layout container style="height: 400px">
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>메뉴등록</q-toolbar-title>
+              <q-btn
+                v-close-popup
+                flat
+                round
+                dense
+                icon="close"
+                @click="onMenuReset"
+              />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form @submit="menuSubmit">
+                  <q-input
+                    v-model="menuParam.menuName"
+                    label="메뉴명"
+                    class="input"
+                    outlined
+                    :rules="[nm_rules]"
+                  />
+                  <q-input
+                    v-model="menuParam.menuPrice"
+                    mask="###,###,###"
+                    unmasked-value
+                    reverse-fill-mask
+                    input-class="text-right"
+                    label="메뉴가격"
+                    class="input"
+                    :rules="[num_rules]"
+                    outlined
+                  />
+                  <q-toolbar class="bg-white">
+                    <q-toolbar-title />
+                    <div class="proc">
+                      <q-btn
+                        push
+                        class="button"
+                        color="primary"
+                        label="등록"
+                        type="submit"
+                      />
+                      <q-btn
+                        v-show="showMenuBtn == true"
+                        push
+                        class="button"
+                        color="negative"
+                        label="삭제"
+                        @click="removeMenu"
+                      />
+                    </div>
+                  </q-toolbar>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
@@ -318,8 +321,8 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, useQuasar } from 'quasar'
-import type { PiniaVuePlugin } from 'pinia'
 import { type ApiResponse } from '../../interface/server'
+import MapSearch from '~/components/MapSearch.vue'
 
 const router = useRouter()
 const { loading } = useQuasar()
@@ -328,7 +331,7 @@ interface Data {
   rstrntSn: number
   rstrntNm: string
   rstrntKndCode: string
-  rstrntDstnc: number
+  rstrntDstnc: string
   recentChoiseDt: string
 }
 
@@ -339,21 +342,21 @@ interface MenuData {
   menuPrice?: string
 }
 
-interface rstrntData {
+interface RstrntData {
   rstrntSn?: number
   rstrntNm: string
   rstrntKndCode: string
-  rstrntDstnc?: number | undefined
+  rstrntDstnc?: string
   recentChoiseDt?: string | undefined
 }
 
-const param = ref<rstrntData>({
+const param = ref<RstrntData>({
   rstrntNm: '',
   rstrntKndCode: '',
-  rstrntDstnc: 0
+  rstrntDstnc: ''
 })
 
-const searchParam = ref<rstrntData>({
+const searchParam = ref<RstrntData>({
   rstrntKndCode: '',
   rstrntNm: ''
 })
@@ -378,6 +381,8 @@ const readonly = ref(true)
 let modifyClick = ''
 let restaurantNm = ''
 
+const currentLocation = ref({ x: '126.981727', y: '37.567858' })
+
 const searchOptions = [
   { label: '전체', value: '' },
   { label: '한식', value: '001' },
@@ -385,6 +390,20 @@ const searchOptions = [
   { label: '일식', value: '003' },
   { label: '양식', value: '004' }
 ]
+
+const selectRstrnt = (
+  rstrnt: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
+) => {
+  const rstrntCdNm = searchOptions.find(
+    (element) => element.label == rstrnt.category_name.substring(6, 8)
+  )
+
+  param.value = {
+    rstrntNm: rstrnt.place_name,
+    rstrntKndCode: rstrntCdNm?.value == undefined ? '' : rstrntCdNm?.value,
+    rstrntDstnc: rstrnt.distance
+  }
+}
 
 const nm_rules = (val: string) => {
   if (!val) {
@@ -431,7 +450,7 @@ const columns = ref<QTableProps['columns']>([
   { name: 'rstrntNm', label: '식당명', field: 'rstrntNm', align: 'left' }
 ])
 
-const clickRow = (evt: Event, row: any, index: number) => {
+const clickRow = (evt: Event, row: Data, _index: number) => {
   param.value = { ...row }
   restaurantNm = param.value.rstrntNm
   getRstrntMenuList()
@@ -455,7 +474,7 @@ const onReset = () => {
   param.value = {
     rstrntNm: '',
     rstrntKndCode: '',
-    rstrntDstnc: 0,
+    rstrntDstnc: '',
     recentChoiseDt: ''
   }
   readonly.value = true
@@ -481,7 +500,6 @@ const getRstrntList = async () => {
   )
     .then((result) => {
       resData.value = result.data
-      console.log('리스트조회 : ', resData.value)
     })
     .catch((error) => {
       console.error(error)
@@ -556,12 +574,12 @@ const getRstrntMenuList = async () => {
   showUpdateDialog.value = true
 }
 
-const modifyRstrnt = async () => {
+const modifyRstrnt = () => {
   readonly.value = false
   modifyClick = '수정!'
 }
 
-const addMenu = async () => {
+const addMenu = () => {
   showMenuBtn.value = false
   showMenuDialog.value = true
 
@@ -610,15 +628,12 @@ const menuSubmit = async () => {
   loading.hide()
 }
 
-const modifyMenu = async (
-  item?: {
-    restaurantSerialNo?: number
-    restaurantMenuSerialNo?: string
-    menuName?: string
-    menuPrice?: string
-  },
-  index?: number
-) => {
+const modifyMenu = (item?: {
+  restaurantSerialNo?: number
+  restaurantMenuSerialNo?: string
+  menuName?: string
+  menuPrice?: string
+}) => {
   menuParam.value = { ...item }
   showMenuDialog.value = true
   showMenuBtn.value = true
@@ -645,25 +660,25 @@ const removeMenu = async () => {
   loading.hide()
 }
 
-const getRstrntMenuDetail = async () => {
-  menuParam.value.restaurantSerialNo = param.value.rstrntSn
+// const getRstrntMenuDetail = async () => {
+//   menuParam.value.restaurantSerialNo = param.value.rstrntSn
 
-  loading.show()
-  await $fetch<ApiResponse<MenuData[]>>(
-    '/playground/public/restaurant/getRstrntMenuList',
-    {
-      method: 'POST',
-      body: JSON.stringify(menuParam.value)
-    }
-  )
-    .then((result) => {
-      menuData.value = result.data
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-  loading.hide()
-}
+//   loading.show()
+//   await $fetch<ApiResponse<MenuData[]>>(
+//     '/playground/public/restaurant/getRstrntMenuList',
+//     {
+//       method: 'POST',
+//       body: JSON.stringify(menuParam.value)
+//     }
+//   )
+//     .then((result) => {
+//       menuData.value = result.data
+//     })
+//     .catch((error) => {
+//       console.error(error)
+//     })
+//   loading.hide()
+// }
 
 onMounted(() => {
   getRstrntList()
