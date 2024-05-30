@@ -1,26 +1,37 @@
 {
-  // TypeScript 컴파일러 옵션 설정
   "compilerOptions": {
-    "target": "esnext", // 컴파일 대상을 ESNext로 설정
-    "module": "esnext", // 모듈 형식을 ESNext로 설정
-    "moduleResolution": "node", // 모듈 해결 방식을 Node.js 스타일로 설정
-    "lib": ["esnext", "esnext.asynciterable", "dom"], // 사용할 라이브러리 설정
-    "noImplicitThis": false, // 암묵적인 'this' 타입 체크를 사용하지 않음
-    "experimentalDecorators": false, // 실험적인 데코레이터 사용 비활성화
-    "resolveJsonModule": true, // JSON 모듈 해결 활성화
-    "esModuleInterop": true, // ES 모듈 형식의 상호 운용성을 위해 CommonJS를 ES 모듈로 변환
-    "allowJs": true, // JavaScript 파일도 컴파일에 포함
-    "checkJs": false, // JavaScript 파일의 타입 체크를 비활성화
-    "sourceMap": true, // 소스 맵 생성
-    "strict": true, // 엄격한 타입 체크 활성화
-    "noEmit": true, // 출력 파일 생성 비활성화
-    "baseUrl": ".", // 상대 경로를 기준으로 모듈 탐색 시작 위치 설정
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noImplicitAny": true,
+    "allowJs": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "types": ["@nuxt/types", "@types/node", "node"],
+    "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
-      "@/*": ["./*"]
-    }, // 모듈 경로 별칭 설정
-    "typeRoots": ["types"], // 타입 정의 파일의 위치 설정
-    "types": ["@nuxt/types", "@types/node"] // 사용할 타입 정의 설정
+      "@/*": ["./*"],
+      "#internal/nitro": ["./node_modules/nitropack/dist/runtime"],
+      "#internal/nitro/app": ["./node_modules/nitropack/dist/runtime/app"],
+      "#internal/nitro/utils": ["./node_modules/nitropack/dist/runtime/utils"],
+      "#vue-router": ["./node_modules/vue-router"]
+    }
   },
-  "extends": "./.nuxt/tsconfig.json" // 다른 tsconfig 파일을 확장하여 사용
+  "exclude": [
+    "**/dist/**",
+    "**/.nuxt/**",
+    "**/nuxt.d.ts",
+    "**/examples/**",
+    "**/docs/**",
+    "**/playground/**",
+    "**/test/fixtures/**",
+    "test/nuxt/**"
+  ]
 }
