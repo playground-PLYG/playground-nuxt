@@ -1,5 +1,5 @@
-import { type ApiResponse, type Code } from '../interface/server';
 import { useQuasar } from 'quasar';
+import { type ApiResponse, type Code } from '../interface/server';
 
 export const codeUtil = {
   getCode: async (upperCode: string, code: string): Promise<Code> => {
@@ -32,17 +32,15 @@ export const codeUtil = {
     return resultCode
   },
   getCodeName: async (upperCode: string, code: string): Promise<string> => {
-    const { loading } = useQuasar();
-
     let codeName: string = "";
     
-    let resultCode:Code = await codeUtil.getCode(upperCode, code)
+    const resultCode:Code = await codeUtil.getCode(upperCode, code)
 
     if (resultCode?.codeName) {
       codeName = resultCode.codeName
     }
   
-    return resultCode.codeName
+    return codeName
   },
   getCodeGroupList: async (upperCode: string): Promise<Code[]> => {
     const { loading } = useQuasar();

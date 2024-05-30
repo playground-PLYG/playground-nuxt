@@ -1,20 +1,27 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
-  devtools: { 
+  devtools: {
     enabled: true,
     timeline: {
-      enabled: true,
-    } 
+      enabled: true
+    }
   },
   dev: true,
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_URL,
       kakaoApiKey: process.env.KAKAO_API_KEY
-    } 
+    }
   },
-  modules: [ "dayjs-nuxt", "@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt", "nuxt-quasar-ui", "@nuxt/devtools"],
+  modules: [
+    'dayjs-nuxt',
+    '@pinia/nuxt',
+    '@pinia-plugin-persistedstate/nuxt',
+    'nuxt-quasar-ui',
+    '@nuxt/devtools',
+    '@nuxt/eslint'
+  ],
   quasar: {
     plugins: [
       'AppFullscreen',
@@ -22,7 +29,7 @@ export default defineNuxtConfig({
       'Dialog',
       'Loading',
       'LoadingBar',
-      'Notify',
+      'Notify'
     ],
     //sassVariables: 'css/quasar.variables.sass',
     quietSassWarnings: true,
@@ -33,10 +40,10 @@ export default defineNuxtConfig({
       font: null,
       fontIcons: ['material-icons', 'fontawesome-v6', 'mdi-v7'],
       svgIcons: [],
-      animations: "all"
+      animations: 'all'
     }
   },
   piniaPersistedstate: {
     storage: 'sessionStorage'
-  },
+  }
 })

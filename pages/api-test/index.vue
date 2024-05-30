@@ -1,11 +1,11 @@
 <template>
     <div>
         api 통신 샘플
-        email : <input :value="param.email" />
-        userId : <input :value="param.userId" />
-        name : <input :value="param.name" />
+        email : <input :value="param.email" >
+        userId : <input :value="param.userId" >
+        name : <input :value="param.name" >
         <button @click="testFetch">testFetch</button>
-        <input type="button" @click="testFetch" value="testFetch">
+        <input type="button" value="testFetch" @click="testFetch">
         <div>data : {{ resData }}</div>
     </div>
 </template>
@@ -28,12 +28,12 @@ interface Data {
   email: string
 }
 
-let param = ref<Search>({
+const param = ref<Search>({
     userId: '',
     name: '',
     email: ''
 });
-let resData = ref<Data[]>();
+const resData = ref<Data[]>();
 
 const testFetch = async () => {
     const result = await $fetch<ApiPagingResponse<Data>>("/playground/public/sample/users", {

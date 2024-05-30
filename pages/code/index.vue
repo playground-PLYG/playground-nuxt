@@ -1,9 +1,9 @@
 <template>
     <div class="q-pa-md">
         <div class="q-gutter-md row items-start">
-            <q-input outlined v-model="param.codeId" label="코드ID" round dense flat />
-            <q-input outlined v-model="param.codeNm" label="코드명" round dense flat />
-            <q-input outlined v-model="param.upperCodeId" label="상위코드명" round dense flat />
+            <q-input v-model="param.codeId" outlined label="코드ID" round dense flat />
+            <q-input v-model="param.codeNm" outlined label="코드명" round dense flat />
+            <q-input v-model="param.upperCodeId" outlined label="상위코드명" round dense flat />
             <!-- <q-select filled round dense flat v-model="param.upCdId" :options="arr" stack-label label="상위코드ID"
                 :display-value="`${param.upCdId ? param.upCdId : '코드선택'}`" style="width: 200px">
                 <template v-slot:append>
@@ -12,26 +12,28 @@
                 </template>
             </q-select> -->
 
-            <q-select outlined v-model="param.groupCodeAt" :options="groupCdOptions" label="그룹코드여부" style="width: 200px"
+            <q-select
+v-model="param.groupCodeAt" outlined :options="groupCdOptions" label="그룹코드여부" style="width: 200px"
                 round dense flat>
-                <template v-if="param.groupCodeAt" v-slot:append>
-                    <q-icon name="clear" @click.stop.prevent="param.groupCodeAt = ''" class="cursor-pointer" />
+                <template v-if="param.groupCodeAt" #append>
+                    <q-icon name="clear" class="cursor-pointer" @click.stop.prevent="param.groupCodeAt = ''" />
                 </template>
             </q-select>
-            <q-btn color="primary" label="조회" @click="codeSearch" value="codeSearch"></q-btn>
+            <q-btn color="primary" label="조회" value="codeSearch" @click="codeSearch"/>
         </div>
     </div>
 
     <div class="q-pa-md">
         <!-- <q-table title="코드관리" :rows="resData" :columns="columns" @row-click="clickRow"> -->
 
-        <q-table flat bordered title="코드관리" :rows="resData" row-key="codeSn" :columns="columns" v-model:selected="selected"
+        <q-table
+v-model:selected="selected" flat bordered title="코드관리" :rows="resData" row-key="codeSn" :columns="columns"
             class="my-sticky-header-table" selection="single">
 
-            <template v-slot:top-right>
+            <template #top-right>
                 <q-btn color="primary" label="등록/수정" @click="insert" />
                 &ensp;
-                <q-btn color="primary" label="삭제" @click="codeDelete" type="reset" />
+                <q-btn color="primary" label="삭제" type="reset" @click="codeDelete" />
             </template>
         </q-table>
 
@@ -46,23 +48,24 @@
                         <q-card-section>
                             <div class="text-h6">코드 등록/수정</div>
                         </q-card-section>
-                        <div>
-
-                        </div>
+                        <div/>
                         <q-card-section class="q-pt-none">
-                            <q-input dense v-model="insertParam.codeId" autofocus label="코드ID" filled
+                            <q-input
+v-model="insertParam.codeId" dense autofocus label="코드ID" filled
                                 :rules="[codeid_rules]" :readonly="readonly" />
-                            <q-input dense v-model="insertParam.codeNm" autofocus label="코드명" filled
+                            <q-input
+v-model="insertParam.codeNm" dense autofocus label="코드명" filled
                                 :rules="[codeNm_rules]" />
-                            <q-checkbox left-label v-model="groupCdCheck" label="상위코드 선택" />
-                            <q-select v-if="groupCdCheck" filled v-model="insertParam.upperCodeId" :options="arr"
-                                hint="상위코드를 선택하세요">
-                            </q-select>
-                            <q-input dense type="number" v-model="insertParam.sortOrdr" autofocus label="정렬순번" filled
+                            <q-checkbox v-model="groupCdCheck" left-label label="상위코드 선택" />
+                            <q-select
+v-if="groupCdCheck" v-model="insertParam.upperCodeId" filled :options="arr"
+                                hint="상위코드를 선택하세요"/>
+                            <q-input
+v-model="insertParam.sortOrdr" dense type="number" autofocus label="정렬순번" filled
                                 :rules="[sortSn_rules]" />
                         </q-card-section>
                         <q-card-actions align="right" class="text-primary">
-                            <q-btn flat label="닫기" type="reset" v-close-popup @click="codeReset" />
+                            <q-btn v-close-popup flat label="닫기" type="reset" @click="codeReset" />
                             <q-btn flat label="등록" type="submit" />
                         </q-card-actions>
                     </q-form>
@@ -75,8 +78,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { type QTableProps, date } from 'quasar';
 import { type ApiResponse } from '../../interface/server';
-import { date, type QTableProps } from 'quasar';
 
 const columns = ref<QTableProps["columns"]>([
     { name: 'codeId', align: 'left', label: '코드ID', field: 'codeId', sortable: true },
@@ -92,13 +95,13 @@ const columns = ref<QTableProps["columns"]>([
 
 
 //let insertForm = ref<any>(null);
-let prompt = ref(false);
-let resData = ref<Data[]>([]);
-let searchData = ref<Data[]>();
+const prompt = ref(false);
+const resData = ref<Data[]>([]);
+const searchData = ref<Data[]>();
 let selected = ref<Data[]>();
 let groupCdCheck = ref(false);
-var arr = new Array();
-let readonly = ref(false);
+let arr = [];
+const readonly = ref(false);
 
 
 
@@ -143,7 +146,7 @@ interface Data {
 }
 
 
-let param = ref<Search>({
+const param = ref<Search>({
     codeId: '',
     codeNm: '',
     upperCodeId: '',
@@ -152,7 +155,7 @@ let param = ref<Search>({
     updtUsrId: ''
 });
 
-let deleteData = ref<Search>({
+const deleteData = ref<Search>({
     codeId: '',
     codeNm: '',
     upperCodeId: '',
@@ -162,7 +165,7 @@ let deleteData = ref<Search>({
 });
 
 
-let insertParam = ref<Search>({
+const insertParam = ref<Search>({
     codeId: '',
     codeNm: '',
     upperCodeId: '',
@@ -171,7 +174,7 @@ let insertParam = ref<Search>({
     updtUsrId: ''
 });
 
-let updateParam = ref<Search>({
+const updateParam = ref<Search>({
     codeId: '',
     codeNm: '',
     upperCodeId: '',
@@ -187,11 +190,11 @@ const codeid_rules = (val: string) => {
     if (!val) {
         return '코드ID를 입력해주세요.';
     }
-    const kor = val.match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g);
+    const kor = val.match(/[ㄱ-ㅎ|ㅏ-ㅣ가-힣]/g);
     if (kor) {
         return '한글은 입력할 수 없습니다.'
     }
-    const special = val.match(/[\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"]/g);
+    const special = val.match(/[{}[\]/?.,;:|)*~`!^\-+<>@#$%&\\=('"]/g);
     if (special) {
         return '특수문자는 입력할 수 없습니다.'
     }
@@ -202,7 +205,7 @@ const codeNm_rules = (val: string) => {
     if (!val) {
         return '코드명을 입력해주세요.';
     }
-    const special = val.match(/[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/g);
+    const special = val.match(/[{}[\]/?.,;:|)*~`!^\-_+<>@#$%&\\=('"]/g);
     if (special) {
         return '특수문자는 입력할 수 없습니다.'
     }
@@ -270,8 +273,7 @@ const codeDelete = async () => {
 
     if (codeId == "" || codeId == null || codeId == undefined) {
         alert('삭제할 코드를 선택하세요.')
-    } else {
-        if (!confirm('코드ID : ' + codeId + '  해당 코드를 삭제하시겠습니까?')) {
+    } else if (!confirm('코드ID : ' + codeId + '  해당 코드를 삭제하시겠습니까?')) {
 
         } else {
             const result = await $fetch<ApiResponse<Data[]>>("/playground/public/code/codeDelete", {
@@ -281,7 +283,6 @@ const codeDelete = async () => {
             alert('삭제되었습니다.')
             codeReset()
         }
-    }
 };
 
 const insert = async () => {

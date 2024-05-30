@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
 import { type ApiResponse } from '../interface/server';
 import { useAuthStore } from '../stores/useAuthStore' 
+import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
 const { loading } = useQuasar()
 const authStore = useAuthStore();
 
@@ -13,7 +13,7 @@ interface MenuData {
   menuUrl: string
 }
 
-let essentialLinks = ref<EssentialLinkProps[]>([])
+const essentialLinks = ref<EssentialLinkProps[]>([])
 
 const iconList = ['school', 'code', 'chat', 'record_voice_over', 'rss_feed', 'public', 'favorite']
 
@@ -87,7 +87,7 @@ onMounted(() => {
       bordered
     >
       <q-list>
-        <q-item-label header v-if="authStore.mberId">
+        <q-item-label v-if="authStore.mberId" header>
           {{authStore.mberId}}님 반가워요! 
         </q-item-label>
         <template v-for="(menuItem, index) in essentialLinks" :key="index">
@@ -101,7 +101,7 @@ onMounted(() => {
 
           </q-item>
         </template>
-        <q-item clickable v-if="authStore.isLogin" exact @click="authStore.logout()">
+        <q-item v-if="authStore.isLogin" clickable exact @click="authStore.logout()">
           <q-item-section avatar>
             <q-icon name="logout" />
           </q-item-section>
@@ -109,7 +109,7 @@ onMounted(() => {
             Logout
           </q-item-section>
         </q-item>
-        <q-item clickable v-else to="/login" exact >
+        <q-item v-else clickable to="/login" exact >
           <q-item-section avatar>
             <q-icon name="login" />
           </q-item-section>
