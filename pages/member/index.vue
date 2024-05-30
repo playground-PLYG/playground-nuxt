@@ -162,7 +162,7 @@ const columns = ref<QTableProps['columns']>([
     align: 'center',
     label: '회원성별',
     field: 'mberSexdstnCode',
-    format: (val) => (val == 'M' ? '남' : '여')
+    format: (val: string) => (val == 'M' ? '남' : '여')
   },
   {
     name: 'mberEmailAdres',
