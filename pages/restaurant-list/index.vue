@@ -342,7 +342,7 @@ interface MenuData {
   menuPrice?: string
 }
 
-interface rstrntData {
+interface RstrntData {
   rstrntSn?: number
   rstrntNm: string
   rstrntKndCode: string
@@ -350,13 +350,13 @@ interface rstrntData {
   recentChoiseDt?: string | undefined
 }
 
-const param = ref<rstrntData>({
+const param = ref<RstrntData>({
   rstrntNm: '',
   rstrntKndCode: '',
   rstrntDstnc: ''
 })
 
-const searchParam = ref<rstrntData>({
+const searchParam = ref<RstrntData>({
   rstrntKndCode: '',
   rstrntNm: ''
 })
