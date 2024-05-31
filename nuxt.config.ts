@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     '@pinia-plugin-persistedstate/nuxt',
     'nuxt-quasar-ui',
     '@nuxt/devtools',
-    '@nuxt/eslint'
+    '@nuxt/eslint',
+    '@vueuse/nuxt'
   ],
   quasar: {
     plugins: [
