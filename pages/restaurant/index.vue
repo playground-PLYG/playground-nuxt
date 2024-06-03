@@ -143,22 +143,25 @@
             class="q-ma-sm card-restaurant cursor-pointer"
           >
             <q-card flat bordered>
-              <q-card-section>
-                <q-img
-                  src="/icon/no-image.png"
-                  class="fit"
-                  :rato="1"
-                  sizes="(max-width: 250px) 250px, (max-height: 300) 300px"
-                >
-                  <q-checkbox
-                    v-show="isRestaurantSelectMode"
-                    v-model="restaurant.isSelected"
-                    class="absolute-full text-subtitle2 flex flex-center"
-                    size="250px"
-                    checked-icon="task_alt"
-                    unchecked-icon="highlight_off"
-                  />
-                </q-img>
+              <q-card-section class="q-pa-none q-pb-xs">
+                <div class="card-img">
+                  <q-img
+                    :src="restaurant.imageUrl"
+                    class="fit"
+                    :rato="1"
+                    :img-style="{ borderRadius: '2px' }"
+                    no-native-menu
+                  >
+                    <q-checkbox
+                      v-show="isRestaurantSelectMode"
+                      v-model="restaurant.isSelected"
+                      class="absolute-full text-subtitle2 flex flex-center"
+                      size="250px"
+                      checked-icon="task_alt"
+                      unchecked-icon="highlight_off"
+                    />
+                  </q-img>
+                </div>
               </q-card-section>
 
               <q-separator inset />
@@ -212,6 +215,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '@/interface/server'
 import { codeUtil } from '@/utils/code'
+import { imageUtil } from '~/utils/image'
 
 const { loading } = useQuasar()
 
@@ -221,6 +225,8 @@ interface Restaurant {
   rstrntNm: string
   rstrntKndCode: string
   rstrntDstnc: number
+  imageFileId: number | null
+  imageUrl: string | undefined
   isSelected?: boolean
 }
 
@@ -255,12 +261,16 @@ const _selectedRestaurant = ref<Restaurant>({
   rstrntSn: -1,
   rstrntNm: '',
   rstrntKndCode: '',
+  imageFileId: null,
+  imageUrl: undefined,
   rstrntDstnc: -1
 })
 
 const isShowRestaurantAddPopup = ref<boolean>(false)
 
-const _addRestaurant = ref<Omit<Restaurant, 'rstrntSn'>>({
+const _addRestaurant = ref<
+  Omit<Restaurant, 'rstrntSn' | 'imageFileId' | 'imageUrl'>
+>({
   rstrntNm: '',
   rstrntKndCode: '',
   rstrntDstnc: -1
@@ -271,15 +281,15 @@ const isRestaurantSelectMode = ref<boolean>(false)
 watch(isRestaurantSelectMode, (newValue) => {
   if (newValue && restaurantResList.value.length > 0) {
     restaurantResList.value.forEach(
-      (restaurnat) => (restaurnat.isSelected = false)
+      (restaurant) => (restaurant.isSelected = false)
     )
   }
 })
 
 const restaurantSelectedIdList = computed(() => {
   return restaurantResList.value
-    .filter((restaurnat) => restaurnat.isSelected)
-    .map((restaurnat) => ({ rstrntSn: restaurnat.rstrntSn }))
+    .filter((restaurant) => restaurant.isSelected)
+    .map((restaurant) => ({ rstrntSn: restaurant.rstrntSn }))
 })
 
 onMounted(() => {
@@ -319,7 +329,12 @@ const fn_getRestaurantList = async (): Promise<void> => {
       if (result.data.length <= 0) {
         //TODO 결과 없음 표시
       } else {
-        result.data.forEach((restaurnat) => (restaurnat.isSelected = false))
+        result.data.forEach((restaurant) => {
+          restaurant.isSelected = false
+          restaurant.imageUrl = restaurant.imageFileId
+            ? imageUtil.getImageUrl(restaurant.imageFileId)
+            : '/icon/no-image.png'
+        })
 
         restaurantResList.value = result.data
       }
@@ -395,6 +410,10 @@ const fn_openRestaurantAddPopup = (): void => {
       height: 400px;
       width: 100%;
       max-width: 300px;
+      .card-img {
+        width: 100%;
+        height: 280px;
+      }
     }
   }
 }
