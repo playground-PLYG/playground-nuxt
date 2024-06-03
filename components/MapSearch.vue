@@ -501,7 +501,7 @@ const displayPagination = (pagination: typeof window.kakao.maps.Pagination) => {
 }
 :deep(#customoverlay:nth-of-type(n)) {
   border: 0;
-  box-shadow: 0px 1px 2px #888;
+  box-shadow: 0px 1px #c4c4c4;
 }
 :deep(#customoverlay a) {
   display: block;
@@ -535,17 +535,5 @@ const displayPagination = (pagination: typeof window.kakao.maps.Pagination) => {
   width: 22px;
   height: 12px;
   background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png');
-}
-.customoverlayparent {
-  cursor: default;
-  position: absolute;
-  background: transparent;
-  border: 1px solid transparent;
-  z-index: 1;
-  display: block;
-  left: -74px;
-  top: 186px;
-  width: 182px;
-  height: 82px;
 }
 </style>
