@@ -1,5 +1,15 @@
 <template>
   <div class="content q-pa-md q-gutter-md">
+    <div class="title">
+      <div class="text-h5">이미지 단건 업로드 컴포넌트 샘플</div>
+    </div>
+
+    <q-separator inset />
+
+    <div class="title">
+      <div class="text-h6">샘플 코드</div>
+    </div>
+
     <div class="row justify-center">
       <div class="col-5">
         <code-editor
