@@ -142,7 +142,6 @@ const fn_fileRemoved = (fileId: string) => {
 
 <style lang="scss" scoped>
 .editor {
-  width: 100%;
   border: 1px solid lightgrey;
 }
 </style>
