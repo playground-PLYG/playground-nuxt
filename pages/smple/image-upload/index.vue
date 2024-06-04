@@ -42,6 +42,7 @@
 
     <div class="title">
       <div class="text-h6">파일 ID가 있는 경우</div>
+      <div class="text-subtitle1 text-red">지우지마세요!</div>
     </div>
 
     <image-upload
