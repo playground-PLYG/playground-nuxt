@@ -1,26 +1,28 @@
 <template>
   <div class="content q-pa-md q-gutter-md">
-    <code-editor
-      class="editor"
-      v-model="sampleCodeTemplate"
-      lang="html"
-      :options="editorOptions"
-      :style="{ height: '230px' }"
-    />
+    <div class="row">
+      <div class="col-5">
+        <code-editor
+          class="editor"
+          v-model="sampleCodeTemplate"
+          lang="html"
+          :options="editorOptions"
+          :style="{ height: '230px' }"
+        />
+      </div>
 
-    <q-separator inset />
-    <br />
+      <q-separator inset vertical class="q-mx-lg" />
 
-    <code-editor
-      class="editor"
-      v-model="sampleCodeScript"
-      lang="typescript"
-      :options="editorOptions"
-      :style="{ height: '540px' }"
-    />
-
-    <q-separator inset />
-    <br />
+      <div class="col-5">
+        <code-editor
+          class="editor"
+          v-model="sampleCodeScript"
+          lang="typescript"
+          :options="editorOptions"
+          :style="{ height: '540px' }"
+        />
+      </div>
+    </div>
 
     <div class="title">
       <div class="text-h6">삭제된 파일 ID인 경우</div>
