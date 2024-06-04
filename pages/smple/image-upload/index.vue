@@ -90,7 +90,7 @@ const sampleCodeTemplate = ref<string>(`
    이미지 단건 업로드 컴포넌트
     - 기존 이미지가 있는 경우 file-id를 props로 전달한다.
 -->
-<imageUpload
+<image-upload
   :file-id="0"
   @fileDeleted="fn_fileDeleted"
   @fileUploaded="fn_fileUploaded"
