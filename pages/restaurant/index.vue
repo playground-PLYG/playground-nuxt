@@ -171,11 +171,6 @@
               </q-card-section>
             </q-card>
           </q-intersection>
-
-          <q-card flat bordered class="q-ma-sm card-restaurant add-btn-card">
-            <q-card-section> 식당 추가 버튼 </q-card-section>
-            <q-card-section> 식당 추가 정보 입력 영역 </q-card-section>
-          </q-card>
         </div>
       </div>
     </div>
@@ -184,7 +179,7 @@
       <q-dialog v-model="isShowRestaurantAddPopup">
         <q-card>
           <q-card-section>
-            <div class="text-h6">Terms of Agreement</div>
+            <div class="text-h6">식당 추가</div>
           </q-card-section>
 
           <q-separator />
@@ -376,14 +371,14 @@ const fn_removeRestaurantList = async (): Promise<void> => {
   }
 }
 
-const fn_resetRestaurantSearchArea = (): void => {
+const fn_resetRestaurantSearchArea = () => {
   restaurantSrchReq.value = {
     rstrntKndCode: '',
     rstrntNm: ''
   }
 }
 
-const fn_openRestaurantAddPopup = (): void => {
+const fn_openRestaurantAddPopup = () => {
   // 상태 체크 및 초기화
   isShowRestaurantAddPopup.value = !isShowRestaurantAddPopup.value
 }
@@ -410,6 +405,7 @@ const fn_openRestaurantAddPopup = (): void => {
       height: 400px;
       width: 100%;
       max-width: 300px;
+
       .card-img {
         width: 100%;
         height: 280px;

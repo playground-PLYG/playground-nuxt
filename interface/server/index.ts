@@ -15,11 +15,13 @@ export interface IFetchOptions {
  * @typedef ApiResponse<Type>
  *
  * @property {string} result "SUCCESS"|"FAIL"
+ * @property {string} resultCode 성공(0000), 공통에러(9999), 그외...
  * @property {string} errorMessage 에러 발생 시 에러 메시지 (optional)
  * @property {Type} data api 결과 데이터
  */
 export interface ApiResponse<Type> {
   result: string
+  resultCode: string
   errorMessage?: string
   data: Type
 }
@@ -47,19 +49,19 @@ export interface ApiPagingResponse<Type> {
  *
  * @property {object} pageable pageable 객체
  * @property {object} pageable.sort 정렬 객체
- * @property {boolean} pageable.sort.empty
+ * @property {boolean} pageable.sort.empty 정렬 빈값 여부
  * @property {boolean} pageable.sort.unsorted 정렬 미적용 여부
  * @property {boolean} pageable.sort.sorted 정렬 적용 여부
  * @property {number} pageable.offset ?
  * @property {number} pageable.pageNumber 페이지 번호 (zero base)
  * @property {number} pageable.pageSize 한 페이지당 row 수
- * @property {boolean} pageable.unpaged
- * @property {boolean} pageable.paged
+ * @property {boolean} pageable.unpaged 페이징 미적용여부
+ * @property {boolean} pageable.paged 페이징 적용여부
  *
- * @property {object} sort
- * @property {boolean} sort.empty
- * @property {boolean} sort.unsorted
- * @property {boolean} sort.sorted
+ * @property {object} sort 정렬
+ * @property {boolean} sort.empty 빈값여부
+ * @property {boolean} sort.unsorted 미적용 여부
+ * @property {boolean} sort.sorted 적용 여부
  *
  * @property {number} totalElements 전체 row 수
  * @property {boolean} last 마지막 페이지 여부
@@ -153,4 +155,19 @@ export interface Code {
   codeName: string
   upperCode: string
   order: number
+}
+
+/**
+ * FileInfo
+ *
+ * @typedef FileInfo
+ *
+ * @property {string} fileId 파일ID
+ * @property {string} fileSize 파일용량(byte)
+ * @property {string} fileName 파일명
+ */
+export interface FileInfo {
+  fileId: string
+  fileSize: number
+  fileName: string
 }

@@ -82,7 +82,21 @@ export default createConfigForNuxt({
   })
 
   .override('nuxt/vue/rules', {
-    rules: {}
+    rules: {
+      'vue/html-self-closing': [
+        'error',
+        {
+          html: {
+            void: 'never',
+            normal: 'always',
+            component: 'always'
+          },
+          svg: 'always',
+          math: 'always',
+          img: 'never'
+        }
+      ]
+    }
   })
 
   // Append local rules
@@ -141,5 +155,12 @@ export default createConfigForNuxt({
           definedTags: ['experimental', '__NO_SIDE_EFFECTS__']
         }
       ]
+    }
+  })
+  .override('local/rules', {
+    files: ['pages/upload.vue'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off', // Disable for these files only
+      '@eslint/no-debug': 'off'
     }
   })
