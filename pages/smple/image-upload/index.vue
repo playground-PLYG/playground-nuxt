@@ -6,74 +6,90 @@
 
     <q-separator inset />
 
-    <div class="title">
-      <div class="text-h6">샘플 코드</div>
-    </div>
+    <div class="content-body">
+      <div class="wrap-box">
+        <div class="title q-pa-md">
+          <div class="text-h6">샘플 코드</div>
+        </div>
 
-    <div class="wrap-code row justify-center q-pa-md">
-      <div class="col-5">
-        <code-editor
-          class="editor"
-          v-model="sampleCodeTemplate"
-          lang="html"
-          :options="editorOptions"
-          :style="{ height: '230px' }"
+        <q-separator inset />
+
+        <div class="row justify-center q-pa-md">
+          <div class="col-5">
+            <code-editor
+              class="editor"
+              v-model="sampleCodeTemplate"
+              lang="html"
+              :options="editorOptions"
+              :style="{ height: '230px' }"
+            />
+          </div>
+
+          <q-separator inset vertical class="q-mx-lg" />
+
+          <div class="col-5">
+            <code-editor
+              class="editor"
+              v-model="sampleCodeScript"
+              lang="typescript"
+              :options="editorOptions"
+              :style="{ height: '540px' }"
+            />
+          </div>
+        </div>
+      </div>
+
+      <q-separator inset class="q-my-lg" />
+
+      <div class="wrap-box">
+        <div class="title q-pa-md">
+          <div class="text-h6">삭제된 파일 ID인 경우</div>
+        </div>
+
+        <q-separator inset />
+
+        <image-upload
+          :file-id="0"
+          @fileDeleted="fn_fileDeleted"
+          @fileUploaded="fn_fileUploaded"
+          @fileRemoved="fn_fileRemoved"
         />
       </div>
 
-      <q-separator inset vertical class="q-mx-lg" />
+      <q-separator inset class="q-my-lg" />
 
-      <div class="col-5">
-        <code-editor
-          class="editor"
-          v-model="sampleCodeScript"
-          lang="typescript"
-          :options="editorOptions"
-          :style="{ height: '540px' }"
+      <div class="wrap-box">
+        <div class="title q-pa-md">
+          <div class="text-h6">파일 ID가 있는 경우</div>
+          <div class="text-subtitle1 text-red">파일 지우지마세요!</div>
+        </div>
+
+        <q-separator inset />
+
+        <image-upload
+          :file-id="1"
+          @fileDeleted="fn_fileDeleted"
+          @fileUploaded="fn_fileUploaded"
+          @fileRemoved="fn_fileRemoved"
+        />
+      </div>
+
+      <q-separator inset class="q-my-lg" />
+
+      <div class="wrap-box">
+        <div class="title q-pa-md">
+          <div class="text-h6">ID가 없는 경우</div>
+        </div>
+
+        <q-separator inset />
+
+        <image-upload
+          @fileDeleted="fn_fileDeleted"
+          @fileUploaded="fn_fileUploaded"
+          @fileRemoved="fn_fileRemoved"
         />
       </div>
     </div>
-
-    <q-separator inset />
-
-    <div class="title">
-      <div class="text-h6">삭제된 파일 ID인 경우</div>
-    </div>
-
-    <image-upload
-      :file-id="0"
-      @fileDeleted="fn_fileDeleted"
-      @fileUploaded="fn_fileUploaded"
-      @fileRemoved="fn_fileRemoved"
-    />
-
-    <q-separator inset />
-    <br />
-
-    <div class="title">
-      <div class="text-h6">파일 ID가 있는 경우</div>
-      <div class="text-subtitle1 text-red">지우지마세요!</div>
-    </div>
-
-    <image-upload
-      :file-id="1"
-      @fileDeleted="fn_fileDeleted"
-      @fileUploaded="fn_fileUploaded"
-      @fileRemoved="fn_fileRemoved"
-    />
-
-    <q-separator inset />
-    <br />
-
-    <div class="title">
-      <div class="text-h6">ID가 없는 경우</div>
-    </div>
-
-    <image-upload
-      @fileDeleted="fn_fileDeleted"
-      @fileUploaded="fn_fileUploaded"
-      @fileRemoved="fn_fileRemoved"
-    />
   </div>
 </template>
 
@@ -156,11 +172,13 @@ const fn_fileRemoved = (fileId: string) => {
 </script>
 
 <style lang="scss" scoped>
-.wrap-code {
-  border: 1px solid lightgrey;
-
-  .editor {
+.content {
+  .wrap-box {
     border: 1px solid lightgrey;
+
+    .editor {
+      border: 1px solid lightgrey;
+    }
   }
 }
 </style>
