@@ -10,7 +10,7 @@
       <div class="text-h6">샘플 코드</div>
     </div>
 
-    <div class="row justify-center">
+    <div class="wrap-code row justify-center q-pa-md">
       <div class="col-5">
         <code-editor
           class="editor"
@@ -156,7 +156,11 @@ const fn_fileRemoved = (fileId: string) => {
 </script>
 
 <style lang="scss" scoped>
-.editor {
+.wrap-code {
   border: 1px solid lightgrey;
+
+  .editor {
+    border: 1px solid lightgrey;
+  }
 }
 </style>
