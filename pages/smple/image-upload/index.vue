@@ -24,6 +24,8 @@
       </div>
     </div>
 
+    <q-separator inset />
+
     <div class="title">
       <div class="text-h6">삭제된 파일 ID인 경우</div>
     </div>
