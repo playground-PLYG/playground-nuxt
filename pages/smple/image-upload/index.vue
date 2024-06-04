@@ -1,6 +1,6 @@
 <template>
   <div class="content q-pa-md q-gutter-md">
-    <div class="row">
+    <div class="row justify-center">
       <div class="col-5">
         <code-editor
           class="editor"
