@@ -11,21 +11,21 @@
         <div class="title q-pa-md">
           <div class="text-h6">datePicker</div>
         </div>
-        <datePicker :date="param.date" @send-date="setDateValue" />
+        <date-picker :date="param.date" @send-date="setDateValue" />
       </div>
 
       <div class="wrap-box">
         <div class="title q-pa-md">
           <div class="text-h6">timePicker</div>
         </div>
-        <timePicker :date="param.time" @send-date="setTimeValue" />
+        <time-picker :date="param.time" @send-date="setTimeValue" />
       </div>
 
       <div class="wrap-box">
         <div class="title q-pa-md">
           <div class="text-h6">datetimePicker</div>
         </div>
-        <dateTimePicker
+        <date-time-picker
           :datetime="param.dateTime"
           :date="param.date"
           :time="param.time"
@@ -37,7 +37,7 @@
         <div class="title q-pa-md">
           <div class="text-h6">dateFromToPicker</div>
         </div>
-        <dateFromToPicker
+        <date-from-to-picker
           :from="param.dateFrom"
           :to="param.dateTo"
           @send-from-date="setDateFromValue"
@@ -49,7 +49,7 @@
         <div class="title q-pa-md">
           <div class="text-h6">dateTimeFromToPicker</div>
         </div>
-        <dateTimeFromToPicker
+        <date-time-from-to-picker
           :from="param.dateFrom"
           :to="param.dateTo"
           @send-from-date="setDateTimeFromValue"
@@ -61,12 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import datePicker from '@/components/datePickerComponent.vue'
-import timePicker from '@/components/timePickerComponent.vue'
-import dateTimePicker from '@/components/dateTimePickerComponent.vue'
-import dateFromToPicker from '@/components/dateFromToPickerComponent.vue'
-import dateTimeFromToPicker from '@/components/dateTimeFromToPickerComponent.vue'
+import { ref } from 'vue'
 
 interface Data {
   date: string

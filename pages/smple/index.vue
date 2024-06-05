@@ -157,51 +157,6 @@
                   stack-label
                   label="3차내용"
                 />
-                <datePicker :date="param.localDate" @send-date="setDateValue" />
-                <timePicker :time="param.localTime" @send-date="setTimeValue" />
-                <dateTimePicker
-                  :datetime="param.useDate"
-                  :date="param.localDate"
-                  :time="param.localTime"
-                  @send-date="setDateTimeValue"
-                />
-                <dateFromToPicker
-                  :from="param.from"
-                  :to="param.to"
-                  @send-from-date="setDateFromValue"
-                  @send-to-date="setDateToValue"
-                />
-                <dateTimeFromToPicker
-                  :from="param.from"
-                  :to="param.to"
-                  @send-from-date="setDateTimeFromValue"
-                  @send-to-date="setDateTimeToValue"
-                />
-                <!-- 
-                <q-date
-                  v-model="param.useDate"
-                  outlined
-                  mask="YYYY-MM-DDTHH:mm:ss"
-                  stack-label
-                  label="시간"
-                  style="padding-bottom: 20px"
-                />
-                <q-time
-                  v-model="param.useDate"
-                  outlined
-                  mask="YYYY-MM-DDTHH:mm:ss"
-                  stack-label
-                  label="시간"
-                  style="padding-bottom: 20px"
-                />
-                
-                <q-date
-                  v-model="param.beginEndDate"
-                  mask="YYYY-MM-DDTHH:mm:ss"
-                  range
-                  label="시작시간 ~ 종료시간"
-                  style="padding-bottom: 20px"
-                /> -->
               </q-form>
             </q-card-section>
           </q-card>
@@ -263,11 +218,6 @@ import {
 } from '../../interface/server'
 
 import paginationLayout from '@/components/Pagination.vue'
-import datePicker from '@/components/datePickerComponent.vue'
-import timePicker from '@/components/timePickerComponent.vue'
-import dateTimePicker from '@/components/dateTimePickerComponent.vue'
-import dateFromToPicker from '@/components/dateFromToPickerComponent.vue'
-import dateTimeFromToPicker from '@/components/dateTimeFromToPickerComponent.vue'
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -585,38 +535,6 @@ const onUpdateSubmit = async () => {
   } catch (error) {
     console.error(error)
   }
-}
-
-const setDateValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
-}
-
-const setTimeValue = (val: string) => {
-  console.log('setTimeValue :::: ', val)
-}
-
-const setDateTimeValue = (val: string) => {
-  console.log('setDateTimeValue :::: ', val)
-}
-
-const setDateFromValue = (val: string) => {
-  console.log('setDateFromToValue :::: ', val)
-  param.value.from = val
-}
-
-const setDateToValue = (val: string) => {
-  console.log('setDateToValue :::: ', val)
-  param.value.to = val
-}
-
-const setDateTimeFromValue = (val: string) => {
-  console.log('setDateTimeFromValue :::: ', val)
-  param.value.from = val
-}
-
-const setDateTimeToValue = (val: string) => {
-  console.log('setDateTimeToValue :::: ', val)
-  param.value.to = val
 }
 
 const reset = (pageIdx: number, idx: string) => {
