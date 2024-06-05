@@ -86,14 +86,9 @@ interface addressData {
   /** 지번 주소 */
   jibunAddress: string
   /** 상세 주소 */
-  detailAddress: string
+  detailAddress?: string
   /** 선택여부 항목 */
   userSelectedType: string
-}
-declare global {
-  interface Window {
-    daum: any
-  }
 }
 
 const param = ref<addressData>({
@@ -139,8 +134,8 @@ const execDaumPostcode = () => {
   }
 
   if (window.daum && window.daum.Postcode) {
-    new window.daum.Postcode({
-      oncomplete: (data: addressData) => {
+    new daum.Postcode({
+      oncomplete: (data) => {
         // 지번 주소를 선택했을 경우
 
         if (props.selectedType === 'R') {
@@ -151,7 +146,7 @@ const execDaumPostcode = () => {
         param.value = data
 
         foldDaumPostcode()
-        //상세주소 입력 focus
+        //상세주소 입력 focush
         inputEl.value?.focus()
         emit('emitArgs', param.value)
       },
