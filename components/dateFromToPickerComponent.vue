@@ -51,7 +51,7 @@ const _dateFrom = ref(props.from)
 const _dateTo = ref(props.to)
 
 const optionsFromDate = function (val: string) {
-  if (_dateTo.value == undefined) {
+  if (_dateTo.value == undefined || _dateTo.value == '') {
     return true
   } else {
     return val <= _dateTo.value.replaceAll('-', '/')
@@ -59,7 +59,7 @@ const optionsFromDate = function (val: string) {
 }
 
 const optionsToDate = function (val: string) {
-  if (_dateFrom.value == undefined) {
+  if (_dateFrom.value == undefined || _dateFrom.value == '') {
     return true
   } else {
     return val >= _dateFrom.value.replaceAll('-', '/')

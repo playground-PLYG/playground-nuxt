@@ -60,7 +60,7 @@ onMounted(() => {
       _date.value + _time.value,
       'YYYY-MM-DD HH:mm'
     )
-  } else {
+  } else if ((_date.value && !_time.value) || (!_date.value && _time.value)) {
     //3. 그 외는 적용 불가
     $q.dialog({
       title: '알림',
