@@ -17,7 +17,7 @@
                   class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
                 >
                   <q-select
-                    v-model="restaurantSrchReq.rstrntKndCode"
+                    v-model="restaurantSrchReq.restaurantKindCode"
                     outlined
                     :options="restaurantKindCodeSearchOptions"
                     option-label="codeName"
@@ -35,7 +35,7 @@
                   class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
                 >
                   <q-input
-                    v-model="restaurantSrchReq.rstrntNm"
+                    v-model="restaurantSrchReq.restaurantName"
                     outlined
                     label="식당명"
                     round
@@ -142,37 +142,41 @@
             :key="restaurantIndex"
             class="q-ma-sm card-restaurant cursor-pointer"
           >
-            <q-card flat bordered>
-              <q-card-section>
-                <q-img
-                  src="/icon/no-image.png"
-                  class="fit"
-                  :rato="1"
-                  sizes="(max-width: 250px) 250px, (max-height: 300) 300px"
-                >
-                  <q-checkbox
-                    v-show="isRestaurantSelectMode"
-                    v-model="restaurant.isSelected"
-                    class="absolute-full text-subtitle2 flex flex-center"
-                    size="250px"
-                    checked-icon="task_alt"
-                    unchecked-icon="highlight_off"
-                  />
-                </q-img>
+            <q-card
+              flat
+              bordered
+              @click="fn_selectRestaurant(restaurant.restaurantSerialNo)"
+            >
+              <q-card-section class="q-pa-none q-pb-xs">
+                <div class="card-img">
+                  <q-img
+                    :src="restaurant.imageUrl"
+                    class="fit"
+                    :rato="1"
+                    :img-style="{ borderRadius: '2px' }"
+                    no-native-menu
+                  >
+                    <q-checkbox
+                      v-show="isRestaurantSelectMode"
+                      v-model="restaurant.isSelected"
+                      class="absolute-full text-subtitle2 flex flex-center"
+                      size="250px"
+                      checked-icon="task_alt"
+                      unchecked-icon="highlight_off"
+                    />
+                  </q-img>
+                </div>
               </q-card-section>
 
               <q-separator inset />
 
               <q-card-section>
-                <div class="text-subtitle1">{{ restaurant.rstrntNm }}</div>
+                <div class="text-subtitle1">
+                  {{ restaurant.restaurantName }}
+                </div>
               </q-card-section>
             </q-card>
           </q-intersection>
-
-          <q-card flat bordered class="q-ma-sm card-restaurant add-btn-card">
-            <q-card-section> 식당 추가 버튼 </q-card-section>
-            <q-card-section> 식당 추가 정보 입력 영역 </q-card-section>
-          </q-card>
         </div>
       </div>
     </div>
@@ -181,7 +185,7 @@
       <q-dialog v-model="isShowRestaurantAddPopup">
         <q-card>
           <q-card-section>
-            <div class="text-h6">Terms of Agreement</div>
+            <div class="text-h6">식당 추가</div>
           </q-card-section>
 
           <q-separator />
@@ -212,15 +216,18 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '@/interface/server'
 import { codeUtil } from '@/utils/code'
+import { imageUtil } from '~/utils/image'
 
 const { loading } = useQuasar()
 
 /* 식당 */
 interface Restaurant {
-  rstrntSn: number
-  rstrntNm: string
-  rstrntKndCode: string
-  rstrntDstnc: number
+  restaurantSerialNo: number
+  restaurantName: string
+  restaurantKindCode: string
+  restaurantDistance: number
+  imageFileId: number | null
+  imageUrl: string | undefined
   isSelected?: boolean
 }
 
@@ -241,9 +248,11 @@ interface HashtagData {
   hashtagName: string
 }
 
-const restaurantSrchReq = ref<Pick<Restaurant, 'rstrntNm' | 'rstrntKndCode'>>({
-  rstrntNm: '',
-  rstrntKndCode: ''
+const restaurantSrchReq = ref<
+  Pick<Restaurant, 'restaurantName' | 'restaurantKindCode'>
+>({
+  restaurantName: '',
+  restaurantKindCode: ''
 })
 
 const restaurantResList = ref<Restaurant[]>([])
@@ -252,18 +261,22 @@ const restaurantKindCodeOptions = ref<Code[]>([])
 const restaurantKindCodeSearchOptions = ref<Code[]>([])
 
 const _selectedRestaurant = ref<Restaurant>({
-  rstrntSn: -1,
-  rstrntNm: '',
-  rstrntKndCode: '',
-  rstrntDstnc: -1
+  restaurantSerialNo: -1,
+  restaurantName: '',
+  restaurantKindCode: '',
+  imageFileId: null,
+  imageUrl: undefined,
+  restaurantDistance: -1
 })
 
 const isShowRestaurantAddPopup = ref<boolean>(false)
 
-const _addRestaurant = ref<Omit<Restaurant, 'rstrntSn'>>({
-  rstrntNm: '',
-  rstrntKndCode: '',
-  rstrntDstnc: -1
+const _addRestaurant = ref<
+  Omit<Restaurant, 'restaurantSerialNo' | 'imageFileId' | 'imageUrl'>
+>({
+  restaurantName: '',
+  restaurantKindCode: '',
+  restaurantDistance: -1
 })
 
 const isRestaurantSelectMode = ref<boolean>(false)
@@ -271,15 +284,17 @@ const isRestaurantSelectMode = ref<boolean>(false)
 watch(isRestaurantSelectMode, (newValue) => {
   if (newValue && restaurantResList.value.length > 0) {
     restaurantResList.value.forEach(
-      (restaurnat) => (restaurnat.isSelected = false)
+      (restaurant) => (restaurant.isSelected = false)
     )
   }
 })
 
 const restaurantSelectedIdList = computed(() => {
   return restaurantResList.value
-    .filter((restaurnat) => restaurnat.isSelected)
-    .map((restaurnat) => ({ rstrntSn: restaurnat.rstrntSn }))
+    .filter((restaurant) => restaurant.isSelected)
+    .map((restaurant) => ({
+      restaurantSerialNo: restaurant.restaurantSerialNo
+    }))
 })
 
 onMounted(() => {
@@ -319,7 +334,12 @@ const fn_getRestaurantList = async (): Promise<void> => {
       if (result.data.length <= 0) {
         //TODO 결과 없음 표시
       } else {
-        result.data.forEach((restaurnat) => (restaurnat.isSelected = false))
+        result.data.forEach((restaurant) => {
+          restaurant.isSelected = false
+          restaurant.imageUrl = restaurant.imageFileId
+            ? imageUtil.getImageUrl(restaurant.imageFileId)
+            : '/icon/no-image.png'
+        })
 
         restaurantResList.value = result.data
       }
@@ -361,16 +381,22 @@ const fn_removeRestaurantList = async (): Promise<void> => {
   }
 }
 
-const fn_resetRestaurantSearchArea = (): void => {
+const fn_resetRestaurantSearchArea = () => {
   restaurantSrchReq.value = {
-    rstrntKndCode: '',
-    rstrntNm: ''
+    restaurantKindCode: '',
+    restaurantName: ''
   }
 }
 
-const fn_openRestaurantAddPopup = (): void => {
+const fn_openRestaurantAddPopup = () => {
   // 상태 체크 및 초기화
   isShowRestaurantAddPopup.value = !isShowRestaurantAddPopup.value
+}
+
+const fn_selectRestaurant = (restaurantSerialNo: number) => {
+  if (!isShowRestaurantAddPopup.value) {
+    console.log(restaurantSerialNo)
+  }
 }
 </script>
 
@@ -395,6 +421,11 @@ const fn_openRestaurantAddPopup = (): void => {
       height: 400px;
       width: 100%;
       max-width: 300px;
+
+      .card-img {
+        width: 100%;
+        height: 280px;
+      }
     }
   }
 }

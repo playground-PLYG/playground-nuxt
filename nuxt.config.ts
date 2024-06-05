@@ -20,7 +20,9 @@ export default defineNuxtConfig({
     '@pinia-plugin-persistedstate/nuxt',
     'nuxt-quasar-ui',
     '@nuxt/devtools',
-    '@nuxt/eslint'
+    '@nuxt/eslint',
+    '@vueuse/nuxt',
+    "nuxt-monaco-editor"
   ],
   quasar: {
     plugins: [
@@ -45,5 +47,12 @@ export default defineNuxtConfig({
   },
   piniaPersistedstate: {
     storage: 'sessionStorage'
+  },
+  monacoEditor: {
+    locale: 'ko',
+    componentName: {
+      codeEditor: 'CodeEditor',
+      diffEditor: 'DiffEditor'
+    }
   }
 })

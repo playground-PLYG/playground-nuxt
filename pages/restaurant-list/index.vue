@@ -133,6 +133,11 @@
             />
           </q-toolbar>
           <q-card-section>
+            <MapLocation
+              :location="currentLocation"
+              :rstrnt="param"
+              class="map-location"
+            />
             <q-form @submit="onSubmit">
               <q-input
                 v-model="param.rstrntNm"
@@ -156,7 +161,7 @@
               <q-input
                 v-model="param.rstrntDstnc"
                 type="number"
-                label="식당거리"
+                label="식당거리(m)"
                 class="input"
                 outlined
                 :readonly="readonly"
@@ -333,6 +338,9 @@ interface Data {
   rstrntKndCode: string
   rstrntDstnc: string
   recentChoiseDt: string
+  kakaoMapId: string
+  laLc: string
+  loLc: string
 }
 
 interface MenuData {
@@ -348,17 +356,26 @@ interface RstrntData {
   rstrntKndCode: string
   rstrntDstnc?: string
   recentChoiseDt?: string | undefined
+  kakaoMapId?: string
+  laLc?: string
+  loLc?: string
 }
 
 const param = ref<RstrntData>({
   rstrntNm: '',
   rstrntKndCode: '',
-  rstrntDstnc: ''
+  rstrntDstnc: '',
+  kakaoMapId: '',
+  laLc: '',
+  loLc: ''
 })
 
 const searchParam = ref<RstrntData>({
   rstrntKndCode: '',
-  rstrntNm: ''
+  rstrntNm: '',
+  kakaoMapId: '',
+  laLc: '',
+  loLc: ''
 })
 
 const menuParam = ref<MenuData>({
@@ -397,11 +414,13 @@ const selectRstrnt = (
   const rstrntCdNm = searchOptions.find(
     (element) => element.label == rstrnt.category_name.substring(6, 8)
   )
-
   param.value = {
     rstrntNm: rstrnt.place_name,
     rstrntKndCode: rstrntCdNm?.value == undefined ? '' : rstrntCdNm?.value,
-    rstrntDstnc: rstrnt.distance
+    rstrntDstnc: rstrnt.distance,
+    kakaoMapId: rstrnt.id,
+    laLc: rstrnt.y,
+    loLc: rstrnt.x
   }
 }
 
@@ -450,7 +469,7 @@ const columns = ref<QTableProps['columns']>([
   { name: 'rstrntNm', label: '식당명', field: 'rstrntNm', align: 'left' }
 ])
 
-const clickRow = (evt: Event, row: Data, _index: number) => {
+const clickRow = (_evt: Event, row: Data, _index: number) => {
   param.value = { ...row }
   restaurantNm = param.value.rstrntNm
   getRstrntMenuList()
@@ -459,7 +478,10 @@ const clickRow = (evt: Event, row: Data, _index: number) => {
 const onResetSelect = () => {
   searchParam.value = {
     rstrntKndCode: '',
-    rstrntNm: ''
+    rstrntNm: '',
+    kakaoMapId: '',
+    laLc: '',
+    loLc: ''
   }
   menuParam.value = {
     restaurantSerialNo: 0,
@@ -475,7 +497,10 @@ const onReset = () => {
     rstrntNm: '',
     rstrntKndCode: '',
     rstrntDstnc: '',
-    recentChoiseDt: ''
+    recentChoiseDt: '',
+    kakaoMapId: '',
+    laLc: '',
+    loLc: ''
   }
   readonly.value = true
   modifyClick = ''
@@ -737,5 +762,9 @@ onMounted(() => {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
   }
+}
+
+.map-location {
+  padding-bottom: 1.5rem;
 }
 </style>
