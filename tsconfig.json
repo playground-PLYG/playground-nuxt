@@ -13,11 +13,7 @@
     "noEmit": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
-<<<<<<< PLAYG-69-주소찾기컴포넌트수정
-    "types": ["@nuxt/types", "@types/node", "node", "@types/daum-postcode"],
-=======
-    "types": ["@nuxt/types", "@types/node", "kakao.maps.d.ts", "node"],
->>>>>>> master
+    "types": ["@nuxt/types", "@types/node", "kakao.maps.d.ts", "@types/daum-postcode", "node"],
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],
