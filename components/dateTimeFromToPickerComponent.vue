@@ -73,8 +73,8 @@ import { onMounted, ref, watch } from 'vue'
 import { dateUtil } from '@/utils/dateUtil'
 
 interface Data {
-  from: string
-  to: string
+  from?: string
+  to?: string
 }
 
 const props = defineProps<Data>()
@@ -101,7 +101,13 @@ onMounted(() => {
 })
 
 const optionsFromDate = function (val: string) {
-  if (_dateTo.value == undefined) {
+  const _dateToDvs = _dateTo.value?.split('T')
+
+  if (
+    _dateTo.value == undefined ||
+    _dateTo.value == '' ||
+    _dateToDvs == undefined
+  ) {
     return true
   } else {
     return val <= _dateTo.value.replaceAll('-', '/')
@@ -109,10 +115,16 @@ const optionsFromDate = function (val: string) {
 }
 
 const optionsToDate = function (val: string) {
-  if (_dateFrom.value == undefined) {
+  const _dateFromDvs = _dateFrom.value?.split('T')
+
+  if (
+    _dateFrom.value == undefined ||
+    _dateFrom.value == '' ||
+    _dateFromDvs == undefined
+  ) {
     return true
   } else {
-    return val >= _dateFrom.value.replaceAll('-', '/')
+    return val >= _dateFromDvs[0].replaceAll('-', '/')
   }
 }
 

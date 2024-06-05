@@ -18,7 +18,7 @@
 import { ref, watch } from 'vue'
 
 interface Data {
-  date: string
+  date?: string
 }
 
 const props = defineProps<Data>()
