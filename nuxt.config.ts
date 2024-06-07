@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     '@nuxt/devtools',
     '@nuxt/eslint',
     '@vueuse/nuxt',
-    "nuxt-monaco-editor"
+    'nuxt-monaco-editor'
   ],
   quasar: {
     plugins: [

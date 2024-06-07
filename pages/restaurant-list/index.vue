@@ -417,7 +417,7 @@ const modifyClick = ref('')
 let restaurantNm = ''
 const showMapLocation = ref(true)
 
-const currentLocation = ref({ x: '126.981727', y: '37.567858' })
+const currentLocation = ref({ x: 126.981727, y: 37.567858 })
 
 const searchOptions = [
   { label: '전체', value: '' },
@@ -433,9 +433,7 @@ const modifyCancel = () => {
   readonly.value = true
 }
 
-const selectRstrnt = (
-  rstrnt: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
-) => {
+const selectRstrnt = (rstrnt: kakao.maps.services.PlacesSearchResultItem) => {
   const rstrntCdNm = searchOptions.find(
     (element) => element.label == rstrnt.category_name.substring(6, 8)
   )

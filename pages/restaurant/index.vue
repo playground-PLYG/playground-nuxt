@@ -2,7 +2,7 @@
   <div>
     <div class="content q-pa-md q-gutter-md">
       <div class="title">
-        <div class="text-h4"><q-icon name="rss_feed" /> 식당 리스트</div>
+        <div class="text-h4"><q-icon name="rss_feed" /> 식당 목록</div>
       </div>
 
       <div class="search">
@@ -183,29 +183,105 @@
 
     <div class="popup">
       <q-dialog v-model="isShowRestaurantAddPopup">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">식당 추가</div>
-          </q-card-section>
+        <q-layout container style="width: 700px; max-width: 80vw">
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>식당 추가</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
 
-          <q-separator />
+          <q-page-container class="bg-white">
+            <q-page padding>
+              <q-stepper
+                v-model="restaurantAddStep"
+                keep-alive
+                vertical
+                color="primary"
+                animated
+              >
+                <q-step
+                  :name="1"
+                  title="식당 선택"
+                  icon="settings"
+                  :done="addRestaurant.restaurantName != ''"
+                >
+                  <map-search
+                    :location="currentLocationCoordinate"
+                    keyword="맛집"
+                    :searchRadius="300"
+                    @marker-click="fn_selectedAddRestaurant"
+                  />
+                </q-step>
 
-          <q-card-section style="max-height: 50vh" class="scroll">
-            <p v-for="n in 15" :key="n">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
-              repellendus sit voluptate voluptas eveniet porro. Rerum blanditiis
-              perferendis totam, ea at omnis vel numquam exercitationem aut,
-              natus minima, porro labore.
-            </p>
-          </q-card-section>
+                <q-step
+                  :name="2"
+                  title="식당정보 확인"
+                  icon="create_new_folder"
+                  :done="restaurantAddStep > 2"
+                >
+                  <q-field label="식당명" stack-label readonly>
+                    <template v-slot:control>
+                      <div class="self-center full-width no-outline">
+                        {{ addRestaurant.restaurantName }}
+                      </div>
+                    </template>
+                  </q-field>
 
-          <q-separator />
+                  <q-field label="식당유형" stack-label readonly>
+                    <template v-slot:control>
+                      <div class="self-center full-width no-outline">
+                        {{ addRestaurant.restaurantKindCodeName }}
+                      </div>
+                    </template>
+                  </q-field>
 
-          <q-card-actions align="right">
-            <q-btn v-close-popup flat label="Decline" color="primary" />
-            <q-btn v-close-popup flat label="Accept" color="primary" />
-          </q-card-actions>
-        </q-card>
+                  <q-field label="식당거리" stack-label readonly>
+                    <template v-slot:control>
+                      <div class="self-center full-width no-outline">
+                        {{ addRestaurant.restaurantDistance }} m
+                      </div>
+                    </template>
+                  </q-field>
+
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="restaurantAddStep = 1"
+                      color="primary"
+                      label="다시선택"
+                      class="q-ml-sm"
+                    />
+                    <q-btn
+                      @click="restaurantAddStep = 3"
+                      color="primary"
+                      label="다음"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step :name="3" title="식당 이미지 업로드" icon="add_comment">
+                  <image-upload
+                    @fileDeleted="fn_fileDeleted"
+                    @fileUploaded="fn_fileUploaded"
+                    @fileRemoved="fn_fileRemoved"
+                  />
+
+                  <q-stepper-navigation>
+                    <q-btn color="primary" label="Finish" />
+                    <q-btn
+                      flat
+                      @click="restaurantAddStep = 2"
+                      color="primary"
+                      label="Back"
+                      class="q-ml-sm"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+              </q-stepper>
+            </q-page>
+          </q-page-container>
+        </q-layout>
       </q-dialog>
     </div>
   </div>
@@ -225,7 +301,11 @@ interface Restaurant {
   restaurantSerialNo: number
   restaurantName: string
   restaurantKindCode: string
+  restaurantKindCodeName?: string
   restaurantDistance: number
+  la: string
+  lo: string
+  kakaoMapId: string
   imageFileId: number | null
   imageUrl: string | undefined
   isSelected?: boolean
@@ -259,11 +339,17 @@ const restaurantResList = ref<Restaurant[]>([])
 
 const restaurantKindCodeOptions = ref<Code[]>([])
 const restaurantKindCodeSearchOptions = ref<Code[]>([])
+const currentLocationCode = ref<Code[]>([])
+
+const currentLocationCoordinate = ref<{ x: number; y: number }>()
 
 const _selectedRestaurant = ref<Restaurant>({
   restaurantSerialNo: -1,
   restaurantName: '',
   restaurantKindCode: '',
+  la: '',
+  lo: '',
+  kakaoMapId: '',
   imageFileId: null,
   imageUrl: undefined,
   restaurantDistance: -1
@@ -271,15 +357,20 @@ const _selectedRestaurant = ref<Restaurant>({
 
 const isShowRestaurantAddPopup = ref<boolean>(false)
 
-const _addRestaurant = ref<
-  Omit<Restaurant, 'restaurantSerialNo' | 'imageFileId' | 'imageUrl'>
->({
+const restaurantAddStep = ref<number>(1)
+
+const addRestaurant = ref<Omit<Restaurant, 'restaurantSerialNo' | 'imageUrl'>>({
   restaurantName: '',
   restaurantKindCode: '',
-  restaurantDistance: -1
+  restaurantDistance: -1,
+  la: '',
+  lo: '',
+  kakaoMapId: '',
+  imageFileId: null
 })
 
 const isRestaurantSelectMode = ref<boolean>(false)
+const isRestaurantAddPopupPlaceSelected = ref<boolean>(false)
 
 watch(isRestaurantSelectMode, (newValue) => {
   if (newValue && restaurantResList.value.length > 0) {
@@ -303,6 +394,8 @@ onMounted(() => {
 })
 
 const fn_getCodeList = async (): Promise<void> => {
+  loading.show()
+
   restaurantKindCodeOptions.value = await codeUtil.getCodeGroupList(
     'RSTRNT_KND_CODE'
   )
@@ -316,6 +409,23 @@ const fn_getCodeList = async (): Promise<void> => {
     },
     ...restaurantKindCodeOptions.value
   ]
+
+  currentLocationCode.value = await codeUtil.getCodeGroupList(
+    'CURRENT_LOCATION'
+  )
+
+  currentLocationCoordinate.value = currentLocationCode.value.reduce(
+    (acc: { x: number; y: number }, codeObj: Code) => {
+      if (codeObj.code == 'x' || codeObj.code == 'y') {
+        acc[codeObj.code] = Number(codeObj.codeName)
+      }
+
+      return acc
+    },
+    {} as { x: number; y: number }
+  )
+
+  loading.hide()
 }
 
 const fn_getRestaurantList = async (): Promise<void> => {
@@ -389,14 +499,54 @@ const fn_resetRestaurantSearchArea = () => {
 }
 
 const fn_openRestaurantAddPopup = () => {
-  // 상태 체크 및 초기화
+  // 상태 체크 및 초기화 addRestaurant
   isShowRestaurantAddPopup.value = !isShowRestaurantAddPopup.value
+  isRestaurantAddPopupPlaceSelected.value = false
 }
 
 const fn_selectRestaurant = (restaurantSerialNo: number) => {
   if (!isShowRestaurantAddPopup.value) {
     console.log(restaurantSerialNo)
   }
+}
+
+const fn_selectedAddRestaurant = (
+  selectedPlace: kakao.maps.services.PlacesSearchResultItem
+) => {
+  console.debug('>>> selectedPlace', selectedPlace)
+
+  const restaurantKindCode = restaurantKindCodeOptions.value.find(
+    (code: Code) => code.codeName == selectedPlace.category_name.substring(6, 8)
+  )
+
+  addRestaurant.value.restaurantName = selectedPlace.place_name
+
+  addRestaurant.value.restaurantKindCode = restaurantKindCode?.code
+    ? restaurantKindCode.code
+    : ''
+
+  addRestaurant.value.restaurantKindCodeName = restaurantKindCode?.code
+    ? restaurantKindCode.codeName
+    : ''
+  addRestaurant.value.restaurantDistance = Number(selectedPlace.distance)
+  addRestaurant.value.la = selectedPlace.y
+  addRestaurant.value.lo = selectedPlace.x
+  addRestaurant.value.kakaoMapId = selectedPlace.id
+
+  isRestaurantAddPopupPlaceSelected.value = true
+  restaurantAddStep.value = 2
+}
+
+const fn_fileDeleted = (fileId: string) => {
+  console.debug('fileDeleted fileId : ', fileId)
+}
+
+const fn_fileUploaded = (fileId: string) => {
+  console.debug('fileUploaded fileId : ', fileId)
+}
+
+const fn_fileRemoved = (fileId: string) => {
+  console.debug('fileRemoved fileId : ', fileId)
 }
 </script>
 
