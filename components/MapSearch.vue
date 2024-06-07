@@ -1,120 +1,237 @@
 <template>
-  <div class="map_wrap">
-    <div id="map" style="width: 100%; height: 500px" />
-    <div id="menu_wrap" class="bg_white">
-      <div class="option">
-        <div>
-          <q-form @submit="searchPlaces">
-            키워드 :
-            <input id="keyword" v-model="keyword" type="text" size="15" />
-            <button type="submit">검색하기</button>
-          </q-form>
+  <ClientOnly>
+    <div class="map_wrap">
+      <div ref="mapArea" id="map" />
+      <div id="menu_wrap" class="bg_white">
+        <div class="option">
+          <div>
+            <q-form @submit="searchPlaces" class="q-pa-xs q-gutter-sm row">
+              <div class="col-8">
+                <q-input
+                  dense
+                  standout
+                  flat
+                  outlined
+                  v-model="keyword"
+                  type="text"
+                  maxlength="15"
+                  label="검색어"
+                />
+              </div>
+              <div class="col-3">
+                <q-btn
+                  outline
+                  push
+                  color="blue-6"
+                  label="검색"
+                  type="submit"
+                  class="q-pa-xs full-width full-height"
+                  size="sm"
+                />
+              </div>
+            </q-form>
+          </div>
+          <div class="q-pa-xs q-gutter-sm row">
+            <div class="col-11 q-pa-xs">
+              <q-slider
+                v-model="searchRadiusLazy"
+                color="blue-6"
+                snap
+                dense
+                label
+                :markers="5"
+                :marker-labels="searchRadiusLabel"
+                :label-value="
+                  searchRadiusLazy >= 1000
+                    ? searchRadiusLazy / 1000 + 'km'
+                    : searchRadiusLazy + 'm'
+                "
+                switch-marker-labels-side
+                :min="50"
+                :max="1200"
+                :inner-min="100"
+                :inner-max="1200"
+                :step="100"
+                @change="
+                  (val) => {
+                    searchRadius = val
+                  }
+                "
+              />
+            </div>
+          </div>
         </div>
+        <hr />
+        <ul id="placesList" class="q-pa-none q-ma-none" />
+        <div id="pagination" />
       </div>
-      <hr />
-      <ul id="placesList" />
-      <div id="pagination" />
     </div>
-  </div>
+  </ClientOnly>
 </template>
+
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { useRuntimeConfig } from 'nuxt/app'
+import { SliderMarkerLabelDefinitionRequiredValue } from 'quasar'
+import { onMounted, ref, watch } from 'vue'
+
 const config = useRuntimeConfig()
-const keyword = ref<string>('')
-let markers: (typeof window.kakao.maps.Marker)[]
+
+let markers: kakao.maps.Marker[]
 let myMarker
-let infowindow: typeof window.kakao.maps.InfoWindow
-let ps: typeof window.kakao.maps.services.Places
-let map: typeof window.kakao.maps.Map
-let markerPosition
+let infoWindow: kakao.maps.InfoWindow
+let ps: kakao.maps.services.Places
+let map: kakao.maps.Map
+let markerPosition: kakao.maps.LatLng
 
 const props = defineProps<{
-  location: { x: string; y: string }
+  location: { x: number; y: number }
+  keyword?: string
+  searchRadius?:
+    | 100
+    | 200
+    | 300
+    | 500
+    | 600
+    | 700
+    | 800
+    | 900
+    | 1000
+    | 1100
+    | 1200
 }>()
+
+const keyword = ref<string>(props.keyword ? props.keyword : '')
+const searchRadius = ref<number>(props.searchRadius || 500)
+const searchRadiusLazy = ref<number>(searchRadius.value)
+const searchRadiusLabel: Array<SliderMarkerLabelDefinitionRequiredValue> = [
+  { value: 100, label: '100m' },
+  { value: 700, label: '700m' },
+  { value: 1200, label: '1.2km' }
+]
+
 const emit = defineEmits(['markerClick'])
 
+watch(searchRadius, () => {
+  searchPlaces()
+})
+
 onMounted(() => {
-  if (window.kakao?.maps) {
-    loadMap()
-  } else {
-    loadScript()
-  }
+  loadScript()
 })
 
 const loadScript = () => {
   const script = document.createElement('script')
   script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services`
-  script.onload = () => window.kakao.maps.load(loadMap)
+  script.onload = () => kakao.maps.load(loadMap)
   document.head.appendChild(script)
 }
 
+const mapArea = ref()
+
 const loadMap = () => {
-  window.kakao.maps.load(() => {
-    const container = document.getElementById('map') //지도를 담을 영역의 DOM 레퍼런스
-    const options = {
-      center: new window.kakao.maps.LatLng(props.location.y, props.location.x), //지도의 중심좌표.
-      level: 1 //지도의 레벨(확대, 축소 정도)
-    }
-    map = new window.kakao.maps.Map(container, options) //지도 생성 및 객체 리턴
+  kakao.maps.load(() => {
+    const container = mapArea.value //지도를 담을 영역의 DOM 레퍼런스
 
-    ps = new window.kakao.maps.services.Places()
-
-    infowindow = new window.kakao.maps.InfoWindow({ zIndex: 1 })
-
-    markerPosition = new window.kakao.maps.LatLng(
-      props.location.y,
-      props.location.x
+    const mapLevel: number = 2
+    const mapCenter: kakao.maps.LatLng = fn_getMapCenter(
+      mapLevel,
+      props.location.x,
+      props.location.y
     )
-    myMarker = new window.kakao.maps.Marker({
+
+    const options: kakao.maps.MapOptions = {
+      center: mapCenter, //지도의 중심좌표.
+      level: mapLevel //지도의 레벨(확대, 축소 정도)
+    }
+
+    map = new kakao.maps.Map(container, options) //지도 생성 및 객체 리턴
+
+    // 지도 타입 변경 컨트롤을 생성한다
+    const mapTypeControl = new kakao.maps.MapTypeControl()
+
+    // 지도의 상단 우측에 지도 타입 변경 컨트롤을 추가한다
+    map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT)
+
+    // 지도에 확대 축소 컨트롤을 생성한다
+    const zoomControl = new kakao.maps.ZoomControl()
+
+    // 지도의 우측에 확대 축소 컨트롤을 추가한다
+    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT)
+
+    kakao.maps.event.addListener(map, 'click', function () {
+      if (infoWindow) {
+        infoWindow.close()
+      }
+    })
+
+    ps = new kakao.maps.services.Places()
+
+    ps.setMap(map)
+
+    infoWindow = new kakao.maps.InfoWindow({ zIndex: 1 })
+
+    markerPosition = new kakao.maps.LatLng(props.location.y, props.location.x)
+
+    myMarker = new kakao.maps.Marker({
       position: markerPosition
     })
+
     myMarker.setMap(map) //현재 위치 마커 표시
+
+    keyword.value = keyword.value.trim()
+
+    if (keyword.value) {
+      searchPlaces()
+    }
   })
 }
 
 const searchPlaces = () => {
-  if (!keyword.value.replace(/^\s+|\s+$/g, '')) {
+  keyword.value = keyword.value.trim()
+
+  if (!keyword.value) {
     alert('키워드를 입력해주세요!')
-    return false
+
+    return
   }
 
-  const condition = {
-    x: '126.981727',
-    y: '37.567858',
+  // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
+  const keywordSearchOptions: kakao.maps.services.PlacesSearchOptions = {
+    x: props.location.x,
+    y: props.location.y,
+    radius: searchRadius.value,
     category_group_code: 'FD6'
   }
-  // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
-  ps.keywordSearch(keyword.value, placesSearchCB, condition)
+
+  ps.keywordSearch(keyword.value, placesSearchCB, keywordSearchOptions)
 }
 
 const placesSearchCB = (
-  data: (typeof window.kakao.maps.services.Places.PlacesSearchResultItem)[],
-  status: string,
-  pagination: number
+  data: kakao.maps.services.PlacesSearchResult,
+  status: kakao.maps.services.Status,
+  pagination: kakao.maps.Pagination
 ) => {
-  if (status === window.kakao.maps.services.Status.OK) {
+  if (status === kakao.maps.services.Status.OK) {
     // 정상적으로 검색이 완료됐으면
     // 검색 목록과 마커를 표출합니다
     displayPlaces(data)
 
     // 페이지 번호를 표출합니다
     displayPagination(pagination)
-  } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+  } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
     alert('검색 결과가 존재하지 않습니다.')
     return
-  } else if (status === window.kakao.maps.services.Status.ERROR) {
-    alert('검색 결과 중 오류가 발생했습니다.')
+  } else if (status === kakao.maps.services.Status.ERROR) {
+    alert('검색 중 오류가 발생했습니다.')
     return
   }
 }
 
-const displayPlaces = (
-  places: (typeof window.kakao.maps.services.Places.PlacesSearchResultItem)[]
-) => {
+const displayPlaces = (places: kakao.maps.services.PlacesSearchResult) => {
   const listEl = document.getElementById('placesList'),
     menuEl = document.getElementById('menu_wrap'),
     fragment = document.createElement('div'),
-    bounds = new window.kakao.maps.LatLngBounds()
+    bounds = new kakao.maps.LatLngBounds()
 
   // 검색 결과 목록에 추가된 항목들을 제거합니다
   if (listEl != null) {
@@ -126,9 +243,9 @@ const displayPlaces = (
 
   for (let i = 0; i < places.length; i++) {
     // 마커를 생성하고 지도에 표시합니다
-    const placePosition = new window.kakao.maps.LatLng(
-        places[i].y,
-        places[i].x
+    const placePosition = new kakao.maps.LatLng(
+        Number(places[i].y),
+        Number(places[i].x)
       ),
       markers = addMarker(placePosition, i, places[i].place_name),
       itemEl = getListItem(i, places[i]) // 검색 결과 항목 Element를 생성합니다
@@ -140,8 +257,11 @@ const displayPlaces = (
     //마커와 검색결과 항목에 click, mouseover 했을때
     //해당 장소에 인포윈도우에 장소명을 표시합니다
     //mouseout 했을 때는 인포윈도우를 닫습니다
-    ;(function (marker, places) {
-      window.kakao.maps.event.addListener(marker, 'click', function () {
+    ;(function (
+      marker: kakao.maps.Marker,
+      places: kakao.maps.services.PlacesSearchResultItem
+    ) {
+      kakao.maps.event.addListener(marker, 'click', function () {
         displayInfowindow(marker, places)
         displayInfo(places)
       })
@@ -151,19 +271,27 @@ const displayPlaces = (
       }
 
       itemEl.onmouseout = function () {
-        infowindow.close()
+        //infoWindow.close()
       }
     })(markers, places[i])
 
     fragment.appendChild(itemEl)
   }
+
   // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
   if (listEl != null) {
     listEl.appendChild(fragment)
   }
-  menuEl?.scrollTop
+
+  if (menuEl?.scrollTop) {
+    menuEl.scrollTop = 0
+  }
+
   // 검색된 항목들을 검색결과 목록 Element에 추가합니다
   map.setBounds(bounds)
+  map.setCenter(
+    fn_getMapCenter(map.getLevel(), props.location.x, props.location.y)
+  )
 }
 
 const removeAllChildNods = (el: Element) => {
@@ -174,38 +302,36 @@ const removeAllChildNods = (el: Element) => {
   }
 }
 
-const displayInfo = (
-  _info: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
-) => {}
+const displayInfo = (_info: kakao.maps.services.PlacesSearchResultItem) => {}
 
 // 지도 위에 표시되고 있는 마커를 모두 제거합니다
 const removeMarker = () => {
   if (markers !== undefined) {
-    for (let i = 0; i < markers.length; i++) {
-      markers[i].setMap(null)
+    for (const element of markers) {
+      element.setMap(null)
     }
   }
   markers = []
 }
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
-function addMarker(position: object, idx: number, _title: string) {
+function addMarker(
+  position: kakao.maps.LatLng | kakao.maps.Viewpoint,
+  idx: number,
+  _title: string
+) {
   const imageSrc =
       'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
-    imageSize = new window.kakao.maps.Size(36, 37), // 마커 이미지의 크기
+    imageSize = new kakao.maps.Size(36, 37), // 마커 이미지의 크기
     imgOptions = {
-      spriteSize: new window.kakao.maps.Size(36, 691),
+      spriteSize: new kakao.maps.Size(36, 691),
       // 스프라이트 이미지의 크기
-      spriteOrigin: new window.kakao.maps.Point(0, idx * 46 + 10),
+      spriteOrigin: new kakao.maps.Point(0, idx * 46 + 10),
       // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
-      offset: new window.kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
+      offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
     },
-    markerImage = new window.kakao.maps.MarkerImage(
-      imageSrc,
-      imageSize,
-      imgOptions
-    ),
-    marker = new window.kakao.maps.Marker({
+    markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
+    marker = new kakao.maps.Marker({
       position,
       // 마커의 위치
       image: markerImage
@@ -222,31 +348,34 @@ function addMarker(position: object, idx: number, _title: string) {
 // 검색결과 항목을 Element로 반환하는 함수입니다
 function getListItem(
   index: number,
-  places: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
+  places: kakao.maps.services.PlacesSearchResultItem
 ) {
   const el = document.createElement('li')
-  let itemStr =
-    '<span class="markerbg marker_' +
-    (index + 1) +
-    '"></span>' +
-    '<div class="info">' +
-    '   <h5>' +
-    places.place_name +
-    '</h5>'
+  let itemStr = `
+    <span class="markerbg marker_${index + 1}"></span>
+    <div class="info">
+      <div class="list-header">
+        ${places.place_name}
+      </div>
+  `
 
   if (places.road_address_name) {
-    itemStr +=
-      '    <span>' +
-      places.road_address_name +
-      '</span>' +
-      '   <span class="jibun gray">' +
-      places.address_name +
-      '</span>'
+    itemStr += `
+      <span>${places.road_address_name}</span>
+      <span class="jibun gray">${places.address_name}</span>
+      `
   } else {
-    itemStr += '    <span>' + places.address_name + '</span>'
+    itemStr += `
+      <span>${places.address_name}</span>
+    `
   }
 
-  itemStr += '  <span class="tel">' + places.phone + '</span>' + '</div>'
+  itemStr += `
+      <span class="tel">
+        ${places.phone}
+      </span>
+    </div>
+  `
 
   el.innerHTML = itemStr
   el.className = 'item'
@@ -257,44 +386,56 @@ function getListItem(
 // 검색결과 목록 또는 마커를 클릭했을 때 호출되는 함수입니다
 // 인포윈도우에 장소명을 표시합니다
 const displayInfowindow = (
-  marker: typeof window.kakao.maps.Map,
-  info: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
+  marker: kakao.maps.Marker,
+  info: kakao.maps.services.PlacesSearchResultItem
 ) => {
   // HTMLElement로 설정하면 부모 요소를 가져올수있다
   //(커스텀 오버레이를 생성할때 부모element(style) 같이 생성되는데 이것때문에 customoverlay style이 잘 안나옴)
   const contents = document.createElement('div')
-  contents.id = 'customoverlay'
+  contents.className = 'customoverlay'
 
-  const childContent =
-    '  <a href="https://map.kakao.com/link/map/' +
-    info.id +
-    '" target="_blank">' +
-    '    <span class="title">카카오맵 바로가기</span>' +
-    '  </a>' +
-    '  <a href="#" id="info">' +
-    '    <span class="title">' +
-    info.place_name +
-    '</span>' +
-    '  </a>'
+  const childContent = `
+      <a href="https://map.kakao.com/link/map/${info.id}" target="_blank" class="link-kakao">
+        <span class="title">카카오맵 바로가기</span>
+      </a>
+      <a href="#" id="info" class="q-mt-xs select-place">
+        <span class="title">${info.place_name}</span>
+      </a>
+  `
 
   contents.innerHTML = childContent
 
   // 커스텀 오버레이를 생성합니다
-  const customOverlay = new window.kakao.maps.CustomOverlay({
+  const customOverlay = new kakao.maps.CustomOverlay({
     map,
-    position: marker.position,
+    position: marker.getPosition(),
     content: contents,
     xAnchor: 1,
     yAnchor: 1
   })
+
   customOverlay.setMap(map)
-  infowindow.setContent(contents)
-  infowindow.open(map, marker)
-  customOverlay.getContent().parentElement.parentElement.style.border = 'none'
-  customOverlay.getContent().parentElement.parentElement.style.background =
-    'transparent'
+  infoWindow.setContent(contents)
+  infoWindow.open(map, marker)
+
+  const windowPosition: kakao.maps.LatLng = infoWindow.getPosition()
+  map.panTo(
+    fn_getMapCenter(
+      map.getLevel(),
+      windowPosition.getLng(),
+      windowPosition.getLat()
+    )
+  )
+
+  const content: HTMLElement = customOverlay.getContent() as HTMLElement
+
+  if (content && content.parentElement && content.parentElement.parentElement) {
+    content.parentElement.parentElement.style.border = 'none'
+    content.parentElement.parentElement.style.background = 'transparent'
+  }
 
   const infoBtn = document.getElementById('info')
+
   if (infoBtn !== null) {
     infoBtn.onclick = function () {
       emit('markerClick', info)
@@ -303,7 +444,7 @@ const displayInfowindow = (
 }
 
 // 검색결과 목록 하단에 페이지 번호를 표시하는 함수입니다
-const displayPagination = (pagination: typeof window.kakao.maps.Pagination) => {
+const displayPagination = (pagination: kakao.maps.Pagination) => {
   const paginationEl = document.getElementById('pagination')
   const fragment = document.createDocumentFragment()
   let i
@@ -338,203 +479,292 @@ const displayPagination = (pagination: typeof window.kakao.maps.Pagination) => {
     paginationEl.appendChild(fragment)
   }
 }
+
+/**
+ * 검색영역으로 맵 정보가 최대한 가려지지 않도록 맵중앙 위치 보정
+ */
+const fn_getMapCenter = (
+  mapLevel: number,
+  x: number,
+  y: number
+): kakao.maps.LatLng => {
+  let correctionX = 0
+  let correctionY = 0
+
+  switch (mapLevel) {
+    case 1:
+      correctionX = -0.0003
+      break
+    case 2:
+      correctionX = -0.0005
+      break
+    case 3:
+      correctionX = -0.0015
+      break
+    case 4:
+      correctionX = -0.003
+      break
+    case 5:
+      correctionX = -0.006
+      break
+  }
+
+  return new kakao.maps.LatLng(y + correctionY, x + correctionX)
+}
 </script>
+
 <style lang="scss" scoped>
-.map_wrap,
-.map_wrap * {
-  margin: 0;
-  padding: 0;
-  font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
-  font-size: 12px;
-}
-.map_wrap a,
-.map_wrap a:hover,
-.map_wrap a:active {
-  color: #000;
-  text-decoration: none;
-}
 .map_wrap {
   position: relative;
   width: 100%;
   height: 500px;
-}
-#menu_wrap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 250px;
-  margin: 10px 0 30px 10px;
-  padding: 5px;
-  overflow-y: auto;
-  background: rgba(255, 255, 255, 0.7);
-  z-index: 1;
-  font-size: 12px;
-  border-radius: 10px;
-}
-.bg_white {
-  background: #fff;
-}
-#menu_wrap hr {
-  display: block;
-  height: 1px;
-  border: 0;
-  border-top: 2px solid #5f5f5f;
-  margin: 3px 0;
-}
-#menu_wrap .option {
-  text-align: center;
-}
-#menu_wrap .option p {
-  margin: 10px 0;
-}
-#menu_wrap .option button {
-  margin-left: 5px;
-}
-#placesList :deep(li) {
-  list-style: none;
-}
-#placesList :deep(.item) {
-  position: relative;
-  border-bottom: 1px solid #888;
-  overflow: hidden;
-  cursor: pointer;
-  min-height: 65px;
-}
-#placesList :deep(.item span) {
-  display: block;
-  margin-top: 4px;
-}
-#placesList :deep(.item h5),
-#placesList:deep(.item .info) {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-#placesList :deep(.item .info) {
-  padding: 10px 0 10px 55px;
-}
-#placesList :deep(.info .gray) {
-  color: #8a8a8a;
-}
-#placesList :deep(.info .jibun) {
-  padding-left: 26px;
-  background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png)
-    no-repeat;
-}
-#placesList :deep(.info .tel) {
-  color: #009900;
-}
-#placesList :deep(.item .markerbg) {
-  float: left;
-  position: absolute;
-  width: 36px;
-  height: 37px;
-  margin: 10px 0 0 10px;
-  background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png)
-    no-repeat;
-}
-#placesList :deep(.item .marker_1) {
-  background-position: 0 -10px;
-}
-#placesList :deep(.item .marker_2) {
-  background-position: 0 -56px;
-}
-#placesList :deep(.item .marker_3) {
-  background-position: 0 -102px;
-}
-#placesList :deep(.item .marker_4) {
-  background-position: 0 -148px;
-}
-#placesList :deep(.item .marker_5) {
-  background-position: 0 -194px;
-}
-#placesList :deep(.item .marker_6) {
-  background-position: 0 -240px;
-}
-#placesList :deep(.item .marker_7) {
-  background-position: 0 -286px;
-}
-#placesList :deep(.item .marker_8) {
-  background-position: 0 -332px;
-}
-#placesList :deep(.item .marker_9) {
-  background-position: 0 -378px;
-}
-#placesList :deep(.item .marker_10) {
-  background-position: 0 -423px;
-}
-#placesList :deep(.item .marker_11) {
-  background-position: 0 -470px;
-}
-#placesList :deep(.item .marker_12) {
-  background-position: 0 -516px;
-}
-#placesList :deep(.item .marker_13) {
-  background-position: 0 -562px;
-}
-#placesList :deep(.item .marker_14) {
-  background-position: 0 -608px;
-}
-#placesList :deep(.item .marker_15) {
-  background-position: 0 -654px;
-}
-#pagination {
-  margin: 10px auto;
-  text-align: center;
-}
-#pagination :deep(a) {
-  display: inline-block;
-  margin-right: 10px;
-}
-#pagination :deep(.on) {
-  font-weight: bold;
-  cursor: default;
-  color: #777;
-}
-:deep(#customoverlay) {
-  bottom: 85px;
-  border-radius: 6px;
-  border: 0;
-  border-bottom: 2px solid #ddd;
-  float: left;
-  z-index: 0;
-}
-:deep(#customoverlay:nth-of-type(n)) {
-  border: 0;
-  box-shadow: 0px 1px #c4c4c4;
-}
-:deep(#customoverlay a) {
-  display: block;
-  text-decoration: none;
-  color: #000;
-  text-align: center;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  overflow: hidden;
-  background: #d95050;
-  background: #d95050
-    url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png)
-    no-repeat right 14px center;
-}
-:deep(#customoverlay .title) {
-  display: block;
-  text-align: center;
-  background: #fff;
-  margin-right: 35px;
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: bold;
-}
-:deep(#customoverlay:after) {
-  content: '';
-  position: absolute;
-  margin-left: -12px;
-  left: 50%;
-  bottom: -12px;
-  width: 22px;
-  height: 12px;
-  background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png');
+
+  * {
+    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+    font-size: 12px;
+  }
+
+  a,
+  a:hover,
+  a:active {
+    color: #000;
+    text-decoration: none;
+  }
+
+  #map {
+    width: 100%;
+    min-height: 500px;
+
+    :deep(div button[draggable='false']) {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  #menu_wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    margin: 10px 0 30px 10px;
+    padding: 5px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 1;
+    font-size: 12px;
+    border-radius: 10px;
+
+    hr {
+      display: block;
+      height: 1px;
+      border: 0;
+      border-top: 2px solid #5f5f5f;
+      margin: 3px 0;
+    }
+
+    .option {
+      text-align: center;
+
+      p {
+        margin: 10px 0;
+      }
+
+      button {
+        margin-left: 5px;
+      }
+    }
+
+    #placesList {
+      :deep(*) {
+        padding: 0;
+        margin: 0;
+      }
+
+      :deep(li) {
+        list-style: none;
+
+        &.item {
+          position: relative;
+          border-bottom: 1px solid #888;
+          overflow: hidden;
+          cursor: pointer;
+          min-height: 65px;
+
+          span {
+            display: block;
+            margin-top: 4px;
+          }
+
+          h5,
+          .info {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+          }
+
+          .info {
+            padding: 10px 0 10px 55px;
+
+            .gray {
+              color: #8a8a8a;
+            }
+
+            .jibun {
+              padding-left: 26px;
+              background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png)
+                no-repeat;
+            }
+
+            .tel {
+              color: #009900;
+            }
+          }
+
+          .markerbg {
+            float: left;
+            position: absolute;
+            width: 36px;
+            height: 37px;
+            margin: 10px 0 0 10px;
+            background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png)
+              no-repeat;
+          }
+
+          .marker_1 {
+            background-position: 0 -10px;
+          }
+
+          .marker_2 {
+            background-position: 0 -56px;
+          }
+
+          .marker_3 {
+            background-position: 0 -102px;
+          }
+
+          .marker_4 {
+            background-position: 0 -148px;
+          }
+
+          .marker_5 {
+            background-position: 0 -194px;
+          }
+
+          .marker_6 {
+            background-position: 0 -240px;
+          }
+
+          .marker_7 {
+            background-position: 0 -286px;
+          }
+
+          .marker_8 {
+            background-position: 0 -332px;
+          }
+
+          .marker_9 {
+            background-position: 0 -378px;
+          }
+
+          .marker_10 {
+            background-position: 0 -423px;
+          }
+
+          .marker_11 {
+            background-position: 0 -470px;
+          }
+
+          .marker_12 {
+            background-position: 0 -516px;
+          }
+
+          .marker_13 {
+            background-position: 0 -562px;
+          }
+
+          .marker_14 {
+            background-position: 0 -608px;
+          }
+
+          .marker_15 {
+            background-position: 0 -654px;
+          }
+        }
+
+        .list-header {
+          font-weight: bold;
+        }
+      }
+    }
+
+    #pagination {
+      margin: 10px auto;
+      text-align: center;
+
+      :deep(a) {
+        display: inline-block;
+        margin-right: 10px;
+      }
+      :deep(.on) {
+        font-weight: bold;
+        cursor: default;
+        color: #777;
+      }
+    }
+  }
+
+  .bg_white {
+    background: #fff;
+  }
+
+  :deep(.customoverlay) {
+    bottom: 85px;
+    border-radius: 6px;
+    border: 1px;
+    border-bottom: 2px solid #ddd;
+    float: left;
+    z-index: 2;
+
+    a {
+      display: block;
+      text-decoration: none;
+      color: #000;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      overflow: hidden;
+      background: #d95050
+        url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png)
+        no-repeat right 14px center;
+    }
+
+    .title {
+      display: block;
+      text-align: center;
+      background: #fff;
+      margin-right: 35px;
+      padding: 10px 15px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    :nth-of-type(n) {
+      border: 0;
+      box-shadow: 0px 1px #c4c4c4;
+    }
+
+    :after {
+      content: '';
+      position: absolute;
+      margin-left: -12px;
+      left: 50%;
+      bottom: -12px;
+      width: 22px;
+      height: 12px;
+      background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png');
+    }
+  }
 }
 </style>
