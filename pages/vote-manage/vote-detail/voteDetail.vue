@@ -1,263 +1,501 @@
 <template>
   <!-- notice dialogRef here -->
   <q-dialog ref="dialogRef" @hide="">
-    <q-card class="q-dialog-plugin"  style="width: 700px; max-width: 80vw;">
-    <div class="q-pa-md">
+    <q-card class="q-dialog-plugin" style="width: 700px; max-width: 80vw">
+      <div class="q-pa-md">
         <div class="row items-start q-gutter-md">
-            <q-responsive :ratio="4/3" class="col" style="max-height: 100px">
-                <q-card class="column" flat bordered>
-                <q-img class="col" src="https://cdn.quasar.dev/img/parallax1.jpg" />
-                </q-card>
-            </q-responsive>
+          <q-responsive :ratio="4 / 3" class="col" style="max-height: 100px">
+            <q-card class="column" flat bordered>
+              <q-img
+                class="col"
+                src="https://cdn.quasar.dev/img/parallax1.jpg"
+              />
+            </q-card>
+          </q-responsive>
         </div>
         <q-card class="my-card" flat bordered>
-            <q-card-section>
-              <div class="text-h4">
-              <q-input 
+          <q-card-section>
+            <div class="text-h4">
+              <q-input
                 outlined
-                :readonly="!editMode" 
+                :readonly="!editMode"
                 v-model="voteData.voteSubject"
-                style="font-size: xx-large;"
+                style="font-size: xx-large"
               />
-              </div>
-            </q-card-section>
-            <q-card-actions>
-                <q-btn flat round icon="event" :disable="!editMode">
-                  <q-popup-proxy @before-show="beginFinishUpdate('BEGIN', 'DATE')" cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="afterDateTime.beginDate" :options="beginDateLimitFn">
-                      <div class="row items-center justify-end q-gutter-sm">
-                        <q-btn label="OK" color="primary" flat @click="settingDateTime(afterDateTime.beginDate, 'DATE', 'BEGIN')" v-close-popup />
-                        <q-btn label="Cancel" color="primary" flat v-close-popup />
-                      </div>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-btn>
+            </div>
+          </q-card-section>
+          <q-card-actions>
+            <q-btn flat round icon="event" :disable="!editMode">
+              <q-popup-proxy
+                @before-show="beginFinishUpdate('BEGIN', 'DATE')"
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="afterDateTime.beginDate"
+                  :options="beginDateLimitFn"
+                >
+                  <div class="row items-center justify-end q-gutter-sm">
+                    <q-btn
+                      label="OK"
+                      color="primary"
+                      flat
+                      @click="
+                        settingDateTime(
+                          afterDateTime.beginDate,
+                          'DATE',
+                          'BEGIN'
+                        )
+                      "
+                      v-close-popup
+                    />
+                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-btn>
 
-                <q-btn flat round icon="access_time" :disable="!editMode">
-                  <q-popup-proxy @before-show="beginFinishUpdate('BEGIN', 'TIME')" cover transition-show="scale" transition-hide="scale">
-                    <q-time v-model="afterDateTime.beginTime">
-                      <div class="row items-center justify-end q-gutter-sm">
-                        <q-btn label="OK" color="primary" flat @click="settingDateTime(afterDateTime.beginTime, 'TIME', 'BEGIN')" v-close-popup />
-                        <q-btn label="Cancel" color="primary" flat v-close-popup />
-                      </div>
-                    </q-time>
-                  </q-popup-proxy>
-                </q-btn>
-                <q-btn flat color="primary" :disable="!editMode">
-                    투표시작 일시 : {{ voteData.voteBeginDate.toString().split('T')[0] + '  ' + voteData.voteBeginDate.toString().split('T')[1].split('.')[0] }}
-                </q-btn>
-                <div style="margin-left:50px;">
-                    <q-checkbox :disable="!editMode" color="black" v-model="voteData.anonymityVoteAlternativeBoo" label="익명투표여부" />
-                </div>
-            </q-card-actions>
-            <q-card-actions>
-                <q-btn flat round icon="event" :disable="!editMode">
-                  <q-popup-proxy @before-show="beginFinishUpdate('FINISH', 'DATE')" cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="afterDateTime.finishData" :options="finishDateLimitFn">
-                      <div class="row items-center justify-end q-gutter-sm">
-                        <q-btn label="OK" color="primary" flat @click="settingDateTime(afterDateTime.finishData, 'DATE', 'FINISH')" v-close-popup />
-                        <q-btn label="Cancel" color="primary" flat v-close-popup />
-                      </div>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-btn>
-                <q-btn flat round icon="access_time" :disable="!editMode">
-                  <q-popup-proxy @before-show="beginFinishUpdate('FINISH', 'TIME')" cover transition-show="scale" transition-hide="scale">
-                    <q-time v-model="afterDateTime.finishTime">
-                      <div class="row items-center justify-end q-gutter-sm">
-                        <q-btn label="OK" color="primary" flat @click="settingDateTime(afterDateTime.finishTime, 'TIME', 'FINISH')" v-close-popup />
-                        <q-btn label="Cancel" color="primary" flat v-close-popup />
-                      </div>
-                    </q-time>
-                  </q-popup-proxy>
-                </q-btn>
-                <q-btn flat color="primary" :disable="!editMode">
-                    투표종료 일시 : {{ voteData.voteEndDate.toString().split('T')[0] + '  ' + voteData.voteEndDate.toString().split('T')[1].split('.')[0] }}
-                </q-btn>  
-                <div style="margin-left:50px;">
-                    <q-select outlined v-model="voteData.voteKindName" :options="codeName" label="투표종류" round dense flat class="select" :readonly="!editMode"/>
-                </div>
-            </q-card-actions>
+            <q-btn flat round icon="access_time" :disable="!editMode">
+              <q-popup-proxy
+                @before-show="beginFinishUpdate('BEGIN', 'TIME')"
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time v-model="afterDateTime.beginTime">
+                  <div class="row items-center justify-end q-gutter-sm">
+                    <q-btn
+                      label="OK"
+                      color="primary"
+                      flat
+                      @click="
+                        settingDateTime(
+                          afterDateTime.beginTime,
+                          'TIME',
+                          'BEGIN'
+                        )
+                      "
+                      v-close-popup
+                    />
+                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-btn>
+            <q-btn flat color="primary" :disable="!editMode">
+              투표시작 일시 :
+              {{
+                voteData.voteBeginDate.toString().split('T')[0] +
+                '  ' +
+                voteData.voteBeginDate.toString().split('T')[1].split('.')[0]
+              }}
+            </q-btn>
+            <div style="margin-left: 50px">
+              <q-checkbox
+                :disable="!editMode"
+                color="black"
+                v-model="voteData.anonymityVoteAlternativeBoo"
+                label="익명투표여부"
+              />
+            </div>
+          </q-card-actions>
+          <q-card-actions>
+            <q-btn flat round icon="event" :disable="!editMode">
+              <q-popup-proxy
+                @before-show="beginFinishUpdate('FINISH', 'DATE')"
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="afterDateTime.finishData"
+                  :options="finishDateLimitFn"
+                >
+                  <div class="row items-center justify-end q-gutter-sm">
+                    <q-btn
+                      label="OK"
+                      color="primary"
+                      flat
+                      @click="
+                        settingDateTime(
+                          afterDateTime.finishData,
+                          'DATE',
+                          'FINISH'
+                        )
+                      "
+                      v-close-popup
+                    />
+                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-btn>
+            <q-btn flat round icon="access_time" :disable="!editMode">
+              <q-popup-proxy
+                @before-show="beginFinishUpdate('FINISH', 'TIME')"
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time v-model="afterDateTime.finishTime">
+                  <div class="row items-center justify-end q-gutter-sm">
+                    <q-btn
+                      label="OK"
+                      color="primary"
+                      flat
+                      @click="
+                        settingDateTime(
+                          afterDateTime.finishTime,
+                          'TIME',
+                          'FINISH'
+                        )
+                      "
+                      v-close-popup
+                    />
+                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </q-btn>
+            <q-btn flat color="primary" :disable="!editMode">
+              투표종료 일시 :
+              {{
+                voteData.voteEndDate.toString().split('T')[0] +
+                '  ' +
+                voteData.voteEndDate.toString().split('T')[1].split('.')[0]
+              }}
+            </q-btn>
+            <div style="margin-left: 50px">
+              <q-select
+                outlined
+                v-model="voteData.voteKindName"
+                :options="codeName"
+                label="투표종류"
+                round
+                dense
+                flat
+                class="select"
+                :readonly="!editMode"
+              />
+            </div>
+          </q-card-actions>
         </q-card>
-    </div>
-    <div class="q-pa-md" v-for="(qestn, index) in showQuestionData" :key="qestn.questionSsno">
-      <q-card class="my-card">
-        <q-card-section class="bg-light-blue-6 text-white">
-            <div class="q-gutter-y-md column" style="width: 90%; display: inline-flex;">
-              <q-input 
-                filled 
-                :name="'qc' + index" 
-                :readonly="!editMode" 
+      </div>
+      <div
+        class="q-pa-md"
+        v-for="(qestn, index) in showQuestionData"
+        :key="qestn.questionSsno"
+      >
+        <q-card class="my-card">
+          <q-card-section class="bg-light-blue-6 text-white">
+            <div
+              class="q-gutter-y-md column"
+              style="width: 90%; display: inline-flex"
+            >
+              <q-input
+                filled
+                :name="'qc' + index"
+                :readonly="!editMode"
                 v-model="qestn.questionContents"
-                style=" font-size: x-large;"
+                style="font-size: x-large"
                 :dense="true"
               />
             </div>
-            <div class="q-pl-lg" style="display: inline-flex;">
-              <q-btn align="center"  size="xs" v-show="editMode" :disable="!editMode" icon="close" outline round color="white" >
-                <q-popup-proxy :offset="[200, -20]">
-                    <q-banner class="bg-indigo-10 text-white">
-                      질문을 삭제하시겠습니까?
-                      <q-card-actions align="center">
-                        <q-btn push color="white" size="xs" text-color="black" label="삭제" style="margin-top:5px;" 
-                          :id="'addBtn'+ qestn.questionSsno"
-                          v-close-popup="isDelQuestion"
-                          @click="delQuestion(qestn.voteSsno, qestn.questionSsno)"
-                        />
-                        <q-btn push color="white" size="xs" text-color="black" label="취소" style="margin-top:5px;" v-close-popup/>
-                      </q-card-actions>
-                    </q-banner>
-                  </q-popup-proxy>
-              </q-btn>
-            </div>
-        </q-card-section>
-        <q-list>
-          <q-item v-for="(iem, index) in qestn.voteIemResponseList" :key="iem.itemId" tag="label" v-ripple>
-            <q-item-section avatar>
-              <q-radio v-model="qestn.questionSsno" :val="iem.itemId" color="light-blue-7" :disable="true"/>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ iem.itemName }}</q-item-label>
-              <q-item-label caption>{{ iem.itemId }} </q-item-label>
-            </q-item-section>
-            <q-item-section avatar>
-              <q-btn size="xs" :disable="!editMode" icon="close" outline round color="grey-7">
+            <div class="q-pl-lg" style="display: inline-flex">
+              <q-btn
+                align="center"
+                size="xs"
+                v-show="editMode"
+                :disable="!editMode"
+                icon="close"
+                outline
+                round
+                color="white"
+              >
                 <q-popup-proxy :offset="[200, -20]">
                   <q-banner class="bg-indigo-10 text-white">
-                    항목을 삭제하시겠습니까?
+                    질문을 삭제하시겠습니까?
                     <q-card-actions align="center">
-                      <q-btn push color="white" size="xs" text-color="black" label="삭제" style="margin-top:5px;" 
-                        :id="'addBtn'+ qestn.questionSsno"
-                        v-close-popup="delTempleteClose"
-                        @click="delVoteItem(qestn.voteSsno, qestn.questionSsno, iem.itemId)"
+                      <q-btn
+                        push
+                        color="white"
+                        size="xs"
+                        text-color="black"
+                        label="삭제"
+                        style="margin-top: 5px"
+                        :id="'addBtn' + qestn.questionSsno"
+                        v-close-popup="isDelQuestion"
+                        @click="delQuestion(qestn.voteSsno, qestn.questionSsno)"
                       />
-                      <q-btn push color="white" size="xs" text-color="black" label="취소" style="margin-top:5px;" v-close-popup/>
+                      <q-btn
+                        push
+                        color="white"
+                        size="xs"
+                        text-color="black"
+                        label="취소"
+                        style="margin-top: 5px"
+                        v-close-popup
+                      />
                     </q-card-actions>
                   </q-banner>
                 </q-popup-proxy>
               </q-btn>
-            </q-item-section>
-          </q-item>
-          <q-card-actions align="left">
-            <!-- <q-checkbox color="black" v-model="selectSubjective" label="주관식여부" /> -->
-            <q-btn size="sm" outline color="indigo-7"  label="항목추가" :disable="!editMode">
-              <q-popup-proxy :offset="[10, 10]">
-                <q-banner class="bg-indigo-10 text-white">
-                  항목 검색해서 세팅하는 형식으로 변경 예정
-                  <q-input standout="bg-grey text-white" v-model="addVoteItemData.itemName" label="Item Name" label-color="white" :dense="true" color="white"/>
-                  <q-input standout="bg-grey text-white" v-model="addVoteItemData.itemId" label="Item ID" label-color="white" :dense="true" />
-                  <q-card-actions align="center">
-                    <q-btn push color="white" size="xs" text-color="black" label="추가" style="margin-top:5px;" 
-                      :id="'addBtn'+ qestn.questionSsno"
-                      v-close-popup="addTempleteClose"
-                      @click="addVoteItem(qestn.voteSsno, qestn.questionSsno)"
+            </div>
+          </q-card-section>
+          <q-list>
+            <q-item
+              v-for="(iem, index) in qestn.voteIemResponseList"
+              :key="iem.itemSsno"
+              tag="label"
+              v-ripple
+            >
+              <q-item-section avatar>
+                <q-radio
+                  v-model="qestn.questionSsno"
+                  :val="iem.itemSsno"
+                  color="light-blue-7"
+                  :disable="true"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label :id="index">{{ iem.itemName }}</q-item-label>
+                <q-item-label caption>{{ iem.itemSsno }} </q-item-label>
+              </q-item-section>
+              <q-item-section avatar>
+                <q-btn
+                  size="xs"
+                  :disable="!editMode"
+                  icon="close"
+                  outline
+                  round
+                  color="grey-7"
+                >
+                  <q-popup-proxy :offset="[200, -20]">
+                    <q-banner class="bg-indigo-10 text-white">
+                      항목을 삭제하시겠습니까?
+                      <q-card-actions align="center">
+                        <q-btn
+                          push
+                          color="white"
+                          size="xs"
+                          text-color="black"
+                          label="삭제"
+                          style="margin-top: 5px"
+                          :id="'addBtn' + qestn.questionSsno"
+                          v-close-popup="delTempleteClose"
+                          @click="
+                            delVoteItem(
+                              qestn.voteSsno,
+                              qestn.questionSsno,
+                              iem.itemSsno
+                            )
+                          "
+                        />
+                        <q-btn
+                          push
+                          color="white"
+                          size="xs"
+                          text-color="black"
+                          label="취소"
+                          style="margin-top: 5px"
+                          v-close-popup
+                        />
+                      </q-card-actions>
+                    </q-banner>
+                  </q-popup-proxy>
+                </q-btn>
+              </q-item-section>
+            </q-item>
+            <q-card-actions align="left">
+              <!-- <q-checkbox color="black" v-model="selectSubjective" label="주관식여부" /> -->
+              <q-btn
+                size="sm"
+                outline
+                color="indigo-7"
+                label="항목추가"
+                :disable="!editMode"
+              >
+                <q-popup-proxy :offset="[10, 10]">
+                  <q-banner class="bg-indigo-5 text-white">
+                    항목 검색해서 세팅하는 형식으로 변경 예정
+                    <q-input
+                      standout="bg-grey text-white"
+                      v-model="addVoteItemData.itemName"
+                      label="Item Name"
+                      label-color="white"
+                      :dense="true"
+                      color="white"
                     />
-                    <q-btn push color="white" size="xs" text-color="black" label="취소" style="margin-top:5px;" v-close-popup 
-                      @click="addVoteItemData.itemId=''; addVoteItemData.itemName='';"
+                    <q-input
+                      standout="bg-grey text-white"
+                      v-model="addVoteItemData.itemSsno"
+                      label="Item ID"
+                      label-color="white"
+                      :dense="true"
                     />
-                  </q-card-actions>
-                </q-banner>
-              </q-popup-proxy>
-            </q-btn>
-            <q-btn size="sm" outline color="indigo-7"  label="식당검색" :disable="!editMode" v-show="voteData.voteKindName.indexOf('식사') > -1 ? true : false"/>
-          </q-card-actions>
-        </q-list>
-      </q-card>
-    </div>
+                    <q-card-actions align="center">
+                      <q-btn
+                        push
+                        color="white"
+                        size="xs"
+                        text-color="black"
+                        label="추가"
+                        style="margin-top: 5px"
+                        :id="'addBtn' + qestn.questionSsno"
+                        v-close-popup="addTempleteClose"
+                        @click="addVoteItem(qestn.voteSsno, qestn.questionSsno)"
+                      />
+                      <q-btn
+                        push
+                        color="white"
+                        size="xs"
+                        text-color="black"
+                        label="취소"
+                        style="margin-top: 5px"
+                        v-close-popup
+                        @click="resetAddVoteItemData"
+                      />
+                    </q-card-actions>
+                  </q-banner>
+                </q-popup-proxy>
+              </q-btn>
+              <q-btn
+                size="sm"
+                outline
+                color="indigo-7"
+                label="식당검색"
+                :disable="!editMode"
+                v-show="
+                  voteData.voteKindName.indexOf('식사') > -1 ? true : false
+                "
+              />
+            </q-card-actions>
+          </q-list>
+        </q-card>
+      </div>
 
       <!-- buttons example -->
       <q-card-actions align="right">
-        <q-btn outline rounded color="indigo-7" label="질문추가하기" @click="addQuestion" :disable="!editMode"/>
+        <q-btn
+          outline
+          rounded
+          color="indigo-7"
+          label="질문추가하기"
+          @click="addQuestion"
+          :disable="!editMode"
+        />
       </q-card-actions>
       <q-card-actions align="center">
-        <q-btn align="around" class="btn-fixed-width" color="brown-5" :label="editBtnLabel" icon="lightbulb_outline" @click="setEditMode" />
-        <q-dialog v-model="isEditConfirm" persistent backdrop-filter="blur(4px)">
+        <q-btn
+          align="around"
+          class="btn-fixed-width"
+          color="brown-5"
+          :label="editBtnLabel"
+          icon="lightbulb_outline"
+          @click="setEditMode"
+        />
+        <q-dialog
+          v-model="isEditConfirm"
+          persistent
+          backdrop-filter="blur(4px)"
+        >
           <q-card>
             <q-card-section class="row items-center">
               <q-avatar icon="print" color="primary" text-color="white" />
               <span class="q-ml-sm">투표내용을 수정하시겠습니까?</span>
             </q-card-section>
             <q-card-actions align="right">
-              <q-btn flat label="수정" color="primary" @click="editVoteDetail" />
+              <q-btn
+                flat
+                label="수정"
+                color="primary"
+                @click="editVoteDetail"
+              />
               <q-btn flat label="취소" color="primary" v-close-popup />
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <q-btn align="between" class="btn-fixed-width" color="blue-grey-5" label="닫기" icon="flight_takeoff" v-close-popup />
+        <q-btn
+          align="between"
+          class="btn-fixed-width"
+          color="blue-grey-5"
+          label="닫기"
+          icon="flight_takeoff"
+          v-close-popup
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
-
 <script setup lang="ts">
-import { ref } from "vue";
-import { useQuasar } from 'quasar';
-import { type ApiResponse } from '../../../interface/server';
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { type ApiResponse } from '../../../interface/server'
 const { loading } = useQuasar()
 
 interface VoteDetailDataType {
-  voteSsno: number,
-  voteKindCode: string,
-  voteKindName: string,
-  voteSubject: string,
-  anonymityVoteAlternative: string,
-  anonymityVoteAlternativeBoo: boolean,
-  voteBeginDate: string,
-  voteEndDate: string,
-  voteDeleteAlternative: string,
-  registUsrId: string,
-  registDt: string,
-  updtUsrId: string,
-  updtDt: string,
-  excuteResult?:string,
-  qestnResponseList : QuestionDetailDataType[]
+  voteSsno: number
+  voteKindCode: string
+  voteKindName: string
+  voteSubject: string
+  anonymityVoteAlternative: string
+  anonymityVoteAlternativeBoo: boolean
+  voteBeginDate: string
+  voteEndDate: string
+  voteDeleteAlternative: string
+  registUsrId: string
+  registDt: string
+  updtUsrId: string
+  updtDt: string
+  excuteResult?: string
+  qestnResponseList: QuestionDetailDataType[]
 }
 
-interface QuestionDetailDataType  {
-  questionSsno : number,
-  voteSsno : number,
-  questionContents : string,
-  compoundNumberChoiceAlternative : string,
+interface QuestionDetailDataType {
+  questionSsno: number
+  voteSsno: number
+  questionContents: string
+  compoundNumberChoiceAlternative: string
   voteIemResponseList: VoteItemDetailDataType[]
 }
 
 interface VoteItemDetailDataType {
-  itemId : string
-  itemName : string,
-  questionSsno? : number,
-  voteSsno? : number
+  itemSsno: number
+  itemName: string
+  questionSsno?: number
+  voteSsno?: number
 }
 
 interface kindCodeType {
-  codeId: string,
-  codeNm:string,
-  upperCodeId: string
+  code: string
+  codeName: string
+  upperCode: string
 }
 
 interface PropsType {
-  voteData : VoteDetailDataType,
-  questionData : QuestionDetailDataType[],
-  codeData : kindCodeType[],
-  codeName : any[]
+  voteData: VoteDetailDataType
+  questionData: QuestionDetailDataType[]
+  codeData: kindCodeType[]
+  codeName: any[]
 }
 
-const props = defineProps<PropsType>();
-let showVoteData = ref<VoteDetailDataType>();
-let showQuestionData = ref<QuestionDetailDataType[]>([]);
-let editMode = ref<boolean>(false);  // editMode = true = 수정
-let editBtnLabel = ref<string>("수정하기");  // editMode = true = 수정
-let isEditConfirm = ref<boolean>(false);
-let initBeginDate:string;
-let initBeginTime:string;
-let initFinishData:string;
-let initFinishTime:string;
+const props = defineProps<PropsType>()
+let showVoteData = ref<VoteDetailDataType>()
+let showQuestionData = ref<QuestionDetailDataType[]>([])
+let editMode = ref<boolean>(false) // editMode = true = 수정
+let editBtnLabel = ref<string>('수정하기') // editMode = true = 수정
+let isEditConfirm = ref<boolean>(false)
+let initBeginDate: string
+let initBeginTime: string
+let initFinishData: string
+let initFinishTime: string
 
-
-interface afterDateTimeType{
-  beginDate: string,
-  beginTime: string,
-  finishData: string,
+interface afterDateTimeType {
+  beginDate: string
+  beginTime: string
+  finishData: string
   finishTime: string
 }
 
@@ -271,254 +509,297 @@ let afterDateTime = ref<afterDateTimeType>({
 const initDetailFunc = () => {
   showVoteData.value = props.voteData
   showQuestionData.value = props.questionData
-  
-  initBeginDate = showVoteData.value.voteBeginDate.toString().split('T')[0].replaceAll('-','/')
+
+  initBeginDate = showVoteData.value.voteBeginDate
+    .toString()
+    .split('T')[0]
+    .replaceAll('-', '/')
   initBeginTime = showVoteData.value.voteBeginDate.toString().split('T')[1]
-  initFinishData = showVoteData.value.voteEndDate.toString().split('T')[0].replaceAll('-','/')
+  initFinishData = showVoteData.value.voteEndDate
+    .toString()
+    .split('T')[0]
+    .replaceAll('-', '/')
   initFinishTime = showVoteData.value.voteEndDate.toString().split('T')[1]
 
-  editMode.value = false;
-  editBtnLabel.value = '수정하기';
+  editMode.value = false
+  editBtnLabel.value = '수정하기'
 }
 
-const beginFinishUpdate = (beginFinish:string, dateTime:string) => {
-  if(dateTime == 'DATE'){
-    if(beginFinish == 'BEGIN'){
+const beginFinishUpdate = (beginFinish: string, dateTime: string) => {
+  if (dateTime == 'DATE') {
+    if (beginFinish == 'BEGIN') {
       afterDateTime.value.beginDate = initBeginDate
-    }else {
+    } else {
       afterDateTime.value.finishData = initFinishData
     }
-  }else{
-    if(beginFinish == 'BEGIN'){
+  } else {
+    if (beginFinish == 'BEGIN') {
       afterDateTime.value.beginTime = initBeginTime
-    }else {
+    } else {
       afterDateTime.value.finishTime = initFinishTime
     }
   }
 }
 
-const beginDateLimitFn = (date:string) => {    
-  let chkFinDate:string = afterDateTime.value.finishData;
-  return date <= ((chkFinDate == '' || chkFinDate == undefined || chkFinDate == null) ? initFinishData : chkFinDate );
+const beginDateLimitFn = (date: string) => {
+  let chkFinDate: string = afterDateTime.value.finishData
+  return (
+    date <=
+    (chkFinDate == '' || chkFinDate == undefined || chkFinDate == null
+      ? initFinishData
+      : chkFinDate)
+  )
 }
 
-const finishDateLimitFn = (date:string) => {
-  let chkStrDate:string = afterDateTime.value.beginDate;
-  return date >= ((chkStrDate == '' || chkStrDate == undefined || chkStrDate == null) ? initBeginDate : chkStrDate );
+const finishDateLimitFn = (date: string) => {
+  let chkStrDate: string = afterDateTime.value.beginDate
+  return (
+    date >=
+    (chkStrDate == '' || chkStrDate == undefined || chkStrDate == null
+      ? initBeginDate
+      : chkStrDate)
+  )
 }
 
-const settingDateTime = (val:string, dateTime:string, beginFinish:string) => {
+const settingDateTime = (
+  val: string,
+  dateTime: string,
+  beginFinish: string
+) => {
   let nowDate = new Date()
-  let nowTime:string = nowDate.getHours()+':'+ nowDate.getMinutes();
-  if(showVoteData.value){
-    if(dateTime== 'DATE' && beginFinish == 'BEGIN'){
-      showVoteData.value.voteBeginDate = val.replaceAll('/', '-')+'T'+nowTime+':00.000'
-
-    }else if(dateTime== 'DATE' && beginFinish == 'FINISH'){
-      showVoteData.value.voteEndDate = val.replaceAll('/', '-')+'T'+nowTime+':00.000'
-
-    }else if(dateTime== 'TIME' && beginFinish == 'BEGIN'){
-      showVoteData.value.voteBeginDate = showVoteData.value.voteBeginDate.toString().split('T')[0] + 'T' + val + ':00.000'
-
-    }else if(dateTime== 'TIME' && beginFinish == 'FINISH'){
-      showVoteData.value.voteEndDate = showVoteData.value.voteEndDate.toString().split('T')[0] + 'T' + val + ':00.000'
+  let nowTime: string = nowDate.getHours() + ':' + nowDate.getMinutes()
+  if (showVoteData.value) {
+    if (dateTime == 'DATE' && beginFinish == 'BEGIN') {
+      showVoteData.value.voteBeginDate =
+        val.replaceAll('/', '-') + 'T' + nowTime + ':00.000'
+    } else if (dateTime == 'DATE' && beginFinish == 'FINISH') {
+      showVoteData.value.voteEndDate =
+        val.replaceAll('/', '-') + 'T' + nowTime + ':00.000'
+    } else if (dateTime == 'TIME' && beginFinish == 'BEGIN') {
+      showVoteData.value.voteBeginDate =
+        showVoteData.value.voteBeginDate.toString().split('T')[0] +
+        'T' +
+        val +
+        ':00.000'
+    } else if (dateTime == 'TIME' && beginFinish == 'FINISH') {
+      showVoteData.value.voteEndDate =
+        showVoteData.value.voteEndDate.toString().split('T')[0] +
+        'T' +
+        val +
+        ':00.000'
     }
   }
 }
 
 const setEditMode = () => {
-  if(editBtnLabel.value == '수정하기'){
-    editMode.value = true;
-    editBtnLabel.value = '확인';
-    isEditConfirm.value = false;
-  }else{
-    let chkVoteIem:QuestionDetailDataType[] = showQuestionData.value;
-    let chkBoolean:boolean = false;
+  if (editBtnLabel.value == '수정하기') {
+    editMode.value = true
+    editBtnLabel.value = '확인'
+    isEditConfirm.value = false
+  } else {
+    let chkVoteIem: QuestionDetailDataType[] = showQuestionData.value
+    let chkBoolean: boolean = false
     chkVoteIem.forEach((qes) => {
-      if(qes.voteIemResponseList.length == 0 ){
-        chkBoolean = true;
+      if (qes.voteIemResponseList.length == 0) {
+        chkBoolean = true
       }
     })
 
-    if(chkBoolean){
+    if (chkBoolean) {
       alert('항목은 최소 한개가 존재해야 합니다.')
-      return false;
-    }else{
-      isEditConfirm.value = true;
+      return false
+    } else {
+      isEditConfirm.value = true
     }
   }
 }
 
 let addVoteItemData = ref<VoteItemDetailDataType>({
-  itemId : '',
-  itemName : '',
-  questionSsno : 0,
-  voteSsno : 0
-});
+  itemSsno: 0,
+  itemName: '',
+  questionSsno: 0,
+  voteSsno: 0
+})
 
-let addTempleteClose = ref<boolean>(false);
-const addVoteItem = (voteSsno:number, questionSsno:number) => {
-  let item_id = addVoteItemData.value.itemId;
-  let item_name = addVoteItemData.value.itemName;
-  if(item_id == '' || item_id == undefined || item_name == '' || item_name == undefined){
+let addTempleteClose = ref<boolean>(false)
+const addVoteItem = (voteSsno: number, questionSsno: number) => {
+  let item_id = addVoteItemData.value.itemSsno
+  let item_name = addVoteItemData.value.itemName
+  if (
+    item_id == 0 ||
+    item_id == undefined ||
+    item_name == '' ||
+    item_name == undefined
+  ) {
     alert('[추가할 항목과 이름을 작성해 주세요.]')
-    return false;
+    return false
   }
 
-  let qestnList = showQuestionData.value;
+  let qestnList = showQuestionData.value
   qestnList.forEach((qes) => {
-    if(qes.voteSsno == voteSsno && qes.questionSsno == questionSsno){
+    if (qes.voteSsno == voteSsno && qes.questionSsno == questionSsno) {
       qes.voteIemResponseList.push({
-        itemId : addVoteItemData.value.itemId,
-        itemName : addVoteItemData.value.itemName
+        itemSsno: addVoteItemData.value.itemSsno,
+        itemName: addVoteItemData.value.itemName
       })
     }
   })
 
   showQuestionData.value = qestnList
 
-  addVoteItemData.value.itemId=''; 
-  addVoteItemData.value.itemName='';
-  addTempleteClose.value = true;
+  addVoteItemData.value.itemSsno = 0
+  addVoteItemData.value.itemName = ''
+  addTempleteClose.value = true
 }
 
-let delTempleteClose = ref<boolean>(false);
-const delVoteItem = (voteSsno:number, questionSsno:number, itemId:string) => {
-  let qestnList = showQuestionData.value;
+let delTempleteClose = ref<boolean>(false)
+const delVoteItem = (
+  voteSsno: number,
+  questionSsno: number,
+  itemSsno: number
+) => {
+  let qestnList = showQuestionData.value
   qestnList.forEach((qes) => {
-    if(qes.voteSsno == voteSsno && qes.questionSsno == questionSsno){
-      if(qes.voteIemResponseList.length <= 1){
+    if (qes.voteSsno == voteSsno && qes.questionSsno == questionSsno) {
+      if (qes.voteIemResponseList.length <= 1) {
         alert('항목은 최소 한개가 존재해야 합니다.')
-        return false;
-      }else{
-        qes.voteIemResponseList = qes.voteIemResponseList.filter((iem) => { if(iem.itemId != itemId) return iem })
+        return false
+      } else {
+        qes.voteIemResponseList = qes.voteIemResponseList.filter((iem) => {
+          if (iem.itemSsno != itemSsno) return iem
+        })
       }
     }
   })
-  showQuestionData.value = [];
-  showQuestionData.value = qestnList;
-  delTempleteClose.value = true;
+  showQuestionData.value = []
+  showQuestionData.value = qestnList
+  delTempleteClose.value = true
 }
 
-
 const addQuestion = () => {
-  let voteNo:number = props.voteData.voteSsno;
-  let qestnList = showQuestionData.value;
-  let tempSsno:number = qestnList[qestnList.length-1].questionSsno + 1; 
+  let voteNo: number = props.voteData.voteSsno
+  let qestnList = showQuestionData.value
+  let tempSsno: number = qestnList[qestnList.length - 1].questionSsno + 1
   qestnList.push({
     questionSsno: tempSsno,
     voteSsno: voteNo,
     questionContents: '질문을 입력해주세요.',
     compoundNumberChoiceAlternative: 'N',
-    voteIemResponseList:[
+    voteIemResponseList: [
       // {
-      //   itemId:'ZZZ',
+      //   itemSsno:'0',
       //   itemName:'미입력'
       // }
     ]
   })
-  showQuestionData.value = qestnList;
+  showQuestionData.value = qestnList
 }
 
-let isDelQuestion = ref<boolean>(false);
-const delQuestion = (voteSsno:number, questionSsno:number) => {
-  let qestnList = showQuestionData.value;
-  if(qestnList.length <= 1){
+let isDelQuestion = ref<boolean>(false)
+const delQuestion = (voteSsno: number, questionSsno: number) => {
+  let qestnList = showQuestionData.value
+  if (qestnList.length <= 1) {
     alert('질문은 최소 한개가 존재해야 합니다.')
-    return false;
-  }else{
-    qestnList = qestnList.filter((qes) => { if(qes.questionSsno != questionSsno) return qes; })
+    return false
+  } else {
+    qestnList = qestnList.filter((qes) => {
+      if (qes.questionSsno != questionSsno) return qes
+    })
   }
-  showQuestionData.value = [];
-  showQuestionData.value = qestnList;
-  isDelQuestion.value = true;
+  showQuestionData.value = []
+  showQuestionData.value = qestnList
+  isDelQuestion.value = true
 }
-
 
 const emits = defineEmits(['chgShowVoteDetail'])
 
 const editVoteDetail = async () => {
   loading.show()
-  let editVoteData = showVoteData.value;
-  let editQuestionData = showQuestionData.value;
-  let getKindName = (showVoteData.value !== undefined ? showVoteData.value.voteKindName  : '')
-  let codeData:kindCodeType[] = props.codeData;
-  let setKindCode:string = '';
+  let editVoteData = showVoteData.value
+  let editQuestionData = showQuestionData.value
+  let getKindName =
+    showVoteData.value !== undefined ? showVoteData.value.voteKindName : ''
+  let codeData: kindCodeType[] = props.codeData
+  let setKindCode: string = ''
   codeData.forEach((el) => {
-    if(el.codeNm == getKindName){
-      setKindCode = el.codeId;
+    if (el.codeName == getKindName) {
+      setKindCode = el.code
     }
-  });
+  })
 
-  let reqData = {};
-  if(editVoteData){
-      let qestnReqList:any = [];
-      editQuestionData.forEach((qes) => {
-        let voteIemReqList:any = [];
-        qes.voteIemResponseList.forEach((iem) => {
-          voteIemReqList.push(iem);
-        })
-        qestnReqList.push({
-          questionSsno : qes.questionSsno,
-          voteSsno : qes.voteSsno,
-          questionContents : qes.questionContents,
-          compoundNumberChoiceAlternative : qes.compoundNumberChoiceAlternative,
-          voteIemRequestList: voteIemReqList
-        })
-      });
+  let reqData = {}
+  if (editVoteData) {
+    let qestnReqList: any = []
+    editQuestionData.forEach((qes) => {
+      let voteIemReqList: any = []
+      qes.voteIemResponseList.forEach((iem) => {
+        voteIemReqList.push(iem)
+      })
+      qestnReqList.push({
+        questionSsno: qes.questionSsno,
+        voteSsno: qes.voteSsno,
+        questionContents: qes.questionContents,
+        compoundNumberChoiceAlternative: qes.compoundNumberChoiceAlternative,
+        voteIemRequestList: voteIemReqList
+      })
+    })
 
-      reqData = {
-          voteSsno: editVoteData.voteSsno,
-          voteKindCode: setKindCode,
-          voteKindName: getKindName,
-          voteSubject: editVoteData.voteSubject,
-          anonymityVoteAlternative: editVoteData.anonymityVoteAlternative,
-          anonymityVoteAlternativeBoo: editVoteData.anonymityVoteAlternative == 'N' ? false: true,
-          voteBeginDate: dateTimeFormatter(editVoteData.voteBeginDate),
-          voteEndDate: dateTimeFormatter(editVoteData.voteEndDate),
-          voteDeleteAlternative: editVoteData.voteDeleteAlternative,
-          registUsrId: editVoteData.registUsrId,
-          registDt: editVoteData.registDt,
-          updtUsrId: editVoteData.updtUsrId,
-          updtDt: editVoteData.updtDt,
-          qestnRequestList : qestnReqList
-      }	
-
+    reqData = {
+      voteSsno: editVoteData.voteSsno,
+      voteKindCode: setKindCode,
+      voteKindName: getKindName,
+      voteSubject: editVoteData.voteSubject,
+      anonymityVoteAlternative: editVoteData.anonymityVoteAlternative,
+      anonymityVoteAlternativeBoo:
+        editVoteData.anonymityVoteAlternative == 'N' ? false : true,
+      voteBeginDate: dateTimeFormatter(editVoteData.voteBeginDate),
+      voteEndDate: dateTimeFormatter(editVoteData.voteEndDate),
+      voteDeleteAlternative: editVoteData.voteDeleteAlternative,
+      registUsrId: editVoteData.registUsrId,
+      registDt: editVoteData.registDt,
+      updtUsrId: editVoteData.updtUsrId,
+      updtDt: editVoteData.updtDt,
+      qestnRequestList: qestnReqList
+    }
   }
   console.log('############ reqData : ', reqData)
   await $fetch<ApiResponse<VoteDetailDataType>>(
-    "/playground/api/vote/modifyVote",
+    '/playground/api/vote/modifyVote',
     {
       method: 'PUT',
       body: JSON.stringify(reqData)
     }
-  ).then((res) => {
-    editMode.value = false;           // 이동시키기
-    editBtnLabel.value = '수정하기';  // 이동시키기
-    isEditConfirm.value = false;
-    emits('chgShowVoteDetail', false)
-    loading.hide();
-  }).catch((error) => {
-    console.error(error);
-  })
+  )
+    .then((res) => {
+      editMode.value = false // 이동시키기
+      editBtnLabel.value = '수정하기' // 이동시키기
+      isEditConfirm.value = false
+      emits('chgShowVoteDetail', false)
+      loading.hide()
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 }
 
-const dateTimeFormatter = (dt:string) => {
-  return dt.toString().split('T')[0] + ' ' + dt.toString().split('T')[1]; //"yyyy-MM-dd HH:mm:ss.SSS"
+const dateTimeFormatter = (dt: string) => {
+  return dt.toString().split('T')[0] + ' ' + dt.toString().split('T')[1] //"yyyy-MM-dd HH:mm:ss.SSS"
+}
+
+const resetAddVoteItemData = () => {
+  addVoteItemData.value.itemSsno = 0
+  addVoteItemData.value.itemName = ''
 }
 
 defineExpose({
   initDetailFunc
-});
-
-
+})
 </script>
 <style lang="scss" scoped>
-.my-card{
+.my-card {
   width: 100%;
   .select {
     width: 200%;
   }
 }
-
 </style>
