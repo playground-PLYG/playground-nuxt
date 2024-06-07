@@ -6,7 +6,7 @@
     <div class="search">
       <q-form @submit="getRstrntList" @reset="onResetSelect">
         <q-select
-          v-model="searchParam.rstrntKndCode"
+          v-model="searchParam.restaurantKindCode"
           outlined
           :options="searchOptions"
           label="식당종류"
@@ -18,7 +18,7 @@
           map-options
         />
         <q-input
-          v-model="searchParam.rstrntNm"
+          v-model="searchParam.restaurantName"
           outlined
           label="식당명"
           round
@@ -82,14 +82,14 @@
               <q-card-section>
                 <q-form @submit="onSubmit">
                   <q-input
-                    v-model="param.rstrntNm"
+                    v-model="param.restaurantName"
                     label="식당명"
                     class="input"
                     outlined
                     :rules="[nm_rules]"
                   />
                   <q-select
-                    v-model="param.rstrntKndCode"
+                    v-model="param.restaurantKindCode"
                     outlined
                     :options="searchOptions"
                     emit-value
@@ -99,7 +99,7 @@
                     :rules="[select_rules]"
                   />
                   <q-input
-                    v-model="param.rstrntDstnc"
+                    v-model="param.restaurantDistance"
                     type="number"
                     label="식당거리(m)"
                     class="input"
@@ -133,14 +133,21 @@
             />
           </q-toolbar>
           <q-card-section>
-            <MapLocation
-              :location="currentLocation"
-              :rstrnt="param"
-              class="map-location"
-            />
+            <div class="map-location">
+              <MapLocation
+                v-if="showMapLocation"
+                :location="currentLocation"
+                :rstrnt="param"
+              />
+              <MapSearch
+                v-if="!showMapLocation"
+                :location="currentLocation"
+                @marker-click="selectRstrnt"
+              />
+            </div>
             <q-form @submit="onSubmit">
               <q-input
-                v-model="param.rstrntNm"
+                v-model="param.restaurantName"
                 label="식당명"
                 class="input"
                 :rules="[nm_rules]"
@@ -148,7 +155,7 @@
                 :readonly="readonly"
               />
               <q-select
-                v-model="param.rstrntKndCode"
+                v-model="param.restaurantKindCode"
                 outlined
                 emit-value
                 map-options
@@ -159,7 +166,7 @@
                 :readonly="readonly"
               />
               <q-input
-                v-model="param.rstrntDstnc"
+                v-model="param.restaurantDistance"
                 type="number"
                 label="식당거리(m)"
                 class="input"
@@ -170,6 +177,15 @@
               <q-toolbar class="search">
                 <q-toolbar-title />
                 <q-btn
+                  v-if="!(modifyClick == '')"
+                  push
+                  color="primary"
+                  class="button"
+                  label="취소"
+                  @click="modifyCancel"
+                />
+                <q-btn
+                  v-if="modifyClick == ''"
                   push
                   color="primary"
                   class="button"
@@ -177,7 +193,7 @@
                   @click="modifyRstrnt"
                 />
                 <q-btn
-                  :disabled="modifyClick == ''"
+                  v-if="!(modifyClick == '')"
                   push
                   color="primary"
                   class="button"
@@ -328,19 +344,20 @@ import { useRouter } from 'vue-router'
 import { type QTableProps, useQuasar } from 'quasar'
 import { type ApiResponse } from '../../interface/server'
 import MapSearch from '~/components/MapSearch.vue'
+import MapLocation from '~/components/MapLocation.vue'
 
 const router = useRouter()
 const { loading } = useQuasar()
 
 interface Data {
-  rstrntSn: number
-  rstrntNm: string
-  rstrntKndCode: string
-  rstrntDstnc: string
-  recentChoiseDt: string
+  restaurantSerialNo: number
+  restaurantName: string
+  restaurantKindCode: string
+  restaurantDistance: string
+  recentChoiseDate: string
   kakaoMapId: string
-  laLc: string
-  loLc: string
+  la: string
+  lo: string
 }
 
 interface MenuData {
@@ -351,31 +368,32 @@ interface MenuData {
 }
 
 interface RstrntData {
-  rstrntSn?: number
-  rstrntNm: string
-  rstrntKndCode: string
-  rstrntDstnc?: string
-  recentChoiseDt?: string | undefined
-  kakaoMapId?: string
-  laLc?: string
-  loLc?: string
+  restaurantSerialNo?: number
+  restaurantName: string
+  restaurantKindCode: string
+  restaurantDistance?: string
+  recentChoiseDate?: string | undefined
+  kakaoMapId: string
+  la: string
+  lo: string
 }
 
 const param = ref<RstrntData>({
-  rstrntNm: '',
-  rstrntKndCode: '',
-  rstrntDstnc: '',
+  restaurantSerialNo: 0,
+  restaurantName: '',
+  restaurantKindCode: '',
+  restaurantDistance: '',
   kakaoMapId: '',
-  laLc: '',
-  loLc: ''
+  la: '',
+  lo: ''
 })
 
 const searchParam = ref<RstrntData>({
-  rstrntKndCode: '',
-  rstrntNm: '',
+  restaurantKindCode: '',
+  restaurantName: '',
   kakaoMapId: '',
-  laLc: '',
-  loLc: ''
+  la: '',
+  lo: ''
 })
 
 const menuParam = ref<MenuData>({
@@ -395,8 +413,9 @@ const showMenuDialog = ref<boolean>(false)
 const showMenuBtn = ref<boolean>(false)
 const noMenu = ref<boolean>(false)
 const readonly = ref(true)
-let modifyClick = ''
+const modifyClick = ref('')
 let restaurantNm = ''
+const showMapLocation = ref(true)
 
 const currentLocation = ref({ x: '126.981727', y: '37.567858' })
 
@@ -408,6 +427,12 @@ const searchOptions = [
   { label: '양식', value: '004' }
 ]
 
+const modifyCancel = () => {
+  modifyClick.value = ''
+  showMapLocation.value = true
+  readonly.value = true
+}
+
 const selectRstrnt = (
   rstrnt: typeof window.kakao.maps.services.Places.PlacesSearchResultItem
 ) => {
@@ -415,12 +440,15 @@ const selectRstrnt = (
     (element) => element.label == rstrnt.category_name.substring(6, 8)
   )
   param.value = {
-    rstrntNm: rstrnt.place_name,
-    rstrntKndCode: rstrntCdNm?.value == undefined ? '' : rstrntCdNm?.value,
-    rstrntDstnc: rstrnt.distance,
+    restaurantSerialNo: param.value.restaurantSerialNo
+      ? param.value.restaurantSerialNo
+      : 0,
+    restaurantName: rstrnt.place_name,
+    restaurantKindCode: rstrntCdNm?.value == undefined ? '' : rstrntCdNm?.value,
+    restaurantDistance: rstrnt.distance,
     kakaoMapId: rstrnt.id,
-    laLc: rstrnt.y,
-    loLc: rstrnt.x
+    la: rstrnt.y,
+    lo: rstrnt.x
   }
 }
 
@@ -447,15 +475,15 @@ const select_rules = (val: string) => {
 
 const columns = ref<QTableProps['columns']>([
   {
-    name: 'rstrntSn',
+    name: 'restaurantSerialNo',
     label: '식당일련번호',
-    field: 'rstrntSn',
+    field: 'restaurantSerialNo',
     align: 'center'
   },
   {
-    name: 'rstrntKndCode',
+    name: 'restaurantKindCode',
     label: '식당종류',
-    field: 'rstrntKndCode',
+    field: 'restaurantKindCode',
     align: 'left',
     format: (val) =>
       val == '001'
@@ -466,22 +494,27 @@ const columns = ref<QTableProps['columns']>([
         ? '일식'
         : '양식'
   },
-  { name: 'rstrntNm', label: '식당명', field: 'rstrntNm', align: 'left' }
+  {
+    name: 'restaurantName',
+    label: '식당명',
+    field: 'restaurantName',
+    align: 'left'
+  }
 ])
 
 const clickRow = (_evt: Event, row: Data, _index: number) => {
   param.value = { ...row }
-  restaurantNm = param.value.rstrntNm
+  restaurantNm = param.value.restaurantName
   getRstrntMenuList()
 }
 
 const onResetSelect = () => {
   searchParam.value = {
-    rstrntKndCode: '',
-    rstrntNm: '',
+    restaurantKindCode: '',
+    restaurantName: '',
     kakaoMapId: '',
-    laLc: '',
-    loLc: ''
+    la: '',
+    lo: ''
   }
   menuParam.value = {
     restaurantSerialNo: 0,
@@ -494,16 +527,17 @@ const onResetSelect = () => {
 
 const onReset = () => {
   param.value = {
-    rstrntNm: '',
-    rstrntKndCode: '',
-    rstrntDstnc: '',
-    recentChoiseDt: '',
+    restaurantName: '',
+    restaurantKindCode: '',
+    restaurantDistance: '',
+    recentChoiseDate: '',
     kakaoMapId: '',
-    laLc: '',
-    loLc: ''
+    la: '',
+    lo: ''
   }
   readonly.value = true
-  modifyClick = ''
+  modifyClick.value = ''
+  showMapLocation.value = true
 }
 
 const onMenuReset = () => {
@@ -570,7 +604,7 @@ const removeRstrnt = async () => {
 }
 
 const getRstrntMenuList = async () => {
-  menuParam.value.restaurantSerialNo = param.value.rstrntSn
+  menuParam.value.restaurantSerialNo = param.value.restaurantSerialNo
   menuParam.value.restaurantMenuSerialNo = ''
   menuParam.value.menuName = ''
   menuParam.value.menuPrice = ''
@@ -601,7 +635,8 @@ const getRstrntMenuList = async () => {
 
 const modifyRstrnt = () => {
   readonly.value = false
-  modifyClick = '수정!'
+  showMapLocation.value = false
+  modifyClick.value = '수정!'
 }
 
 const addMenu = () => {

@@ -16,7 +16,12 @@ let infowindow: typeof window.kakao.maps.InfoWindow
 
 const props = defineProps<{
   location: { x: string; y: string }
-  rstrnt: { rstrntNm: string; kakaoMapId: string; laLc: string; loLc: string }
+  rstrnt: {
+    restaurantName: string
+    kakaoMapId: string
+    la: string
+    lo: string
+  }
 }>()
 
 onMounted(() => {
@@ -51,8 +56,8 @@ const loadMap = () => {
     )
 
     rstrntMarkerPosition = new window.kakao.maps.LatLng(
-      props.rstrnt.laLc,
-      props.rstrnt.loLc
+      props.rstrnt.la,
+      props.rstrnt.lo
     )
     const imageSrc =
       'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'
@@ -95,7 +100,7 @@ const displayInfowindow = (rstrntMarker: typeof window.kakao.maps.Map) => {
     '  </a>' +
     '  <a href="#" id="info">' +
     '    <span class="title">' +
-    props.rstrnt.rstrntNm +
+    props.rstrnt.restaurantName +
     '</span>' +
     '  </a>'
 

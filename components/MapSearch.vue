@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 const config = useRuntimeConfig()
-const keyword = ref<string>('종각 맛집')
+const keyword = ref<string>('')
 let markers: (typeof window.kakao.maps.Marker)[]
 let myMarker
 let infowindow: typeof window.kakao.maps.InfoWindow
@@ -78,12 +78,13 @@ const searchPlaces = () => {
     return false
   }
 
-  // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
-  ps.keywordSearch(keyword.value, placesSearchCB, {
+  const condition = {
     x: '126.981727',
     y: '37.567858',
     category_group_code: 'FD6'
-  })
+  }
+  // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
+  ps.keywordSearch(keyword.value, placesSearchCB, condition)
 }
 
 const placesSearchCB = (
