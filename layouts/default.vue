@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { type ApiResponse } from '../interface/server';
-import { useAuthStore } from '../stores/useAuthStore' 
-import type { EssentialLinkProps } from '@/components/EssentialLink.vue';
+import { ref } from 'vue'
+import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
+import { type ApiResponse } from '../interface/server'
+import { useAuthStore } from '../stores/useAuthStore'
 const { loading } = useQuasar()
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 // api로 조회할 데이터 구조
 interface MenuData {
@@ -13,9 +13,25 @@ interface MenuData {
   menuUrl: string
 }
 
-const essentialLinks = ref<EssentialLinkProps[]>([])
+interface Data {
+  mberId: string
+}
 
-const iconList = ['school', 'code', 'chat', 'record_voice_over', 'rss_feed', 'public', 'favorite']
+let param = ref<Data>({
+  mberId: authStore.mberId
+})
+
+let essentialLinks = ref<EssentialLinkProps[]>([])
+
+const iconList = [
+  'school',
+  'code',
+  'chat',
+  'record_voice_over',
+  'rss_feed',
+  'public',
+  'favorite'
+]
 
 const leftDrawerOpen = ref(false)
 
@@ -25,10 +41,10 @@ function toggleLeftDrawer() {
 
 const selectMenu = async () => {
   loading.show()
-  await $fetch<ApiResponse<MenuData>>(
-    "/playground/public/menu/select", 
-    { method: 'GET' }
-    )
+  await $fetch<ApiResponse<MenuData>>('/playground/public/menu/select', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
+  })
     .then(({ data }) => {
       setMenu(data)
     })
@@ -44,7 +60,7 @@ const setMenu = (arr: object) => {
   // const menu = Object.entries(resData)
   // const menu = Object.keys(resData)
   const menu = Object.values(arr)
-  
+
   menu.forEach((item, idx) => {
     const menuItem: EssentialLinkProps = {
       title: item.menuNm,
@@ -73,22 +89,16 @@ onMounted(() => {
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Playground
-        </q-toolbar-title>
+        <q-toolbar-title> Playground </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label v-if="authStore.mberId" header>
-          {{authStore.mberId}}님 반가워요! 
+        <q-item-label header v-if="authStore.mberId">
+          {{ authStore.mberId }}님 반가워요!
         </q-item-label>
         <template v-for="(menuItem, index) in essentialLinks" :key="index">
           <q-item clickable :to="menuItem.link">
@@ -98,24 +108,24 @@ onMounted(() => {
             <q-item-section>
               {{ menuItem.title }}
             </q-item-section>
-
           </q-item>
         </template>
-        <q-item v-if="authStore.isLogin" clickable exact @click="authStore.logout()">
+        <q-item
+          clickable
+          v-if="authStore.isLogin"
+          exact
+          @click="authStore.logout()"
+        >
           <q-item-section avatar>
             <q-icon name="logout" />
           </q-item-section>
-          <q-item-section>
-            Logout
-          </q-item-section>
+          <q-item-section> Logout </q-item-section>
         </q-item>
-        <q-item v-else clickable to="/login" exact >
+        <q-item clickable v-else to="/login" exact>
           <q-item-section avatar>
             <q-icon name="login" />
           </q-item-section>
-          <q-item-section>
-            Login
-          </q-item-section>
+          <q-item-section> Login </q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
