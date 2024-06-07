@@ -158,6 +158,12 @@ const loadMap = () => {
     // 지도의 우측에 확대 축소 컨트롤을 추가한다
     map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT)
 
+    kakao.maps.event.addListener(map, 'click', function () {
+      if (infoWindow) {
+        infoWindow.close()
+      }
+    })
+
     ps = new kakao.maps.services.Places()
 
     ps.setMap(map)
@@ -265,7 +271,7 @@ const displayPlaces = (places: kakao.maps.services.PlacesSearchResult) => {
       }
 
       itemEl.onmouseout = function () {
-        infoWindow.close()
+        //infoWindow.close()
       }
     })(markers, places[i])
 
