@@ -79,22 +79,14 @@
             </div>
           </q-card-section>
           <q-list>
-            <q-item
-              v-for="(iem, index) in qestn.voteIemResponseList"
-              :key="iem.itemSsno"
-              tag="label"
-              v-ripple
-            >
+            <q-item v-for="iem in qestn.voteIemResponseList">
               <q-item-section avatar>
                 <q-radio
-                  v-model="iem.questionSsno"
+                  v-model="selectVal[index]"
                   :val="iem.itemSsno"
                   color="light-blue-7"
+                  :label="iem.itemName"
                 />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label :id="index">{{ iem.itemName }}</q-item-label>
-                <q-item-label caption>{{ iem.itemSsno }} </q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -180,6 +172,8 @@ interface kindCodeType {
   codeName: string
   upperCode: string
 }
+
+let selectVal = ref<String[]>([''])
 
 let showVoteData = ref<VoteDetailDataType>({
   voteSsno: 0,
@@ -333,17 +327,15 @@ const settingAnswer = () => {
   console.log('## settingAnswer ####### : select :', showVoteData.value)
   let voteData = showVoteData.value
   let insertVoteResult: answerType[] = []
-  voteData.qestnResponseList.forEach((qestn) => {
-    let selectIemSsno: number = 0
 
-    qestn.voteIemResponseList.forEach((iem) => {
-      // 선택한 itemSsno가 iem.questionSsno에 담겨 있음
-      if (
-        iem.questionSsno != null &&
-        iem.questionSsno != 0 &&
-        iem.questionSsno != undefined
-      ) {
-        selectIemSsno = iem.questionSsno
+  console.log('## settingAnswer ####### : selectVal :', selectVal.value)
+  let selectedData = selectVal.value
+
+  voteData.qestnResponseList.forEach((qestn, index) => {
+    let selectIemSsno: number = 0
+    selectedData.forEach((sel, i) => {
+      if (index == i) {
+        selectIemSsno = Number(sel)
       }
     })
 
