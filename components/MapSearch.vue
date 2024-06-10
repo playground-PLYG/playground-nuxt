@@ -1,7 +1,6 @@
 <template>
   <ClientOnly>
-    <div class="map_wrap">
-      <div ref="mapArea" id="map" />
+    <div :class="['map_wrap', isMobile ? 'mobile' : '']">
       <div id="menu_wrap" class="bg_white">
         <div class="option">
           <div>
@@ -31,8 +30,8 @@
               </div>
             </q-form>
           </div>
-          <div class="q-pa-xs q-gutter-sm row">
-            <div class="col-11 q-pa-xs">
+          <div class="q-pa-xs q-gutter-sm">
+            <div class="radius-wrap col-11 q-pa-xs q-px-md">
               <q-slider
                 v-model="searchRadiusLazy"
                 color="blue-6"
@@ -47,10 +46,8 @@
                     : searchRadiusLazy + 'm'
                 "
                 switch-marker-labels-side
-                :min="50"
+                :min="100"
                 :max="1200"
-                :inner-min="100"
-                :inner-max="1200"
                 :step="100"
                 @change="
                   (val) => {
@@ -62,19 +59,23 @@
           </div>
         </div>
         <hr />
-        <ul id="placesList" class="q-pa-none q-ma-none" />
+        <div id="placesList" class="q-pa-none q-ma-none" />
         <div id="pagination" />
       </div>
+      <div ref="mapArea" id="map" />
     </div>
   </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
-import { SliderMarkerLabelDefinitionRequiredValue } from 'quasar'
+import { SliderMarkerLabelDefinitionRequiredValue, useQuasar } from 'quasar'
 import { onMounted, ref, watch } from 'vue'
 
 const config = useRuntimeConfig()
+
+const { platform } = useQuasar()
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 let markers: kakao.maps.Marker[]
 let myMarker
@@ -105,7 +106,9 @@ const searchRadius = ref<number>(props.searchRadius || 500)
 const searchRadiusLazy = ref<number>(searchRadius.value)
 const searchRadiusLabel: Array<SliderMarkerLabelDefinitionRequiredValue> = [
   { value: 100, label: '100m' },
+  { value: 400, label: '400m' },
   { value: 700, label: '700m' },
+  { value: 1000, label: '1km' },
   { value: 1200, label: '1.2km' }
 ]
 
@@ -230,7 +233,7 @@ const placesSearchCB = (
 const displayPlaces = (places: kakao.maps.services.PlacesSearchResult) => {
   const listEl = document.getElementById('placesList'),
     menuEl = document.getElementById('menu_wrap'),
-    fragment = document.createElement('div'),
+    fragment = document.createElement('ul'),
     bounds = new kakao.maps.LatLngBounds()
 
   // 검색 결과 목록에 추가된 항목들을 제거합니다
@@ -352,28 +355,30 @@ function getListItem(
 ) {
   const el = document.createElement('li')
   let itemStr = `
-    <span class="markerbg marker_${index + 1}"></span>
-    <div class="info">
-      <div class="list-header">
-        ${places.place_name}
-      </div>
+    <div class="list-warp">
+      <span class="markerbg marker_${index + 1}"></span>
+      <div class="info">
+        <div class="list-header">
+          ${places.place_name}
+        </div>
   `
 
   if (places.road_address_name) {
     itemStr += `
-      <span>${places.road_address_name}</span>
-      <span class="jibun gray">${places.address_name}</span>
+        <span>${places.road_address_name}</span>
+        <span class="jibun gray">${places.address_name}</span>
       `
   } else {
     itemStr += `
-      <span>${places.address_name}</span>
+        <span>${places.address_name}</span>
     `
   }
 
   itemStr += `
-      <span class="tel">
-        ${places.phone}
-      </span>
+        <a class="tel" href="tel:${places.phone}">
+          ${places.phone}
+        </a>
+      </div>
     </div>
   `
 
@@ -488,6 +493,10 @@ const fn_getMapCenter = (
   x: number,
   y: number
 ): kakao.maps.LatLng => {
+  if (platform.is.mobile) {
+    return new kakao.maps.LatLng(y, x)
+  }
+
   let correctionX = 0
   let correctionY = 0
 
@@ -514,7 +523,7 @@ const fn_getMapCenter = (
 </script>
 
 <style lang="scss" scoped>
-.map_wrap {
+.map_wrap:not(.mobile) {
   position: relative;
   width: 100%;
   height: 500px;
@@ -532,26 +541,28 @@ const fn_getMapCenter = (
   }
 
   #map {
-    width: 100%;
-    min-height: 500px;
-
     :deep(div button[draggable='false']) {
       margin: 0;
       padding: 0;
     }
   }
 
+  #map {
+    width: 100%;
+    min-height: 500px;
+  }
+
   #menu_wrap {
     position: absolute;
     top: 0;
     left: 0;
-    bottom: 0;
     width: 250px;
+    height: 100%;
     margin: 10px 0 30px 10px;
     padding: 5px;
     overflow-y: auto;
     background: rgba(255, 255, 255, 0.7);
-    z-index: 1;
+    z-index: 2;
     font-size: 12px;
     border-radius: 10px;
 
@@ -617,6 +628,7 @@ const fn_getMapCenter = (
             }
 
             .tel {
+              text-decoration: none;
               color: #009900;
             }
           }
@@ -706,6 +718,257 @@ const fn_getMapCenter = (
         display: inline-block;
         margin-right: 10px;
       }
+
+      :deep(.on) {
+        font-weight: bold;
+        cursor: default;
+        color: #777;
+      }
+    }
+  }
+
+  .bg_white {
+    background: #fff;
+  }
+
+  :deep(.customoverlay) {
+    bottom: 85px;
+    border-radius: 6px;
+    border: 1px;
+    border-bottom: 2px solid #ddd;
+    float: left;
+    z-index: 2;
+
+    a {
+      display: block;
+      text-decoration: none;
+      color: #000;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      overflow: hidden;
+      background: #d95050
+        url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png)
+        no-repeat right 14px center;
+    }
+
+    .title {
+      display: block;
+      text-align: center;
+      background: #fff;
+      margin-right: 35px;
+      padding: 10px 15px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    :nth-of-type(n) {
+      border: 0;
+      box-shadow: 0px 1px #c4c4c4;
+    }
+
+    :after {
+      content: '';
+      position: absolute;
+      margin-left: -12px;
+      left: 50%;
+      bottom: -12px;
+      width: 22px;
+      height: 12px;
+      background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png');
+    }
+  }
+}
+
+.map_wrap.mobile {
+  position: relative;
+  border: 1px solid lightgray;
+  width: 100%;
+
+  * {
+    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+    font-size: 12px;
+  }
+
+  a,
+  a:hover,
+  a:active {
+    color: #000;
+    text-decoration: none;
+  }
+
+  #map {
+    :deep(div button[draggable='false']) {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  #map {
+    width: 100%;
+    min-height: 300px;
+  }
+
+  #menu_wrap {
+    width: 100%;
+    padding: 10px 10px 5px 10px;
+    background: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    border-bottom: 1px solid lightgray;
+
+    hr {
+      display: block;
+      height: 1px;
+      border: 0;
+      border-top: 2px solid lightgray;
+      margin: 3px 0;
+    }
+
+    .option {
+      padding-top: 4px;
+
+      .radius-wrap {
+        margin-top: 0;
+      }
+    }
+
+    form {
+      padding: 1px;
+
+      & > div {
+        margin-top: 3px;
+      }
+    }
+
+    #placesList {
+      :deep(*) {
+        padding: 0;
+        margin: 0;
+      }
+
+      :deep(ul) {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: row;
+
+        li.item {
+          list-style: none;
+          height: 100%;
+
+          .list-warp {
+            width: 215px;
+          }
+
+          span {
+            display: block;
+            margin-top: 2px;
+          }
+
+          .info {
+            padding: 3px 0 3px 40px;
+
+            .gray {
+              color: #8a8a8a;
+            }
+
+            .jibun {
+              padding-left: 26px;
+              background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png)
+                no-repeat;
+            }
+
+            .tel {
+              text-decoration: none;
+              color: #009900;
+            }
+          }
+
+          .markerbg {
+            float: left;
+            width: 36px;
+            height: 45px;
+            margin: 15px 0 0 0;
+            background: url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png)
+              no-repeat;
+          }
+
+          .marker_1 {
+            background-position: 0 -10px;
+          }
+
+          .marker_2 {
+            background-position: 0 -56px;
+          }
+
+          .marker_3 {
+            background-position: 0 -102px;
+          }
+
+          .marker_4 {
+            background-position: 0 -148px;
+          }
+
+          .marker_5 {
+            background-position: 0 -194px;
+          }
+
+          .marker_6 {
+            background-position: 0 -240px;
+          }
+
+          .marker_7 {
+            background-position: 0 -286px;
+          }
+
+          .marker_8 {
+            background-position: 0 -332px;
+          }
+
+          .marker_9 {
+            background-position: 0 -378px;
+          }
+
+          .marker_10 {
+            background-position: 0 -423px;
+          }
+
+          .marker_11 {
+            background-position: 0 -470px;
+          }
+
+          .marker_12 {
+            background-position: 0 -516px;
+          }
+
+          .marker_13 {
+            background-position: 0 -562px;
+          }
+
+          .marker_14 {
+            background-position: 0 -608px;
+          }
+
+          .marker_15 {
+            background-position: 0 -654px;
+          }
+        }
+
+        .list-header {
+          font-weight: bold;
+        }
+      }
+    }
+
+    #pagination {
+      margin: 5px auto;
+      text-align: center;
+
+      :deep(a) {
+        display: inline-block;
+        margin-right: 30px;
+      }
+
       :deep(.on) {
         font-weight: bold;
         cursor: default;
