@@ -182,8 +182,15 @@
     </div>
 
     <div class="popup">
-      <q-dialog v-model="isShowRestaurantAddPopup">
-        <q-layout container style="width: 700px; max-width: 80vw">
+      <q-dialog
+        v-model="isShowRestaurantAddPopup"
+        :maximized="isMobile"
+        :full-width="isMobile"
+      >
+        <q-layout
+          container
+          :style="!isMobile ? { width: '1000px', 'max-width': '80vw' } : {}"
+        >
           <q-header>
             <q-toolbar class="bg-primary">
               <q-toolbar-title>식당 추가</q-toolbar-title>
@@ -294,7 +301,7 @@ import { type ApiResponse, type Code } from '@/interface/server'
 import { codeUtil } from '@/utils/code'
 import { imageUtil } from '~/utils/image'
 
-const { loading } = useQuasar()
+const { loading, platform } = useQuasar()
 
 /* 식당 */
 interface Restaurant {
@@ -371,6 +378,7 @@ const addRestaurant = ref<Omit<Restaurant, 'restaurantSerialNo' | 'imageUrl'>>({
 
 const isRestaurantSelectMode = ref<boolean>(false)
 const isRestaurantAddPopupPlaceSelected = ref<boolean>(false)
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 watch(isRestaurantSelectMode, (newValue) => {
   if (newValue && restaurantResList.value.length > 0) {
