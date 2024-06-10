@@ -783,7 +783,14 @@ const editVoteDetail = async () => {
 }
 
 const dateTimeFormatter = (dt: string) => {
-  return dt.toString().split('T')[0] + ' ' + dt.toString().split('T')[1] //"yyyy-MM-dd HH:mm:ss.SSS"
+  if (dt.length <= 19) {
+    //  2024-05-15T17:06:00
+    return (
+      dt.toString().split('T')[0] + ' ' + dt.toString().split('T')[1] + '.000'
+    )
+  } else {
+    return dt.toString().split('T')[0] + ' ' + dt.toString().split('T')[1]
+  }
 }
 
 const resetAddVoteItemData = () => {
