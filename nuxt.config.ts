@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import materialIcons from 'quasar/icon-set/svg-material-icons'
+import materialIconsRound from 'quasar/icon-set/svg-material-icons-round'
 
 export default defineNuxtConfig({
   devtools: {
@@ -34,14 +36,22 @@ export default defineNuxtConfig({
       'Notify'
     ],
     //sassVariables: 'css/quasar.variables.sass',
+    sassVariables: true,
     quietSassWarnings: true,
     lang: 'ko-KR',
-    iconSet: 'material-icons',
+    iconSet: {
+      ...materialIcons,
+      colorPicker: materialIconsRound.colorPicker,
+    },
     config: {},
     extras: {
       font: null,
-      fontIcons: ['material-icons', 'fontawesome-v6', 'mdi-v7'],
-      svgIcons: [],
+      fontIcons: [
+        'material-icons',
+        'mdi-v7',
+        'fontawesome-v6',
+        'bootstrap-icons'
+      ],
       animations: 'all'
     }
   },

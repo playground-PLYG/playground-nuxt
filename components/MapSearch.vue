@@ -30,6 +30,7 @@
               </div>
             </q-form>
           </div>
+
           <div class="q-pa-xs q-gutter-sm">
             <div class="radius-wrap col-11 q-pa-xs q-px-md">
               <q-slider
@@ -62,7 +63,18 @@
         <div id="placesList" class="q-pa-none q-ma-none" />
         <div id="pagination" />
       </div>
+
       <div ref="mapArea" id="map" />
+
+      <div class="custom_control" v-if="isMobile">
+        <q-btn
+          round
+          push
+          color="blue-5"
+          icon="my_location"
+          @click="fn_setCurrentLocation"
+        />
+      </div>
     </div>
   </ClientOnly>
 </template>
@@ -74,7 +86,7 @@ import { onMounted, ref, watch } from 'vue'
 
 const config = useRuntimeConfig()
 
-const { platform } = useQuasar()
+const { platform, notify } = useQuasar()
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 let markers: kakao.maps.Marker[]
@@ -324,21 +336,25 @@ function addMarker(
   _title: string
 ) {
   const imageSrc =
-      'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
-    imageSize = new kakao.maps.Size(36, 37), // 마커 이미지의 크기
-    imgOptions = {
-      spriteSize: new kakao.maps.Size(36, 691),
-      // 스프라이트 이미지의 크기
-      spriteOrigin: new kakao.maps.Point(0, idx * 46 + 10),
-      // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
-      offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
-    },
-    markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
-    marker = new kakao.maps.Marker({
-      position,
-      // 마커의 위치
-      image: markerImage
-    })
+    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png' // 마커 이미지 url, 스프라이트 이미지를 씁니다
+  const imageSize = new kakao.maps.Size(36, 37) // 마커 이미지의 크기
+  const imgOptions = {
+    spriteSize: new kakao.maps.Size(36, 691),
+    // 스프라이트 이미지의 크기
+    spriteOrigin: new kakao.maps.Point(0, idx * 46 + 10),
+    // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
+    offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
+  }
+  const markerImage = new kakao.maps.MarkerImage(
+    imageSrc,
+    imageSize,
+    imgOptions
+  )
+  const marker = new kakao.maps.Marker({
+    position,
+    // 마커의 위치
+    image: markerImage
+  })
 
   marker.setMap(map)
   // 지도 위에 마커를 표출합니다
@@ -520,6 +536,31 @@ const fn_getMapCenter = (
 
   return new kakao.maps.LatLng(y + correctionY, x + correctionX)
 }
+
+const fn_setCurrentLocation = () => {
+  console.debug('fn_setCurrentLocation')
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      map.setCenter(
+        fn_getMapCenter(
+          map.getLevel(),
+          position.coords.longitude,
+          position.coords.latitude
+        )
+      )
+    })
+  } else {
+    map.setCenter(
+      fn_getMapCenter(map.getLevel(), props.location.x, props.location.y)
+    )
+
+    notify({
+      message: '위치 서비스를 사용할 수 없어 초기 위치로 이동합니다.',
+      position: 'top'
+    })
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -528,8 +569,7 @@ const fn_getMapCenter = (
   width: 100%;
   height: 500px;
 
-  * {
-    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+  *:not(i) {
     font-size: 12px;
   }
 
@@ -550,6 +590,13 @@ const fn_getMapCenter = (
   #map {
     width: 100%;
     min-height: 500px;
+  }
+
+  .custom_control {
+    position: absolute;
+    top: 5px;
+    right: 125px;
+    z-index: 3;
   }
 
   #menu_wrap {
@@ -786,8 +833,7 @@ const fn_getMapCenter = (
   border: 1px solid lightgray;
   width: 100%;
 
-  * {
-    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+  *:not(i) {
     font-size: 12px;
   }
 
@@ -808,6 +854,13 @@ const fn_getMapCenter = (
   #map {
     width: 100%;
     min-height: 300px;
+  }
+
+  .custom_control {
+    position: absolute;
+    top: 230px;
+    left: 8px;
+    z-index: 3;
   }
 
   #menu_wrap {
