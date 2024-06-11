@@ -210,7 +210,7 @@
                 <q-step
                   :name="1"
                   title="식당 선택"
-                  icon="settings"
+                  icon="add_location"
                   :done="addRestaurant.restaurantName != ''"
                 >
                   <map-search
@@ -224,7 +224,7 @@
                 <q-step
                   :name="2"
                   title="식당정보 확인"
-                  icon="create_new_folder"
+                  icon="info"
                   :done="restaurantAddStep > 2"
                 >
                   <q-field label="식당명" stack-label readonly>
@@ -256,7 +256,7 @@
                       flat
                       @click="restaurantAddStep = 1"
                       color="primary"
-                      label="다시선택"
+                      label="다시 선택"
                       class="q-ml-sm"
                     />
                     <q-btn
@@ -267,21 +267,28 @@
                   </q-stepper-navigation>
                 </q-step>
 
-                <q-step :name="3" title="식당 이미지 업로드" icon="add_comment">
+                <q-step
+                  :name="3"
+                  title="식당 이미지 업로드"
+                  icon="add_photo_alternate"
+                >
                   <image-upload
-                    @fileDeleted="fn_fileDeleted"
                     @fileUploaded="fn_fileUploaded"
                     @fileRemoved="fn_fileRemoved"
                   />
 
                   <q-stepper-navigation>
-                    <q-btn color="primary" label="Finish" />
                     <q-btn
                       flat
                       @click="restaurantAddStep = 2"
                       color="primary"
-                      label="Back"
+                      label="이전 단계"
                       class="q-ml-sm"
+                    />
+                    <q-btn
+                      color="primary"
+                      label="저장"
+                      @click="fn_saveRestaurant"
                     />
                   </q-stepper-navigation>
                 </q-step>
@@ -577,16 +584,42 @@ const fn_selectedAddRestaurant = async (
   loading.hide()
 }
 
-const fn_fileDeleted = (fileId: string) => {
-  console.debug('fileDeleted fileId : ', fileId)
+const fn_fileUploaded = (fileId: number) => {
+  addRestaurant.value.imageFileId = fileId
 }
 
-const fn_fileUploaded = (fileId: string) => {
-  console.debug('fileUploaded fileId : ', fileId)
+const fn_fileRemoved = (_fileId: number) => {
+  addRestaurant.value.imageFileId = null
 }
 
-const fn_fileRemoved = (fileId: string) => {
-  console.debug('fileRemoved fileId : ', fileId)
+const fn_saveRestaurant = async () => {
+  if (!addRestaurant.value.kakaoMapId || !addRestaurant.value.restaurantName) {
+    alert('식당정보를 선택해주세요.')
+    restaurantAddStep.value = 1
+    return
+  } else if (!addRestaurant.value.imageFileId) {
+    alert('식당이미지를 업로드 해 주세요.')
+    return
+  }
+
+  loading.show()
+  await $fetch<ApiResponse<Restaurant>>(
+    '/playground/public/restaurant/addRstrnt',
+    {
+      method: 'POST',
+      body: JSON.stringify(addRestaurant.value)
+    }
+  )
+    .then(() => {
+      alert('식당이 추가되었습니다.')
+      isShowRestaurantAddPopup.value = false
+      fn_getRestaurantList()
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('식당 추가 중 에러가 발생했습니다.')
+    })
+  loading.hide()
 }
 </script>
 
