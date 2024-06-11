@@ -396,6 +396,10 @@ function getListItem(
         </a>
       </div>
     </div>
+
+    <div class="wrap-vertical-hr">
+      <hr class="vertical-hr q-separator q-separator--vertical q-separator--vertical-inset q-mx-sm flex inline" aria-orientation="vertical">
+    </div>
   `
 
   el.innerHTML = itemStr
@@ -948,6 +952,7 @@ const fn_setCurrentLocation = () => {
         li.item {
           list-style: none;
           height: 100%;
+          display: flex;
 
           .list-warp {
             width: 215px;
@@ -1049,6 +1054,15 @@ const fn_setCurrentLocation = () => {
 
         .list-header {
           font-weight: bold;
+        }
+
+        .wrap-vertical-hr {
+          padding: 8px 0;
+        }
+
+        .vertical-hr {
+          margin-right: 10px;
+          height: 100%;
         }
       }
     }
