@@ -518,31 +518,63 @@ const fn_selectRestaurant = (restaurantSerialNo: number) => {
   }
 }
 
-const fn_selectedAddRestaurant = (
+const fn_selectedAddRestaurant = async (
   selectedPlace: kakao.maps.services.PlacesSearchResultItem
 ) => {
   console.debug('>>> selectedPlace', selectedPlace)
 
-  const restaurantKindCode = restaurantKindCodeOptions.value.find(
-    (code: Code) => code.codeName == selectedPlace.category_name.substring(6, 8)
+  loading.show()
+
+  await $fetch<ApiResponse<Restaurant | null>>(
+    '/playground/public/restaurant/getIsExist',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        restaurantName: selectedPlace.place_name,
+        kakaoMapId: selectedPlace.id
+      })
+    }
   )
+    .then((result) => {
+      if (result.data != null) {
+        let existRestaurantName = ''
 
-  addRestaurant.value.restaurantName = selectedPlace.place_name
+        if (selectedPlace.place_name != result.data.restaurantName) {
+          existRestaurantName = `'${result.data.restaurantName}'으로 `
+        }
 
-  addRestaurant.value.restaurantKindCode = restaurantKindCode?.code
-    ? restaurantKindCode.code
-    : ''
+        alert(
+          `'${selectedPlace.place_name}'은(는) ${existRestaurantName}이미 등록된 식당입니다.`
+        )
+      } else {
+        const restaurantKindCode = restaurantKindCodeOptions.value.find(
+          (code: Code) =>
+            code.codeName == selectedPlace.category_name.substring(6, 8)
+        )
 
-  addRestaurant.value.restaurantKindCodeName = restaurantKindCode?.code
-    ? restaurantKindCode.codeName
-    : ''
-  addRestaurant.value.restaurantDistance = Number(selectedPlace.distance)
-  addRestaurant.value.la = selectedPlace.y
-  addRestaurant.value.lo = selectedPlace.x
-  addRestaurant.value.kakaoMapId = selectedPlace.id
+        addRestaurant.value.restaurantName = selectedPlace.place_name
 
-  isRestaurantAddPopupPlaceSelected.value = true
-  restaurantAddStep.value = 2
+        addRestaurant.value.restaurantKindCode = restaurantKindCode?.code
+          ? restaurantKindCode.code
+          : ''
+
+        addRestaurant.value.restaurantKindCodeName = restaurantKindCode?.code
+          ? restaurantKindCode.codeName
+          : ''
+        addRestaurant.value.restaurantDistance = Number(selectedPlace.distance)
+        addRestaurant.value.la = selectedPlace.y
+        addRestaurant.value.lo = selectedPlace.x
+        addRestaurant.value.kakaoMapId = selectedPlace.id
+
+        isRestaurantAddPopupPlaceSelected.value = true
+        restaurantAddStep.value = 2
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+
+  loading.hide()
 }
 
 const fn_fileDeleted = (fileId: string) => {
