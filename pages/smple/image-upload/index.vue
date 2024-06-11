@@ -158,15 +158,15 @@ const fn_fileRemoved = (fileId: string) => {
 }
 `)
 
-const fn_fileDeleted = (fileId: string) => {
+const fn_fileDeleted = (fileId: number) => {
   console.debug('fileDeleted fileId : ', fileId)
 }
 
-const fn_fileUploaded = (fileId: string) => {
+const fn_fileUploaded = (fileId: number) => {
   console.debug('fileUploaded fileId : ', fileId)
 }
 
-const fn_fileRemoved = (fileId: string) => {
+const fn_fileRemoved = (fileId: number) => {
   console.debug('fileRemoved fileId : ', fileId)
 }
 </script>
