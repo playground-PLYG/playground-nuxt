@@ -86,7 +86,7 @@ import { onMounted, ref, watch } from 'vue'
 
 const config = useRuntimeConfig()
 
-const { platform, notify } = useQuasar()
+const { platform, notify, loading } = useQuasar()
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 let markers: kakao.maps.Marker[]
@@ -541,22 +541,62 @@ const fn_setCurrentLocation = () => {
   console.debug('fn_setCurrentLocation')
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function (position) {
-      map.setCenter(
-        fn_getMapCenter(
-          map.getLevel(),
-          position.coords.longitude,
-          position.coords.latitude
+    loading.show()
+
+    navigator.geolocation.getCurrentPosition(
+      (position: GeolocationPosition) => {
+        loading.hide()
+
+        map.setCenter(
+          fn_getMapCenter(
+            map.getLevel(),
+            position.coords.longitude,
+            position.coords.latitude
+          )
         )
-      )
-    })
+      },
+      (positionError: GeolocationPositionError) => {
+        loading.hide()
+
+        let errMessage = ''
+
+        switch (positionError.code) {
+          case GeolocationPositionError.PERMISSION_DENIED:
+            errMessage =
+              '위치정보 조회 권한 없어서 기본 위치로 이동합니다.\n브라우저의 위치정보 권한을 허용하면 위치 확인이 가능합니다.'
+            break
+          case GeolocationPositionError.POSITION_UNAVAILABLE:
+            errMessage = '위치정보를 사용 불가능해서 기본 위치로 이동합니다.'
+            break
+          case GeolocationPositionError.TIMEOUT:
+            errMessage =
+              '위치정보 조회 요청시간 초과되서 기본 위치로 이동합니다.'
+            break
+          default:
+            '위치 서비스를 사용 할 수 없어서 초기 위치로 이동합니다.'
+        }
+
+        map.setCenter(
+          fn_getMapCenter(map.getLevel(), props.location.x, props.location.y)
+        )
+
+        notify({
+          type: 'warning',
+          html: true,
+          message: errMessage,
+          position: 'top'
+        })
+      }
+    )
   } else {
     map.setCenter(
       fn_getMapCenter(map.getLevel(), props.location.x, props.location.y)
     )
 
     notify({
-      message: '위치 서비스를 사용할 수 없어 초기 위치로 이동합니다.',
+      type: 'warning',
+      html: true,
+      message: '위치 서비스를 사용 할 수 없습니다.<br/>초기 위치로 이동합니다.',
       position: 'top'
     })
   }
