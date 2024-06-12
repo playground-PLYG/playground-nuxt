@@ -208,7 +208,7 @@
                   기준
                   <br />
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_1" :key="index" style="width: 53px;">
+                    <span v-for="(txt, index) in testStr4_1" :key="index" style="width: 55px;" class="q-pr-xs">
                       <q-input
                         v-model="testStr4_1[index]"
                         outlined
@@ -225,7 +225,7 @@
                   정렬 전
                   <br />
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_2" :key="index" style="width: 53px;">
+                    <span v-for="(txt, index) in testStr4_2" :key="index" style="width: 55px;" class="q-pr-xs">
                       <q-input
                         v-model="testStr4_2[index]"
                         outlined
