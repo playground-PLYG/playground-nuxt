@@ -190,7 +190,7 @@
       <q-layout
         view="lhh LpR lff"
         container
-        style="height: 460px"
+        style="height: 380px"
         class="q-mt-md shadow-2 rounded-borders"
         :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'"
       >
@@ -253,7 +253,7 @@
                   v-model="testCode4"
                   lang="typescript"
                   :options="editorOptions"
-                  :style="{ height: '180px' }"
+                  :style="{ height: '260px' }"
                 />
               </div>
             </div>
@@ -328,7 +328,7 @@
       <q-layout
         view="lhh LpR lff"
         container
-        style="height: 320px"
+        style="height: 300px"
         class="q-mt-md shadow-2 rounded-borders"
         :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'"
       >
@@ -494,7 +494,8 @@ const testCode4 = ref<string>(`import { sortByGroups } from 'hangul-util'
 /**
  * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
  */
-sortByGroups(['${testStr4_2.value.join('\', \'')}'], ['${testStr4_1.value.join('\', \'')}'])`)
+sortByGroups(['${testStr4_2.value.join('\', \'')}'], 
+              ['${testStr4_1.value.join('\', \'')}'])`)
 
 watch([testStr4_1, testStr4_2], (a) => {
   testStr4_3.value = sortByGroups(testStr4_2.value, testStr4_1.value)
@@ -504,7 +505,8 @@ watch([testStr4_1, testStr4_2], (a) => {
 /**
  * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
  */
-sortByGroups(['${testStr4_2.value.join('\', \'')}'], ['${testStr4_1.value.join('\', \'')}'])`
+sortByGroups(['${testStr4_2.value.join('\', \'')}'], 
+              ['${testStr4_1.value.join('\', \'')}'])`
 }, {deep: true})
 // 문자 배열 조건 정렬 - end
 
