@@ -250,7 +250,7 @@
           <q-page style="padding-top: 60px" class="q-pa-md bg-white">
             <q-page-sticky position="top" expand class="bg-primary text-white">
               <q-toolbar>
-                <q-toolbar-title>조사</q-toolbar-title>
+                <q-toolbar-title>조사 포맷</q-toolbar-title>
               </q-toolbar>
             </q-page-sticky>
 
@@ -302,6 +302,68 @@
           </q-page>
         </q-page-container>
       </q-layout>
+
+      <q-layout
+        view="lhh LpR lff"
+        container
+        style="height: 320px"
+        class="q-mt-md shadow-2 rounded-borders"
+        :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'"
+      >
+        <q-page-container>
+          <q-page style="padding-top: 60px" class="q-pa-md bg-white">
+            <q-page-sticky position="top" expand class="bg-primary text-white">
+              <q-toolbar>
+                <q-toolbar-title>올바른 조사 조회</q-toolbar-title>
+              </q-toolbar>
+            </q-page-sticky>
+
+            <div class="q-pa-md row">
+              <div class="col-4">
+                <q-input
+                  v-model="testStr6_1"
+                  outlined
+                  label="단어"
+                  round
+                  dense
+                  flat
+                  class="input"
+                />
+
+                <br />
+
+                <q-input
+                  v-model="testStr6_2"
+                  outlined
+                  label="조사"
+                  round
+                  dense
+                  flat
+                  class="input"
+                />
+
+                <q-separator inset class="q-my-lg" />
+
+                <p class="test-result">
+                  {{ testStr6_3 }}
+                </p>
+              </div>
+
+              <q-separator inset vertical class="q-mx-lg" />
+
+              <div class="col-7">
+                <code-editor
+                  class="editor"
+                  v-model="testCode6"
+                  lang="typescript"
+                  :options="editorOptions"
+                  :style="{ height: '180px' }"
+                />
+              </div>
+            </div>
+          </q-page>
+        </q-page-container>
+      </q-layout>
     </div>
   </div>
 </template>
@@ -314,7 +376,8 @@ import {
   formatNumberAll,
   formatDate,
   sortByGroups,
-  formatJosa
+  formatJosa,
+  josa
 } from 'hangul-util'
 
 const editorOptions = ref({
@@ -414,7 +477,7 @@ sortByGroups([${testStr4_2.value.join(', ')}], [${testStr4_1.value.join(
 )})`)
 // 문자 배열 조건 정렬 - end
 
-// 조사 - start
+// 조사 포맷 - start
 const testStr5_1 = ref<string>('사진[을/를]')
 const testStr5_2 = ref<string>('티비[을/를]')
 const testStr5_3 = ref<string>(formatJosa(testStr5_1.value))
@@ -441,7 +504,30 @@ formatJosa('${testStr5_1.value}')
 
 formatJosa('${testStr5_2.value}')`
 })
-// 조사 - end
+// 조사 포맷 - end
+
+// 올바른 조사 조회 - start
+const testStr6_1 = ref<string>('인생')
+const testStr6_2 = ref<string>('를')
+const testStr6_3 = ref<string>(josa(testStr6_1.value, testStr6_2.value))
+const testCode6 = ref<string>(`import { josa } from 'hangul-util'
+
+/**
+ * josa(letter?: string, _josa?: string): string
+ */
+josa('${testStr6_1.value}', '${testStr6_2.value}')`)
+
+watch([testStr6_1, testStr6_2], () => {
+  testStr6_3.value = josa(testStr6_1.value, testStr6_2.value)
+
+  testCode6.value = `import { josa } from 'hangul-util'
+
+/**
+ * josa(letter?: string, _josa?: string): string
+ */
+josa('${testStr6_1.value}', '${testStr6_2.value}')`
+})
+// 올바른 조사 조회 - end
 </script>
 
 <style lang="scss" scoped>
