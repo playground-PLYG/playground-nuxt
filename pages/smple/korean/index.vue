@@ -190,7 +190,7 @@
       <q-layout
         view="lhh LpR lff"
         container
-        style="height: 320px"
+        style="height: 460px"
         class="q-mt-md shadow-2 rounded-borders"
         :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'"
       >
@@ -207,13 +207,37 @@
                 <p class="test-result">
                   기준
                   <br />
-                  {{ testStr4_1 }}
+                  <div class="row">
+                    <span v-for="(txt, index) in testStr4_1"
+                    :key="index" style="width: 53px;">
+                      <q-input
+                      v-model="testStr4_1[index]"
+                      outlined
+                      round
+                      dense
+                      flat
+                      class="input col-1"
+                    />
+                    </span>
+                  </div>
 
                   <br />
                   <br />
                   정렬 전
                   <br />
-                  {{ testStr4_2 }}
+                  <div class="row">
+                    <span v-for="(txt, index) in testStr4_2"
+                    :key="index" style="width: 53px;">
+                      <q-input
+                      v-model="testStr4_2[index]"
+                      outlined
+                      round
+                      dense
+                      flat
+                      class="input col-1"
+                    />
+                    </span>
+                  </div>
 
                   <br />
                   <br />
@@ -462,8 +486,8 @@ watch([testStr3_1, testStr3_2], (newVal) => {
 // 날짜 포맷 - end
 
 // 문자 배열 조건 정렬 - start
-const testStr4_1 = ref<string[]>(['회장', '사장', '부장', '대리', '사원'])
-const testStr4_2 = ref<string[]>(['대리', '사원', '사장', '회장', '부장'])
+const testStr4_1 = ref<string[]>(['사장', '부장', '대리', '사원'])
+const testStr4_2 = ref<string[]>(['대리', '사원', '사장', '부장'])
 const testStr4_3 = ref<string[]>(
   sortByGroups(testStr4_2.value, testStr4_1.value)
 )
@@ -472,9 +496,18 @@ const testCode4 = ref<string>(`import { sortByGroups } from 'hangul-util'
 /**
  * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
  */
-sortByGroups([${testStr4_2.value.join(', ')}], [${testStr4_1.value.join(
-  ', '
-)})`)
+sortByGroups(['${testStr4_2.value.join('\', \'')}'], ['${testStr4_1.value.join('\', \'')}'])`)
+
+watch([testStr4_1, testStr4_2], (a) => {
+  testStr4_3.value = sortByGroups(testStr4_2.value, testStr4_1.value)
+
+  testCode4.value = `import { sortByGroups } from 'hangul-util'
+
+/**
+ * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
+ */
+sortByGroups(['${testStr4_2.value.join('\', \'')}'], ['${testStr4_1.value.join('\', \'')}'])`
+}, {deep: true})
 // 문자 배열 조건 정렬 - end
 
 // 조사 포맷 - start
