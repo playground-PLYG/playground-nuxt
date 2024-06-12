@@ -118,10 +118,18 @@
     <div class="proc">
       <q-btn
         push
-        class="button"
+        class="float-left"
         color="primary"
         label="등록"
         @click="showVoteRegistForm = true"
+      />
+
+      <q-btn
+        push
+        class="float-right"
+        color="red"
+        :label="showVoteResultTitle"
+        @click="onClickResult"
       />
     </div>
   </div>
@@ -143,6 +151,8 @@
     :code-name="kindCodeNm"
     @chgShowVoteRegist="chgShowVoteRegist"
   />
+
+  <voteStatistics ref="statisticsForm" v-model="showVoteStatistics" />
 </template>
 
 <script setup lang="ts">
@@ -151,8 +161,11 @@ import { type ApiResponse } from '../../interface/server'
 import { useQuasar, type QTableProps } from 'quasar'
 import voteDetail from './vote-detail/voteDetail.vue'
 import voteRegistForm from './vote-detail/voteRegistForm.vue'
+import voteStatistics from './statistics/voteStatistics.vue'
 import { useRouter } from 'vue-router'
+import { dateUtil } from '~/utils/dateUtil'
 const { loading } = useQuasar()
+const $q = useQuasar()
 
 interface kindCodeType {
   code: string
@@ -493,7 +506,11 @@ let selectedVote = ref<VoteDetailDataType>({
 let selectedQestn = ref<QuestionDetailDataType[]>([])
 
 const onClickVote = (evt: Object, row: ResponseData, index: number) => {
-  getVoteDetail(row.voteSsno, row.voteKindCode)
+  if (showVoteResult.value) {
+    getVoteResult(row)
+  } else {
+    getVoteDetail(row.voteSsno, row.voteKindCode)
+  }
 }
 
 const voteDetailComponent = ref()
@@ -550,6 +567,61 @@ let showVoteRegistForm = ref<boolean>(false)
 const chgShowVoteRegist = (call: boolean) => {
   showVoteRegistForm.value = call
   router.go(0)
+}
+
+let showVoteResult = ref<boolean>(false)
+let showVoteResultTitle = ref<string>('투표결과보기')
+const onClickResult = () => {
+  if (showVoteResult.value) {
+    searchParam.value = {
+      voteSubject: '',
+      voteKindCode: '',
+      anonymityVoteAlternativeBoo: false,
+      anonymityVoteAlternative: '',
+      voteBeginDate: '',
+      voteEndDate: ''
+    }
+    selectVoteList()
+
+    showVoteResultTitle.value = '투표결과보기'
+    showVoteResult.value = false
+  } else {
+    searchParam.value = {
+      voteSubject: '',
+      voteKindCode: '',
+      anonymityVoteAlternativeBoo: false,
+      anonymityVoteAlternative: '',
+      voteBeginDate: '',
+      voteEndDate: dateUtil.getformatDate(new Date(), 'YYYY/MM/DD')
+    }
+    selectVoteList()
+
+    showVoteResultTitle.value = '전체보기'
+    showVoteResult.value = true
+  }
+}
+
+let showVoteStatistics = ref<boolean>(false)
+const statisticsForm = ref()
+
+const getVoteResult = (row: ResponseData) => {
+  console.log('getVoteResult ::: row : ', row)
+  let dateDiff = new Date(row.voteEndDate).getTime() - new Date().getTime()
+  if (dateDiff >= 0) {
+    $q.dialog({
+      title: 'Alert',
+      message: '투표가 종류된 후에 결과를 확인 할 수 있습니다.'
+    })
+      .onOk(() => {})
+      .onCancel(() => {})
+      .onDismiss(() => {
+        //I am triggered on both OK and Cancel
+      })
+  } else {
+    console.log('go Vote Result')
+    showVoteStatistics.value = true
+    statisticsForm.value.initFunc(row.voteSsno, row.voteSubject)
+  }
 }
 </script>
 <style lang="scss" scoped>
