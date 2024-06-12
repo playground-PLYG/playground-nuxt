@@ -5,7 +5,7 @@
         <strong>{{ comment.registUsrId }}</strong
         >:
         {{
-          comment.deleteChk === "Y" ? "삭제된 댓글입니다" : comment.commentCn
+          comment.deleteChk === 'Y' ? '삭제된 댓글입니다' : comment.commentCn
         }}
       </div>
     </div>
@@ -32,7 +32,7 @@
           <q-form class="q-gutter-md">
             <q-card-section>
               <div class="text-h6">
-                {{ isDel ? "댓글 삭제" : isEdit ? "댓글 수정" : "대댓글 작성" }}
+                {{ isDel ? '댓글 삭제' : isEdit ? '댓글 수정' : '대댓글 작성' }}
               </div>
             </q-card-section>
             <q-card-section class="q-pt-none">
@@ -68,155 +68,155 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
+import { ref, defineProps } from 'vue'
 
-import { type ApiResponse } from "../../../interface/server";
+import { type ApiResponse } from '../../../interface/server'
 
-const props = defineProps<{ comment: Comment }>();
+const props = defineProps<{ comment: Comment }>()
 
 interface Comment {
-  boardId: string;
-  noticeNo: number;
-  commentNo: number;
-  commentCn: string;
-  upperCommentNo: number | null;
-  deleteChk: string;
-  commentList?: Comment[];
-  registUsrId: string;
+  boardId: string
+  noticeNo: number
+  commentNo: number
+  commentCn: string
+  upperCommentNo: number | null
+  deleteChk: string
+  commentList?: Comment[]
+  registUsrId: string
 }
 
 interface CommentData {
-  boardId: string;
-  noticeNo: number;
-  commentCn: string;
-  upperCommentNo: number | null;
+  boardId: string
+  noticeNo: number
+  commentCn: string
+  upperCommentNo: number | null
 }
 
-let prompt = ref(false);
-let isEdit = ref(false);
-let isDel = ref(false);
+let prompt = ref(false)
+let isEdit = ref(false)
+let isDel = ref(false)
 
 let insertComment = ref<CommentData>({
-  boardId: "",
+  boardId: '',
   noticeNo: 0,
-  commentCn: "",
-  upperCommentNo: 0,
-});
+  commentCn: '',
+  upperCommentNo: 0
+})
 
 const reInsert = async () => {
-  prompt.value = true;
-  isEdit.value = false;
-};
+  prompt.value = true
+  isEdit.value = false
+}
 
 const registration = () => {
   if (isEdit.value) {
-    modifyComment();
+    modifyComment()
   } else if (isDel.value) {
-    console.log("delete :: ");
-    removeComment();
+    console.log('delete :: ')
+    removeComment()
   } else {
-    console.log("reComment :: ");
-    createReComment();
+    console.log('reComment :: ')
+    createReComment()
   }
-};
+}
 
 const createReComment = async () => {
-  console.log(props.comment);
+  console.log(props.comment)
 
   const commentToAdd: CommentData = {
     boardId: props.comment.boardId,
     noticeNo: props.comment.noticeNo,
     commentCn: insertComment.value.commentCn,
-    upperCommentNo: props.comment.commentNo,
-  };
+    upperCommentNo: props.comment.commentNo
+  }
 
-  console.log("insert Comment ::", commentToAdd);
+  console.log('insert Comment ::', commentToAdd)
 
-  await $fetch<ApiResponse<CommentData>>("/playground/api/comment/addComment", {
-    method: "POST",
-    body: JSON.stringify(commentToAdd),
+  await $fetch<ApiResponse<CommentData>>('/playground/api/comment/addComment', {
+    method: 'POST',
+    body: JSON.stringify(commentToAdd)
   })
     .then((result) => {
-      console.log("comment CC Test :: ", result);
-      prompt.value = false;
-      window.location.reload();
+      console.log('comment CC Test :: ', result)
+      prompt.value = false
+      window.location.reload()
     })
     .catch((error) => {
-      console.error(error);
-    });
-};
+      console.error(error)
+    })
+}
 
 const closeComment = async () => {
-  prompt.value = false;
-  isDel.value = false;
-  insertComment.value.commentCn = "";
-};
+  prompt.value = false
+  isDel.value = false
+  insertComment.value.commentCn = ''
+}
 
 const comment_rules = (val: string) => {
   if (!val) {
-    return "댓글을 입력해주세요.";
+    return '댓글을 입력해주세요.'
   }
-  return true;
-};
+  return true
+}
 
 const editComment = () => {
-  isEdit.value = true;
-  insertComment.value.commentCn = props.comment.commentCn;
-  prompt.value = true;
-};
+  isEdit.value = true
+  insertComment.value.commentCn = props.comment.commentCn
+  prompt.value = true
+}
 
 const modifyComment = async () => {
   const commentUpdate = {
     commentNo: props.comment.commentNo,
-    commentCn: insertComment.value.commentCn,
-  };
+    commentCn: insertComment.value.commentCn
+  }
 
   await $fetch<ApiResponse<CommentData>>(
-    "/playground/api/comment/modifyComment",
+    '/playground/api/comment/modifyComment',
     {
-      method: "POST",
-      body: JSON.stringify(commentUpdate),
+      method: 'POST',
+      body: JSON.stringify(commentUpdate)
     }
   )
     .then((result) => {
-      console.log("comment CC Test :: ", result);
-      prompt.value = false;
-      window.location.reload();
+      console.log('comment CC Test :: ', result)
+      prompt.value = false
+      window.location.reload()
     })
     .catch((error) => {
-      console.error(error);
-    });
-};
+      console.error(error)
+    })
+}
 
 const delComment = () => {
-  isDel.value = true;
-  insertComment.value.commentCn = props.comment.commentCn;
-  prompt.value = true;
-};
+  isDel.value = true
+  insertComment.value.commentCn = props.comment.commentCn
+  prompt.value = true
+}
 
 const removeComment = async () => {
   const commentRemove = {
-    commentNo: props.comment.commentNo,
-  };
+    commentNo: props.comment.commentNo
+  }
 
-  console.log("comment ReMove Date :: ", commentRemove);
+  console.log('comment ReMove Date :: ', commentRemove)
 
   await $fetch<ApiResponse<CommentData>>(
-    "/playground/api/comment/removeComment",
+    '/playground/api/comment/removeComment',
     {
-      method: "DELETE",
-      body: JSON.stringify(commentRemove),
+      method: 'DELETE',
+      body: JSON.stringify(commentRemove)
     }
   )
     .then((result) => {
-      prompt.value = false;
-      isDel.value = false;
-      window.location.reload();
+      prompt.value = false
+      isDel.value = false
+      window.location.reload()
     })
     .catch((error) => {
-      console.log("error :: ", error);
-    });
-};
+      console.log('error :: ', error)
+    })
+}
 </script>
 
 <style scoped>

@@ -7,9 +7,9 @@
       </div>
       <div class="search">
         <q-form ref="loginForm"  @submit="login">
-          <q-input outlined label="ID"  v-model="param.mberId" :dense="dense" class="input" :rules="[idRules]" style="width: 175px;"/>
+          <q-input v-model="param.mberId" outlined  label="ID" :dense="dense" class="input" :rules="[idRules]" style="width: 175px;"/>
           <br>
-          <q-input outlined label="PASSWORD"  v-model="param.mberPassword"  type="password" :dense="dense" class="input" :rules="[passwordRules]"  style="width: 175px;"/>
+          <q-input v-model="param.mberPassword" outlined  label="PASSWORD"  type="password" :dense="dense" class="input" :rules="[passwordRules]"  style="width: 175px;"/>
           <br>
           <q-btn push class="button" color="green-7" label="로그인" type="submit"/>
           <q-btn push class="button" color="green-7" label="회원가입" type="submit" to="/sign-up"/>
@@ -51,12 +51,12 @@ interface ResData {
   mberId:string
 }
 
-let param = ref<Param>({
+const param = ref<Param>({
     mberId: '',
     mberPassword:''
 });
 
-let resData = ref<ResData>({
+const resData = ref<ResData>({
   token: '',
   mberId:''
 });

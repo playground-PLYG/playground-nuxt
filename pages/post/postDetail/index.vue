@@ -40,86 +40,84 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useNoticeStore } from "../../../stores/useNoticeStore";
-import { type ApiResponse } from "../../../interface/server";
-import CommentItem from "./CommentItem.vue";
+import { ref, onMounted } from 'vue'
+import { useNoticeStore } from '../../../stores/useNoticeStore'
+import { type ApiResponse } from '../../../interface/server'
+import CommentItem from './CommentItem.vue'
 
 interface Comment {
-  boardId: string;
-  noticeNo: number;
-  commentNo: number;
-  commentCn: string;
-  upperCommentNo: number | null;
-  deleteChk: string;
-  commentList?: Comment[];
-  registUsrId: string;
+  boardId: string
+  noticeNo: number
+  commentNo: number
+  commentCn: string
+  upperCommentNo: number | null
+  deleteChk: string
+  commentList?: Comment[]
+  registUsrId: string
 }
 
 interface CommentAdd {
-  boardId: string;
-  noticeNo: number;
-  commentCn: string;
-  upperCommentNo: number | null;
+  boardId: string
+  noticeNo: number
+  commentCn: string
+  upperCommentNo: number | null
 }
 
-const comments = ref<Comment[]>([]);
-const newComment = ref<string>("");
+const comments = ref<Comment[]>([])
+const newComment = ref<string>('')
 const commentList = {
-  boardId: "smile", // 임시 하드코딩
-  noticeNo: 0,
-};
+  boardId: 'smile', // 임시 하드코딩
+  noticeNo: 0
+}
 
-const noticeStore = useNoticeStore();
-const router = useRouter();
+const noticeStore = useNoticeStore()
 
 onMounted(async () => {
-  getCommentList();
-});
+  getCommentList()
+})
 
 const getCommentList = async () => {
-  commentList.noticeNo = Number(noticeStore.noticeNo);
+  commentList.noticeNo = Number(noticeStore.noticeNo)
   await $fetch<ApiResponse<Comment[]>>(
-    "/playground/public/comment/getCommentList",
+    '/playground/public/comment/getCommentList',
     {
-      method: "POST",
-      body: JSON.stringify(commentList),
+      method: 'POST',
+      body: JSON.stringify(commentList)
     }
   )
     .then((result) => {
-      comments.value = result.data;
+      comments.value = result.data
     })
     .catch((error) => {
-      console.error(error);
-    });
-};
+      console.error(error)
+    })
+}
 const addComment = async () => {
   if (!newComment.value.trim()) {
-    alert("댓글을 입력하세요.");
-    return;
+    alert('댓글을 입력하세요.')
+    return
   }
 
   const commentToAdd: CommentAdd = {
     boardId: commentList.boardId,
     noticeNo: commentList.noticeNo,
     commentCn: newComment.value,
-    upperCommentNo: null,
-  };
+    upperCommentNo: null
+  }
 
-  await $fetch<ApiResponse<Comment>>("/playground/api/comment/addComment", {
-    method: "POST",
-    body: JSON.stringify(commentToAdd),
+  await $fetch<ApiResponse<Comment>>('/playground/api/comment/addComment', {
+    method: 'POST',
+    body: JSON.stringify(commentToAdd)
   })
     .then((result) => {
-      getCommentList();
+      getCommentList()
     })
     .catch((error) => {
-      console.error(error);
-    });
+      console.error(error)
+    })
 
-  newComment.value = "";
-};
+  newComment.value = ''
+}
 </script>
 
 <style scoped>
