@@ -208,16 +208,15 @@
                   기준
                   <br />
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_1"
-                    :key="index" style="width: 53px;">
+                    <span v-for="(txt, index) in testStr4_1" :key="index" style="width: 53px;">
                       <q-input
-                      v-model="testStr4_1[index]"
-                      outlined
-                      round
-                      dense
-                      flat
-                      class="input col-1"
-                    />
+                        v-model="testStr4_1[index]"
+                        outlined
+                        round
+                        dense
+                        flat
+                        class="input col-1"
+                      />
                     </span>
                   </div>
 
@@ -226,16 +225,15 @@
                   정렬 전
                   <br />
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_2"
-                    :key="index" style="width: 53px;">
+                    <span v-for="(txt, index) in testStr4_2" :key="index" style="width: 53px;">
                       <q-input
-                      v-model="testStr4_2[index]"
-                      outlined
-                      round
-                      dense
-                      flat
-                      class="input col-1"
-                    />
+                        v-model="testStr4_2[index]"
+                        outlined
+                        round
+                        dense
+                        flat
+                        class="input col-1"
+                      />
                     </span>
                   </div>
 
