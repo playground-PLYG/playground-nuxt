@@ -51,6 +51,7 @@
     "@vueuse/core": "^10.10.0",
     "@vueuse/nuxt": "^10.10.0",
     "dayjs-nuxt": "^2.1.9",
+    "hangul-util": "^0.1.4",
     "pinia": "^2.1.7",
     "quasar": "^2.16.4"
   }
