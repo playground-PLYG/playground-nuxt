@@ -1,71 +1,79 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import type { EssentialLinkProps } from "@/components/EssentialLink.vue";
-import { type ApiResponse } from "../interface/server";
-import { useAuthStore } from "../stores/useAuthStore";
-const { loading } = useQuasar();
-const authStore = useAuthStore();
+import { ref } from 'vue'
+import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
+import { type ApiResponse } from '../interface/server'
+import { useAuthStore } from '../stores/useAuthStore'
+const { loading } = useQuasar()
+const authStore = useAuthStore()
 
 // api로 조회할 데이터 구조
 interface MenuData {
-  menuId: string;
-  menuNm: string;
-  menuUrl: string;
+  menuId: string
+  menuNm: string
+  menuUrl: string
 }
 
-let essentialLinks = ref<EssentialLinkProps[]>([]);
+interface Data {
+  mberId: string
+}
+
+let param = ref<Data>({
+  mberId: authStore.mberId
+})
+
+let essentialLinks = ref<EssentialLinkProps[]>([])
 
 const iconList = [
-  "school",
-  "code",
-  "chat",
-  "record_voice_over",
-  "rss_feed",
-  "public",
-  "favorite",
-  "messenger",
-];
+  'school',
+  'code',
+  'chat',
+  'record_voice_over',
+  'rss_feed',
+  'public',
+  'favorite'
+]
 
-const leftDrawerOpen = ref(false);
+const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
+  leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
 const selectMenu = async () => {
-  loading.show();
-  await $fetch<ApiResponse<MenuData>>("/playground/public/menu/select", {
-    method: "GET",
+  loading.show()
+  await $fetch<ApiResponse<MenuData>>('/playground/public/menu/select', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
   })
     .then(({ data }) => {
-      setMenu(data);
+      setMenu(data)
     })
     .catch((error) => {
-      console.error("error: ", error);
-      alert("메뉴 목록을 불러오지 못했습니다.");
-      return;
-    });
-  loading.hide();
-};
+      console.error('error: ', error)
+      alert('메뉴 목록을 불러오지 못했습니다.')
+      return
+    })
+  loading.hide()
+}
 
 const setMenu = (arr: object) => {
   // const menu = Object.entries(resData)
   // const menu = Object.keys(resData)
-  const menu = Object.values(arr);
+  const menu = Object.values(arr)
 
   menu.forEach((item, idx) => {
     const menuItem: EssentialLinkProps = {
       title: item.menuNm,
       icon: iconList[idx],
-      link: item.menuUrl,
-    };
-    essentialLinks.value.push(menuItem);
-  });
-};
+      link: item.menuUrl
+    }
+    essentialLinks.value.push(menuItem)
+  })
+}
 
 onMounted(() => {
-  selectMenu();
-});
+  selectMenu()
+})
 </script>
 <template>
   <q-layout view="hHh Lpr lFf">
@@ -81,7 +89,7 @@ onMounted(() => {
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title> Playground </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
