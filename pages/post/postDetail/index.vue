@@ -1,10 +1,9 @@
 <template>
-  <div class="q-pa-md q-gutter-sm">
-    <div class="title">
-      <div class="text-h4">
-        <q-icon name="messenger" /> {{ noticeStore.boardNm }}
-      </div>
+  <div class="q-pa-md">
+    <div class="text-h4">
+      <q-icon name="messenger" /> {{ noticeStore.boardNm }}
     </div>
+
     <q-card class="q-mt-md">
       <q-card-section>
         <div class="text-h5">{{ noticeStore.noticeSj }}</div>
@@ -41,8 +40,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useNoticeStore } from '../../../stores/useNoticeStore'
-import { type ApiResponse } from '../../../interface/server'
+import { useNoticeStore } from '@/stores/useNoticeStore'
+import { type ApiResponse } from '@/interface/server'
 import CommentItem from './CommentItem.vue'
 
 interface Comment {
@@ -120,17 +119,10 @@ const addComment = async () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .q-pa-md {
   padding: 16px;
-}
-
-.q-gutter-sm {
   margin: 8px;
-}
-
-.title {
-  margin-bottom: 16px;
 }
 
 .q-card {
@@ -144,6 +136,6 @@ const addComment = async () => {
 .right-align {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem; /* 버튼 위에 공간 */
+  margin-top: 1rem;
 }
 </style>

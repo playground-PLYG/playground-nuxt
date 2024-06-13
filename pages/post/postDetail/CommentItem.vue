@@ -1,7 +1,7 @@
 <template>
-  <div class="comment-item">
-    <div class="comment-content">
-      <div class="comment-text">
+  <div class="comment">
+    <div class="content">
+      <div class="text">
         <strong>{{ comment.registUsrId }}</strong
         >:
         {{
@@ -10,13 +10,13 @@
       </div>
     </div>
     <div v-if="comment.deleteChk === 'N'">
-      <a class="reply-button" @click="reInsert">답글</a>
-      <a class="edit-button" @click="editComment"> 수정</a>
-      <a class="delete-button" @click="delComment"> 삭제</a>
+      <a class="cmtButton" @click="reInsert">답글</a>
+      <a class="cmtButton" @click="editComment"> 수정</a>
+      <a class="cmtButton" @click="delComment"> 삭제</a>
     </div>
     <div
       v-if="comment.commentList && comment.commentList.length"
-      class="comment-replies"
+      class="replies"
     >
       <CommentItem
         v-for="childComment in comment.commentList"
@@ -69,8 +69,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps } from 'vue'
-
-import { type ApiResponse } from '../../../interface/server'
+import { type ApiResponse } from '@/interface/server'
 
 const props = defineProps<{ comment: Comment }>()
 
@@ -219,31 +218,26 @@ const removeComment = async () => {
 }
 </script>
 
-<style scoped>
-.comment-item {
+<style lang="scss" scoped>
+.comment {
   padding: 5px;
   border-radius: 40px;
+  .content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .text {
+    flex-grow: 1;
+  }
+  .replies {
+    margin-left: 20px;
+    padding-left: 10px;
+  }
 }
 
-.comment-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.comment-text {
-  flex-grow: 1;
-}
-
-.reply-button,
-.edit-button,
-.delete-button {
+.cmtButton {
   cursor: pointer;
   color: blue;
-}
-
-.comment-replies {
-  margin-left: 20px;
-  padding-left: 10px;
 }
 </style>

@@ -72,127 +72,127 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { type ApiResponse } from "../../interface/server";
-import { useNoticeStore } from "../../stores/useNoticeStore";
-import { type QTableProps } from "quasar";
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { type ApiResponse } from '../../interface/server'
+import { useNoticeStore } from '../../stores/useNoticeStore'
+import { type QTableProps } from 'quasar'
 
 interface Post {
-  boardId: string;
-  noticeCn: string;
-  noticeSj: string;
+  boardId: string
+  noticeCn: string
+  noticeSj: string
 }
 interface Data {
-  boardId: String;
+  boardId: String
 }
 let param = ref<Data>({
-  boardId: "smile", // 임시 하드코딩
-});
+  boardId: 'smile' // 임시 하드코딩
+})
 
 let insertPost = ref<Post>({
-  boardId: "smile", // 임시 하드코딩
-  noticeCn: "",
-  noticeSj: "",
-});
+  boardId: 'smile', // 임시 하드코딩
+  noticeCn: '',
+  noticeSj: ''
+})
 
 // 반응형 상태 변수 초기화
-let post = ref<Post[]>([]);
-let prompt = ref(false);
+let post = ref<Post[]>([])
+let prompt = ref(false)
 
-const noticeStore = useNoticeStore();
-const router = useRouter();
+const noticeStore = useNoticeStore()
+const router = useRouter()
 
-const columns = ref<QTableProps["columns"]>([
-  { name: "noticeSj", label: "제목", field: "noticeSj", align: "center" },
+const columns = ref<QTableProps['columns']>([
+  { name: 'noticeSj', label: '제목', field: 'noticeSj', align: 'center' },
   {
-    name: "registUsrId",
-    label: "작성자ID",
-    field: "registUsrId",
-    align: "center",
-  },
-]);
+    name: 'registUsrId',
+    label: '작성자ID',
+    field: 'registUsrId',
+    align: 'center'
+  }
+])
 
 onMounted(async () => {
-  getPostList();
-});
+  getPostList()
+})
 
 const getPostList = async () => {
   // param.value.boardId = noticeStore.boardId; //임시 주석
-  await $fetch<ApiResponse<Post[]>>("/playground/public/post/getPostList", {
-    method: "POST",
-    body: JSON.stringify(param.value),
+  await $fetch<ApiResponse<Post[]>>('/playground/public/post/getPostList', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
   })
     .then((result) => {
-      post.value = result.data;
+      post.value = result.data
     })
     .catch((error) => {
-      console.error(error);
-    });
-};
+      console.error(error)
+    })
+}
 
 const rowClick = (evt: Event, row: any, index: number) => {
-  noticeStore.boardId = row.boardId;
-  noticeStore.boardNm = "공지사항"; //임시 하드코딩
-  noticeStore.noticeCn = row.noticeCn;
-  noticeStore.noticeSj = row.noticeSj;
-  noticeStore.noticeNo = row.noticeNo;
-  noticeStore.registUsrId = row.registUsrId;
+  noticeStore.boardId = row.boardId
+  noticeStore.boardNm = '공지사항' //임시 하드코딩
+  noticeStore.noticeCn = row.noticeCn
+  noticeStore.noticeSj = row.noticeSj
+  noticeStore.noticeNo = row.noticeNo
+  noticeStore.registUsrId = row.registUsrId
 
-  router.push({ path: "/post/postDetail" });
-};
+  router.push({ path: '/post/postDetail' })
+}
 
 const insert = async () => {
-  prompt.value = true;
-};
+  prompt.value = true
+}
 
 const createPost = async () => {
-  await $fetch<ApiResponse<Post[]>>("playground/api/post/addPost", {
-    method: "POST",
-    body: JSON.stringify(insertPost.value),
+  await $fetch<ApiResponse<Post[]>>('playground/api/post/addPost', {
+    method: 'POST',
+    body: JSON.stringify(insertPost.value)
   })
     .then((result) => {
-      console.log("result ::", result);
-      prompt.value = false;
+      console.log('result ::', result)
+      prompt.value = false
       insertPost.value = {
-        boardId: "",
-        noticeCn: "",
-        noticeSj: "",
-      };
+        boardId: '',
+        noticeCn: '',
+        noticeSj: ''
+      }
     })
     .catch((error) => {
-      console.log(error);
-    });
-};
+      console.log(error)
+    })
+}
 
 const closePost = async () => {
-  prompt.value = false;
+  prompt.value = false
   insertPost.value = {
-    boardId: "",
-    noticeCn: "",
-    noticeSj: "",
-  };
-};
+    boardId: '',
+    noticeCn: '',
+    noticeSj: ''
+  }
+}
 
 const title_rules = (val: string) => {
   if (!val) {
-    return "제목을 입력해주세요.";
+    return '제목을 입력해주세요.'
   }
-  return true;
-};
+  return true
+}
 
 const content_rules = (val: string) => {
   if (!val) {
-    return "게시물의 내용을 입력해주세요.";
+    return '게시물의 내용을 입력해주세요.'
   }
-  return true;
-};
+  return true
+}
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .right-align {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem; /* 버튼 위에 공간을 추가하고 싶다면 */
+  margin-top: 1rem;
 }
 </style>
