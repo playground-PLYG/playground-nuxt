@@ -206,7 +206,6 @@ const selectList = async () => {
   } else {
     createdYn = true
     resultList.value = result.data[0]
-    console.log(resultList.value)
 
     if (resultList.value.compnoChoiseYn == 'N') {
       compnoYn = false

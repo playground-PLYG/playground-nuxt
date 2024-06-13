@@ -139,9 +139,9 @@ const login = async () => {
       let queryString = location.search
       const urlParams = new URLSearchParams(queryString)
       if (urlParams.get('redirectUrl')) {
-        router.push({ path: '/' + urlParams.get('redirectUrl') })
+        router.replace({ path: '/' + urlParams.get('redirectUrl') })
       } else {
-        router.push({ path: '/' })
+        router.replace({ path: '/' })
       }
     })
     .catch((err) => {
