@@ -21,8 +21,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { type ApiResponse } from '../../interface/server'
-import { useNoticeStore } from '../../stores/useNoticeStore'
+import { type ApiResponse } from '@/interface/server'
+import { useNoticeStore } from '@/stores/useNoticeStore'
 //import axios from 'axios';
 import { type QTableProps } from 'quasar'
 
