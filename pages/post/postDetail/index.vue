@@ -17,7 +17,7 @@
       <q-card-section>
         댓글
         <div v-for="comment in comments" :key="comment.commentNo">
-          <CommentItem :comment="comment" />
+          <comment-item :comment="comment" />
         </div>
       </q-card-section>
     </q-card>
@@ -42,7 +42,7 @@
 import { ref, onMounted } from 'vue'
 import { useNoticeStore } from '@/stores/useNoticeStore'
 import { type ApiResponse } from '@/interface/server'
-import CommentItem from './CommentItem.vue'
+import CommentItem from './comment-item.vue'
 
 interface Comment {
   boardId: string
@@ -71,7 +71,7 @@ const commentList = {
 
 const noticeStore = useNoticeStore()
 
-onMounted(async () => {
+onMounted(() => {
   getCommentList()
 })
 
@@ -120,11 +120,6 @@ const addComment = async () => {
 </script>
 
 <style lang="scss" scoped>
-.q-pa-md {
-  padding: 16px;
-  margin: 8px;
-}
-
 .q-card {
   margin-top: 16px;
 }

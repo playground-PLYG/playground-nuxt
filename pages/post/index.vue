@@ -21,8 +21,7 @@
         <q-btn color="blue" label="게시물 작성" @click="insert" />
       </div>
     </div>
-  </div>
-  <template>
+
     <div class="q-pa-md q-gutter-sm">
       <q-dialog v-model="prompt" persistent>
         <q-card style="min-width: 600px">
@@ -68,14 +67,14 @@
         </q-card>
       </q-dialog>
     </div>
-  </template>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { type ApiResponse } from '../../interface/server'
-import { useNoticeStore } from '../../stores/useNoticeStore'
+import { type ApiResponse } from '@/interface/server'
+import { useNoticeStore } from '@/stores/useNoticeStore'
 import { type QTableProps } from 'quasar'
 
 interface Post {
@@ -86,19 +85,19 @@ interface Post {
 interface Data {
   boardId: String
 }
-let param = ref<Data>({
+const param = ref<Data>({
   boardId: 'smile' // 임시 하드코딩
 })
 
-let insertPost = ref<Post>({
+const insertPost = ref<Post>({
   boardId: 'smile', // 임시 하드코딩
   noticeCn: '',
   noticeSj: ''
 })
 
 // 반응형 상태 변수 초기화
-let post = ref<Post[]>([])
-let prompt = ref(false)
+const post = ref<Post[]>([])
+const prompt = ref(false)
 
 const noticeStore = useNoticeStore()
 const router = useRouter()
@@ -113,7 +112,7 @@ const columns = ref<QTableProps['columns']>([
   }
 ])
 
-onMounted(async () => {
+onMounted(() => {
   getPostList()
 })
 
@@ -142,7 +141,7 @@ const rowClick = (evt: Event, row: any, index: number) => {
   router.push({ path: '/post/postDetail' })
 }
 
-const insert = async () => {
+const insert = () => {
   prompt.value = true
 }
 
@@ -152,7 +151,6 @@ const createPost = async () => {
     body: JSON.stringify(insertPost.value)
   })
     .then((result) => {
-      console.log('result ::', result)
       prompt.value = false
       insertPost.value = {
         boardId: '',
@@ -165,7 +163,7 @@ const createPost = async () => {
     })
 }
 
-const closePost = async () => {
+const closePost = () => {
   prompt.value = false
   insertPost.value = {
     boardId: '',

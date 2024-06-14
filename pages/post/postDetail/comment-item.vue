@@ -18,53 +18,50 @@
       v-if="comment.commentList && comment.commentList.length"
       class="replies"
     >
-      <CommentItem
+      <comment-item
         v-for="childComment in comment.commentList"
         :key="childComment.commentNo"
         :comment="childComment"
       />
     </div>
+
+    <q-dialog v-model="prompt" persistent>
+      <q-card style="min-width: 600px">
+        <q-form class="q-gutter-md">
+          <q-card-section>
+            <div class="text-h6">
+              {{ isDel ? '댓글 삭제' : isEdit ? '댓글 수정' : '대댓글 작성' }}
+            </div>
+          </q-card-section>
+          <q-card-section class="q-pt-none">
+            <q-input
+              v-model="insertComment.commentCn"
+              autofocus
+              label="댓글"
+              :disable="isDel"
+              filled
+              :rules="[comment_rules]"
+            />
+          </q-card-section>
+          <q-card-actions align="right" class="text-primary">
+            <q-btn
+              flat
+              label="닫기"
+              type="reset"
+              v-close-popup
+              @click="closeComment"
+            />
+            <q-btn
+              flat
+              :label="isDel ? '삭제' : '등록'"
+              type="reset"
+              @click="registration"
+            />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </div>
-  <template>
-    <div class="q-pa-md q-gutter-sm">
-      <q-dialog v-model="prompt" persistent>
-        <q-card style="min-width: 600px">
-          <q-form class="q-gutter-md">
-            <q-card-section>
-              <div class="text-h6">
-                {{ isDel ? '댓글 삭제' : isEdit ? '댓글 수정' : '대댓글 작성' }}
-              </div>
-            </q-card-section>
-            <q-card-section class="q-pt-none">
-              <q-input
-                v-model="insertComment.commentCn"
-                autofocus
-                label="댓글"
-                :disable="isDel"
-                filled
-                :rules="[comment_rules]"
-              />
-            </q-card-section>
-            <q-card-actions align="right" class="text-primary">
-              <q-btn
-                flat
-                label="닫기"
-                type="reset"
-                v-close-popup
-                @click="closeComment"
-              />
-              <q-btn
-                flat
-                :label="isDel ? '삭제' : '등록'"
-                type="reset"
-                @click="registration"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
-      </q-dialog>
-    </div>
-  </template>
 </template>
 
 <script setup lang="ts">
@@ -102,7 +99,7 @@ let insertComment = ref<CommentData>({
   upperCommentNo: 0
 })
 
-const reInsert = async () => {
+const reInsert = () => {
   prompt.value = true
   isEdit.value = false
 }
@@ -111,17 +108,13 @@ const registration = () => {
   if (isEdit.value) {
     modifyComment()
   } else if (isDel.value) {
-    console.log('delete :: ')
     removeComment()
   } else {
-    console.log('reComment :: ')
     createReComment()
   }
 }
 
 const createReComment = async () => {
-  console.log(props.comment)
-
   const commentToAdd: CommentData = {
     boardId: props.comment.boardId,
     noticeNo: props.comment.noticeNo,
@@ -129,14 +122,11 @@ const createReComment = async () => {
     upperCommentNo: props.comment.commentNo
   }
 
-  console.log('insert Comment ::', commentToAdd)
-
   await $fetch<ApiResponse<CommentData>>('/playground/api/comment/addComment', {
     method: 'POST',
     body: JSON.stringify(commentToAdd)
   })
     .then((result) => {
-      console.log('comment CC Test :: ', result)
       prompt.value = false
       window.location.reload()
     })
@@ -145,7 +135,7 @@ const createReComment = async () => {
     })
 }
 
-const closeComment = async () => {
+const closeComment = () => {
   prompt.value = false
   isDel.value = false
   insertComment.value.commentCn = ''
@@ -178,7 +168,6 @@ const modifyComment = async () => {
     }
   )
     .then((result) => {
-      console.log('comment CC Test :: ', result)
       prompt.value = false
       window.location.reload()
     })
@@ -197,8 +186,6 @@ const removeComment = async () => {
   const commentRemove = {
     commentNo: props.comment.commentNo
   }
-
-  console.log('comment ReMove Date :: ', commentRemove)
 
   await $fetch<ApiResponse<CommentData>>(
     '/playground/api/comment/removeComment',
