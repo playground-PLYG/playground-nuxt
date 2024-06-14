@@ -1,69 +1,96 @@
 <template>
-    <div class="content">
-      <div class="title">
-        <div class="text-h4">
-          <q-icon name="login" /> LOGIN
-        </div>
-      </div>
-      <div class="search">
-        <q-form ref="loginForm"  @submit="login">
-          <q-input v-model="param.mberId" outlined  label="ID" :dense="dense" class="input" :rules="[idRules]" style="width: 175px;"/>
-          <br>
-          <q-input v-model="param.mberPassword" outlined  label="PASSWORD"  type="password" :dense="dense" class="input" :rules="[passwordRules]"  style="width: 175px;"/>
-          <br>
-          <q-btn push class="button" color="green-7" label="로그인" type="submit"/>
-          <q-btn push class="button" color="green-7" label="회원가입" type="submit" to="/sign-up"/>
-        </q-form>
-      </div>
-      <div class="search">
-        <q-btn flat padding="none" @click="kakao">
-          <img style="width: 180px;" src="../../assets/kakao_login.png">
-        </q-btn>
-        <br>
-        <br>
-        <q-btn flat padding="none" @click="naver">
-          <img style="width: 180px;" src="../../assets/naver_login.png">
-        </q-btn>
-      </div>
+  <div class="content">
+    <div class="title">
+      <div class="text-h4"><q-icon name="login" /> LOGIN</div>
     </div>
-
+    <div class="search">
+      <q-form ref="loginForm" @submit="login">
+        <q-input
+          v-model="param.mberId"
+          outlined
+          label="ID"
+          :dense="dense"
+          class="input"
+          :rules="[idRules]"
+          style="width: 175px"
+        />
+        <br />
+        <q-input
+          v-model="param.mberPassword"
+          outlined
+          label="PASSWORD"
+          type="password"
+          :dense="dense"
+          class="input"
+          :rules="[passwordRules]"
+          style="width: 175px"
+        />
+        <br />
+        <q-btn
+          push
+          class="button"
+          color="green-7"
+          label="로그인"
+          type="submit"
+        />
+        <q-btn
+          push
+          class="button"
+          color="green-7"
+          label="회원가입"
+          type="submit"
+          to="/sign-up"
+        />
+      </q-form>
+    </div>
+    <div class="search">
+      <q-btn flat padding="none" @click="kakao">
+        <img style="width: 180px" src="../../assets/kakao_login.png" />
+      </q-btn>
+      <br />
+      <br />
+      <q-btn flat padding="none" @click="naver">
+        <img style="width: 180px" src="../../assets/naver_login.png" />
+      </q-btn>
+    </div>
+  </div>
 </template>
 
-
 <script setup lang="ts">
-import { useRouter } from "vue-router";
-import { useAuthStore } from '../../stores/useAuthStore' 
-import { type ApiResponse } from '../../interface/server';
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/useAuthStore'
+import { type ApiResponse } from '../../interface/server'
+import { useCookie } from 'nuxt/app'
 
-const router = useRouter();
-const authStore = useAuthStore();
-const { loading } = useQuasar();
+const router = useRouter()
+const authStore = useAuthStore()
+const { loading } = useQuasar()
 const dense = ref(true)
 const loginForm = ref<any>(null)
 
 interface Param {
   mberId: string
-  mberPassword:string
+  mberPassword: string
 }
 
 interface ResData {
-  token: string,
-  mberId:string
+  token: string
+  mberId: string
 }
 
 const param = ref<Param>({
-    mberId: '',
-    mberPassword:''
-});
+  mberId: '',
+  mberPassword: ''
+})
 
 const resData = ref<ResData>({
   token: '',
-  mberId:''
-});
+  mberId: ''
+})
 
 async function kakao() {
   const client_id = '68ae4b196239138e24e76a6664659155'
-  const redirect_uri = new URL(document.location.origin ) +'/sign-up'
+  const redirect_uri = new URL(document.location.origin) + '/sign-up'
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&prompt=login`
   localStorage.setItem('snsLogin', 'KAKAO')
   await navigateTo(kakaoURL, {
@@ -73,7 +100,7 @@ async function kakao() {
 
 async function naver() {
   const client_id = 'CzAlAQJdMEto7NeN57QA'
-  const redirect_uri = new URL(document.location.origin ) +'sign-up'
+  const redirect_uri = new URL(document.location.origin) + 'sign-up'
   const state = 'RAMDOM_STATE'
   const naverURL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`
   localStorage.setItem('snsLogin', 'NAVER')
@@ -83,8 +110,9 @@ async function naver() {
 }
 
 async function google() {
-  const client_id = '398062070212-aqopvnd41jggo92j6grp5acvevkahca4.apps.googleusercontent.com'
-  const redirect_uri = new URL(document.location.origin ) +'sign-up'
+  const client_id =
+    '398062070212-aqopvnd41jggo92j6grp5acvevkahca4.apps.googleusercontent.com'
+  const redirect_uri = new URL(document.location.origin) + 'sign-up'
   const scope = 'email profile'
   const googleURL = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
   localStorage.setItem('snsLogin', 'GOOGLE')
@@ -95,35 +123,45 @@ async function google() {
 
 const login = async () => {
   loading.show()
-  const result = await $fetch<ApiResponse<ResData>>('/playground/public/member/signIn', {
+  const result = await $fetch<ApiResponse<ResData>>(
+    '/playground/public/member/signIn',
+    {
       method: 'POST',
-      body: JSON.stringify(param.value) 
-  })
-  .then(result => {
-    loading.hide()
-
-    authStore.mberId = result.data.mberId
-    authStore.token = result.data.token
-    router.push({ path: "/" });
-  })
-  .catch(err => {
-    loading.hide()
-    return
-  })
+      body: JSON.stringify(param.value)
+    }
+  )
+    .then((result) => {
+      loading.hide()
+      const token = useCookie('token')
+      token.value = result.data.token
+      authStore.mberId = result.data.mberId
+      authStore.token = result.data.token
+      let queryString = location.search
+      const urlParams = new URLSearchParams(queryString)
+      if (urlParams.get('redirectUrl')) {
+        router.replace({ path: '/' + urlParams.get('redirectUrl') })
+      } else {
+        router.replace({ path: '/' })
+      }
+    })
+    .catch((err) => {
+      loading.hide()
+      return
+    })
 }
 
 const idRules = (val: string) => {
-  if(!val){
-        return 'ID를 입력해주세요.'
-    }
-    return true
+  if (!val) {
+    return 'ID를 입력해주세요.'
+  }
+  return true
 }
 
 const passwordRules = (val: string) => {
-  if(!val){
-        return 'PASSWORD를 입력해주세요.'
-    }
-    return true
+  if (!val) {
+    return 'PASSWORD를 입력해주세요.'
+  }
+  return true
 }
 </script>
 <style>
@@ -176,5 +214,3 @@ const passwordRules = (val: string) => {
   float: right;
 }
 </style>
-
-
