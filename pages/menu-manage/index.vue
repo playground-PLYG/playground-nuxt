@@ -26,7 +26,7 @@
         @row-click="clickRow"
       >
         <template v-slot:bottom>
-          <paginationLayout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset"/>
+          <pagination-layout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset" />
         </template>
       </q-table>
     </div>
@@ -167,10 +167,10 @@
             <q-card-section>
               <q-form ref="modifyForm">
                 <q-input outlined stack-label v-model="detailData.menuNm" label="메뉴명" :rules="[ required_rules ]" />
-                  <q-input outlined stack-label v-model="detailData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" />
-                  <q-input outlined stack-label v-model="detailData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" />
-                  <q-input outlined stack-label v-model="detailData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" style="padding-bottom: 20px;"/>
-                  <q-select outlined stack-label v-model="detailData.useAt" label="사용여부" :options="useAtInputOption"  option-label="name" option-value="code" emit-values map-options/>
+                <q-input outlined stack-label v-model="detailData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" />
+                <q-input outlined stack-label v-model="detailData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" />
+                <q-input outlined stack-label v-model="detailData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" style="padding-bottom: 20px;"/>
+                <q-select outlined stack-label v-model="detailData.useAt" label="사용여부" :options="useAtInputOption"  option-label="name" option-value="code" emit-values map-options/>
               </q-form>
             </q-card-section>
           </q-card>
@@ -609,79 +609,62 @@ onMounted(() => {
 
 </script>
 
-<style>
+<style lang="scss" scoped>
   .content {
     margin-top: 2rem;
     margin-left: 5rem;
     margin-right: 5rem;
+
+    .title {
+      margin-top: 2rem;
+    }
+
+    .search {
+      margin-top: 2rem;
+
+      .input {
+        display: inline-block;
+        vertical-align: middle;
+        width: 15%;
+        padding-right: 0.5rem;
+      }
+      .select {
+        display: inline-block;
+        vertical-align: middle;
+        width: 15%;
+        padding-right: 0.5rem;
+      }
+      .button {
+        margin-right: 0.5rem;
+      }
+
+
+    }
+
+    .table {
+        margin-top: 1rem; 
+    }
+
+    .proc {
+      margin-top: 1rem;
+
+      .button {
+        margin-right: 0.5rem;
+      }
+      .buttonR {
+        margin-left: 0.5rem;
+        float: right;
+      }
+    }
+
+    .items-center {
+      justify-content: center;
+      height : 5rem;
+
+      .flex-center {
+        padding : 0;
+      }
+    }
   }
 
-  .title {
-    margin-top: 2rem;
-  }
-
-  .search {
-    margin-top: 2rem;
-  }
-
-  .search .select {
-    display: inline-block;
-    vertical-align: middle;
-    width: 15%;
-    padding-right: 0.5rem;
-  }
-
-  .search .input {
-    display: inline-block;
-    vertical-align: middle;
-    width: 15%;
-    padding-right: 0.5rem;
-  }
-
-  .search .button {
-    margin-right: 0.5rem;
-  }
-
-  .table {
-    margin-top: 1rem;
-  }
-
-  .table_menu_menage {
-    height : 25rem;
-  }
-
-  .q-table__bottom {
-    justify-content: center;
-    height : 5rem;
-  }
-
-  .q-pa-lg {
-    padding : 0;
-  }
-
-  .proc {
-    margin-top: 1rem;
-  }
-
-  .proc .button {
-    margin-right: 0.5rem;
-  }
-  
-  .proc .buttonR {
-    margin-left: 0.5rem;
-    float: right;
-  }
-
-  .q-dialog .q-input {
-      margin-bottom: 0.5rem;
-  }
-
-  .q-dialog .q-select {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .q-dialog .q-footer .q-toolbar .button {
-    margin-right: 0.5rem;
-  }
 </style>
