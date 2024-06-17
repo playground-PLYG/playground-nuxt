@@ -66,7 +66,7 @@
       />
       <q-btn
         push
-        class="button"
+        class="buttonR"
         color="primary"
         label="권한별 메뉴 등록"
         @click="clickAuthorMenuAdd"
@@ -79,7 +79,7 @@
     <q-dialog v-model="showUpdateDialog" @hide="onReset">
       <q-card style="width: 600px; max-width: 100vw">
         <q-toolbar class="bg-primary">
-          <q-toolbar-title style="color: white">권한수정</q-toolbar-title>
+          <q-toolbar-title style="color: white">권한</q-toolbar-title>
           <q-btn
             flat
             v-close-popup
@@ -105,6 +105,7 @@
               class="input"
               :rules="[nm_rules]"
               outlined
+              :readonly="readonly"
             />
             <q-select
               outlined
@@ -115,11 +116,13 @@
               label="삭제여부"
               class="select"
               :rules="[select_rules]"
+              :readonly="readonly"
             />
             <q-input
               v-model="param.registDt"
               label="등록일시"
               class="input"
+              mask="####-##-## ##:##:##"
               :rules="[nm_rules]"
               outlined
               :readonly="readonly"
@@ -128,6 +131,7 @@
               v-model="param.updtDt"
               label="수정일시"
               class="input"
+              mask="####-##-## ##:##:##"
               :rules="[nm_rules]"
               outlined
               :readonly="readonly"
@@ -135,11 +139,28 @@
             <q-toolbar class="bg-white">
               <q-toolbar-title></q-toolbar-title>
               <q-btn
+                v-if="!(modifyClick == '')"
+                push
+                color="primary"
+                class="buttonR"
+                label="취소"
+                @click="modifyCancel"
+              />
+              <q-btn
+                v-if="modifyClick == ''"
+                class="button"
                 push
                 color="primary"
                 label="수정"
-                type="submit"
                 @click="modifyAuthor"
+              />
+              <q-btn
+                v-if="!(modifyClick == '')"
+                class="buttonR"
+                push
+                color="primary"
+                label="저장"
+                type="submit"
               />
             </q-toolbar>
           </q-form>
@@ -247,7 +268,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type ApiResponse } from '../../interface/server'
 import { useQuasar } from 'quasar'
-import { type QTableProps } from 'quasar'
+import { date, type QTableProps } from 'quasar'
 import type { PiniaVuePlugin } from 'pinia'
 
 const router = useRouter()
@@ -315,8 +336,8 @@ let showInsertDialog = ref<boolean>(false)
 let showUpdateDialog = ref<boolean>(false)
 let showMenuMapngDialog = ref<boolean>(false)
 let readonly = ref(true)
-let modifyClick = ''
 let menuClickYn = 'N'
+const modifyClick = ref('')
 
 const searchOptions = [
   { label: '전체', value: '' },
@@ -353,14 +374,26 @@ const columns = ref<QTableProps['columns']>([
     field: 'registUsrId',
     align: 'left'
   },
-  { name: 'registDt', label: '등록일시', field: 'registDt', align: 'center' },
+  {
+    name: 'registDt',
+    label: '등록일시',
+    field: 'registDt',
+    align: 'center',
+    format: (val) => `${date.formatDate(val, 'YYYY-MM-DD HH:mm:ss')}`
+  },
   {
     name: 'updtUsrId',
     label: '수정사용자ID',
     field: 'updtUsrId',
     align: 'left'
   },
-  { name: 'updtDt', label: '수정일시', field: 'updtDt', align: 'center' }
+  {
+    name: 'updtDt',
+    label: '수정일시',
+    field: 'updtDt',
+    align: 'center',
+    format: (val) => `${date.formatDate(val, 'YYYY-MM-DD HH:mm:ss')}`
+  }
 ])
 
 const MenuColumns = ref<QTableProps['columns']>([
@@ -394,6 +427,11 @@ const MenuColumns = ref<QTableProps['columns']>([
   }
 ])
 
+const modifyCancel = () => {
+  modifyClick.value = ''
+  readonly.value = true
+}
+
 const clickRow = (evt: Event, row: any, index: number) => {
   param.value = { ...row }
   showUpdateDialog.value = true
@@ -415,7 +453,7 @@ const onReset = () => {
     deleteAt: 'N'
   }
   readonly.value = true
-  modifyClick = ''
+  modifyClick.value = ''
 }
 
 const getAuthorList = async () => {
@@ -486,7 +524,7 @@ const removeAuthor = async () => {
 
 const modifyAuthor = async () => {
   readonly.value = false
-  modifyClick = '수정'
+  modifyClick.value = '수정'
 }
 
 const clickAuthorMenuAdd = async () => {
@@ -630,5 +668,10 @@ onMounted(() => {
 
 .proc .button {
   margin-right: 0.5rem;
+}
+
+.buttonR {
+  margin-left: 0.5rem;
+  float: right;
 }
 </style>
