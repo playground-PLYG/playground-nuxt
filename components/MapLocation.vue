@@ -1,19 +1,42 @@
 <template>
-  <div class="map_wrap">
-    <div id="map" ref="mapArea" />
+  <div ref="mapContainer" class="map_wrap">
+    <div id="mapWrapper">
+      <div id="map" ref="mapArea" />
+      <div
+        id="roadviewControl"
+        ref="roadviewControl"
+        :class="rvActive ? 'active' : ''"
+        @click="setRoadviewRoad"
+      />
+    </div>
+
+    <div id="rvWrapper">
+      <div v-if="rvActive" id="roadview" ref="roadview" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
 import { onMounted, ref } from 'vue'
 const config = useRuntimeConfig()
-let marker
-let rstrntMarker
+let marker: kakao.maps.Marker
+let rstrntMarker: kakao.maps.Marker
+let mapWalker: kakao.maps.Marker
 let map: kakao.maps.Map
-let markerPosition
-let rstrntMarkerPosition
+let markerPosition: kakao.maps.LatLng
+let rstrntMarkerPosition: kakao.maps.LatLng
 let bounds: kakao.maps.LatLngBounds
 let infowindow: kakao.maps.InfoWindow
+const rvActive = ref<boolean>(false)
+let overlayOn: boolean = false // 지도 위에 로드뷰 오버레이가 추가된 상태를 가지고 있을 변수
+let rvClient
+
+const mapArea = ref()
+const roadviewControl = ref()
+const roadview = ref()
+const mapContainer = ref()
+
+let rv: kakao.maps.Roadview
 
 const props = defineProps<{
   location: { x: number; y: number }
@@ -35,12 +58,10 @@ onMounted(() => {
 
 const loadScript = () => {
   const script = document.createElement('script')
-  script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services`
+  script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services,clusterer,drawing`
   script.onload = () => kakao.maps.load(loadMap)
   document.head.appendChild(script)
 }
-
-const mapArea = ref()
 
 const loadMap = () => {
   kakao.maps.load(() => {
@@ -85,6 +106,26 @@ const loadMap = () => {
     map.setBounds(bounds, 100, 100, 100, 100)
 
     displayInfowindow(rstrntMarker)
+
+    // 마커 이미지를 생성합니다
+    const markImage = new kakao.maps.MarkerImage(
+      'https://t1.daumcdn.net/localimg/localimages/07/2018/pc/roadview_minimap_wk_2018.png',
+      new kakao.maps.Size(26, 46),
+      {
+        // 스프라이트 이미지를 사용합니다.
+        // 스프라이트 이미지 전체의 크기를 지정하고
+        spriteSize: new kakao.maps.Size(1666, 168),
+        // 사용하고 싶은 영역의 좌상단 좌표를 입력합니다.
+        // background-position으로 지정하는 값이며 부호는 반대입니다.
+        spriteOrigin: new kakao.maps.Point(705, 114),
+        offset: new kakao.maps.Point(13, 46)
+      }
+    )
+    mapWalker = new kakao.maps.Marker({
+      image: markImage,
+      position: markerPosition,
+      draggable: true
+    })
   })
 }
 
@@ -122,21 +163,137 @@ const displayInfowindow = (rstrntMarker: kakao.maps.Marker) => {
     content.parentElement.parentElement.style.background = 'transparent'
   }
 }
+
+const setRoadviewRoad = () => {
+  rvActive.value = !rvActive.value
+
+  if (rvActive.value) {
+    // 로드뷰 도로 오버레이가 보이게 합니다
+    toggleOverlay(true)
+  } else {
+    // 로드뷰 도로 오버레이를 제거합니다
+    toggleOverlay(false)
+  }
+}
+
+const toggleOverlay = (active: boolean) => {
+  if (active) {
+    overlayOn = true
+
+    // 지도 위에 로드뷰 도로 오버레이를 추가합니다
+    map.addOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW)
+
+    // 지도 위에 마커를 표시합니다
+    mapWalker.setMap(map)
+    // marker.setMap(null)
+    // 로드뷰의 위치를 현재 위치로 설정합니다
+    toggleRoadview(rstrntMarkerPosition)
+    // (현재 위치 좌표, 현재위치-음식점 중심 좌표 )
+  } else {
+    overlayOn = false
+
+    // 지도 위의 로드뷰 도로 오버레이를 제거합니다
+    map.removeOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW)
+
+    mapWalker.setMap(null)
+    // marker.setMap(map)
+  }
+}
+
+const toggleRoadview = (position: kakao.maps.LatLng) => {
+  rvClient = new kakao.maps.RoadviewClient()
+  rvClient.getNearestPanoId(position, 20, function (panoId) {
+    // 파노라마 ID가 null 이면 로드뷰를 숨깁니다
+    if (panoId === null) {
+      map.setBounds(bounds, 100, 100, 100, 100)
+    } else {
+      map.setBounds(bounds, 100, 100, 100, 100)
+      const rvContainer = roadview.value
+      rv = new kakao.maps.Roadview(rvContainer, { pan: 180 })
+      // panoId로 로드뷰를 설정합니다
+      rv.setPanoId(panoId, position)
+
+      // 마커에 dragend 이벤트를 등록합니다
+      kakao.maps.event.addListener(mapWalker, 'dragend', function () {
+        // 현재 마커가 놓인 자리의 좌표입니다
+        const rvPosition = mapWalker.getPosition()
+
+        // 마커가 놓인 위치를 기준으로 로드뷰를 설정합니다
+        toggleRoadview(rvPosition)
+      })
+
+      // 로드뷰에 좌표가 바뀌었을 때 발생하는 이벤트를 등록합니다
+      kakao.maps.event.addListener(rv, 'position_changed', function () {
+        // 현재 로드뷰의 위치 좌표를 얻어옵니다
+        const rvPosition = rv.getPosition()
+
+        // 지도 위에 로드뷰 도로 오버레이가 추가된 상태이면
+        if (overlayOn) {
+          // 마커의 위치를 현재 로드뷰의 위치로 설정합니다
+          mapWalker.setPosition(rvPosition)
+        }
+      })
+
+      //지도에 클릭 이벤트를 등록합니다
+      kakao.maps.event.addListener(
+        map,
+        'click',
+        function (mouseEvent: kakao.maps.event.MouseEvent) {
+          // 지도 위에 로드뷰 도로 오버레이가 추가된 상태가 아니면 클릭이벤트를 무시합니다
+          if (!overlayOn) {
+            return
+          }
+
+          // 클릭한 위치의 좌표입니다
+          const clickPosition = mouseEvent.latLng
+
+          // 마커를 클릭한 위치로 옮깁니다
+          mapWalker.setPosition(clickPosition)
+
+          // 클락한 위치를 기준으로 로드뷰를 설정합니다
+          toggleRoadview(clickPosition)
+        }
+      )
+    }
+  })
+}
 </script>
 <style lang="scss" scoped>
 .map_wrap {
+  overflow: hidden;
   position: relative;
   width: 100%;
-  height: 500px;
 
   * {
     font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
     font-size: 12px;
   }
 
-  #map {
+  #roadview {
     width: 100%;
-    min-height: 500px;
+    min-height: 250px;
+  }
+
+  #mapWrapper {
+    z-index: 1;
+    #roadviewControl {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 42px;
+      height: 42px;
+      z-index: 1;
+      cursor: pointer;
+      background: url(https://t1.daumcdn.net/localimg/localimages/07/2018/pc/common/img_search.png)
+        0 -450px no-repeat;
+    }
+    #roadviewControl.active {
+      background-position: 0 -350px;
+    }
+    #map {
+      width: 100%;
+      min-height: 380px;
+    }
   }
 
   :deep(.customoverlay) {
