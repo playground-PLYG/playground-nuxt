@@ -22,18 +22,12 @@ let param = ref<Data>({
 })
 
 let essentialLinks = ref<EssentialLinkProps[]>([])
+let essentialLowerLinks = ref<EssentialLinkProps[]>([])
 
-const iconList = [
-  'school',
-  'code',
-  'chat',
-  'record_voice_over',
-  'rss_feed',
-  'public',
-  'favorite'
-]
+const iconList = ['']
 
 const leftDrawerOpen = ref(false)
+const menuDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
@@ -65,10 +59,28 @@ const setMenu = (arr: object) => {
     const menuItem: EssentialLinkProps = {
       title: item.menuNm,
       icon: iconList[idx],
-      link: item.menuUrl
+      link: item.menuUrl,
+      menuSn: item.menuSn,
+      upperMenuSn: item.upperMenuSn,
+      lwprtMenuHoldAt: item.lwprtMenuHoldAt,
+      open: false
     }
-    essentialLinks.value.push(menuItem)
+
+    if (item.upperMenuSn != null) {
+      essentialLowerLinks.value.push(menuItem)
+    } else {
+      menuItem.icon = ''
+
+      if (menuItem.lwprtMenuHoldAt == 'Y') {
+        menuItem.link = ''
+      }
+      essentialLinks.value.push(menuItem)
+    }
   })
+}
+
+const toggleMenu = (menuItem: object) => {
+  menuItem.open = !menuItem.open
 }
 
 onMounted(() => {
@@ -96,19 +108,39 @@ onMounted(() => {
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
+      <q-list bordered>
         <q-item-label header v-if="authStore.mberId">
           {{ authStore.mberId }}님 반가워요!
         </q-item-label>
         <template v-for="(menuItem, index) in essentialLinks" :key="index">
-          <q-item clickable :to="menuItem.link">
+          <q-item clickable :to="menuItem.link" @click="toggleMenu(menuItem)">
             <q-item-section avatar>
-              <q-icon :name="menuItem.icon" />
+              <q-icon
+                v-if="menuItem.lwprtMenuHoldAt == 'Y'"
+                :name="menuItem.open ? 'expand_less' : 'expand_more'"
+              />
             </q-item-section>
             <q-item-section>
               {{ menuItem.title }}
             </q-item-section>
           </q-item>
+          <template v-for="(menuChild, idx) in essentialLowerLinks" :key="idx">
+            <q-slide-transition
+              v-show="menuItem.open"
+              v-if="menuItem.menuSn == menuChild.upperMenuSn"
+            >
+              <q-list class="q-pl-md">
+                <q-item clickable v-ripple :to="menuChild.link">
+                  <q-item-section avatar>
+                    <q-icon :name="menuChild.icon" />
+                  </q-item-section>
+                  <q-item-section>
+                    {{ menuChild.title }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-slide-transition>
+          </template>
         </template>
         <q-item
           clickable
@@ -135,3 +167,9 @@ onMounted(() => {
     </q-page-container>
   </q-layout>
 </template>
+
+<style>
+.q-slide-transition {
+  transition: max-height 0.3s ease;
+}
+</style>
