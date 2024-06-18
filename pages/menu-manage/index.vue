@@ -26,14 +26,14 @@
         @row-click="clickRow"
       >
         <template v-slot:bottom>
-          <pagination-layout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset" />
+             <pagination-layout :totalPage="totalPages" :currentPage="currentPage" @send-event="reset" style="margin: 0 auto"/>
         </template>
       </q-table>
     </div>
     <div class="proc">
-      <q-btn push class="button" color="primary" label="등록" @click="showAddDialog = true"/>
+      <q-btn push class="button" color="primary" label="등록" @click="showAddDialog = true; showModifyField = false;"/>
       <q-btn push class="button" color="negative" label="삭제"  @click="removeMenuList"/>
-      <q-btn push class="buttonR" color="warning" label="사용여부 변경"/>
+      <q-btn push class="buttonR" color="warning" label="사용여부 변경" @click="modifyUseAtMenu"/>
     </div>
   </div>
 
@@ -52,47 +52,29 @@
         <q-page-container class="bg-white">
           <q-card>
             <q-card-section>
-              <q-field stack-label label="메뉴명" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.menuNm }}</div>
+              <q-form ref="modifyForm">
+                <q-input outlined stack-label class="q-pb-lg" v-model="detailData.menuNm" label="메뉴명" :rules="[ required_rules ]" :readonly="mReadonly"/>
+                <q-input outlined stack-label class="q-pb-lg" v-model="detailData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" :readonly="mReadonly"/>
+                <q-input outlined stack-label class="q-pb-lg" v-model="detailData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" :readonly="mReadonly"/>
+                <q-input outlined stack-label class="q-pb-lg" v-model="detailData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" :readonly="mReadonly"/>
+                <q-select outlined stack-label class="q-pb-lg" v-model="detailData.useAt" label="사용여부" :options="useAtInputOption"  option-label="name" option-value="code" :readonly="mReadonly"/>
+              </q-form>
+              <q-field stack-label class="q-pb-sm" label="최초등록자">
+              <template v-slot:control>
+                <div class="self-center full-width no-outline">{{ detailData.registUsrId }}</div>
                 </template>
               </q-field >
-              <q-field stack-label label="메뉴URL" style="padding-bottom: 20px;" >
+              <q-field stack-label class="q-pb-sm" label="최초등록일시">
                 <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.menuUrl }}</div>
-                </template>
+                <div class="self-center full-width no-outline">{{ date.formatDate(detailData.registDt, 'YYYY/MM/DD HH:mm:ss') }}</div>
+              </template>
               </q-field >
-              <q-field stack-label label="상위메뉴ID" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.upperMenuSn }}</div>
-                </template>
-              </q-field >
-              <q-field stack-label label="정렬순서" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.menuSortOrdr }}</div>
-                </template>
-              </q-field >
-              <q-field stack-label label="사용여부" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.useAt }}</div>
-                </template>
-              </q-field >
-              <q-field stack-label label="최초등록자" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ detailData.registUsrId }}</div>
-                </template>
-              </q-field >
-              <q-field stack-label label="최초등록일시" style="padding-bottom: 20px;" >
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline">{{ date.formatDate(detailData.registDt, 'YYYY/MM/DD HH:mm:ss') }}</div>
-                </template>
-              </q-field >
-              <q-field stack-label label="최종수정자" style="padding-bottom: 20px;" >
+              <q-field stack-label class="q-pb-sm" label="최종수정자">
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">{{ detailData.updtUsrId }}</div>
                 </template>
               </q-field >
-              <q-field stack-label label="최종수정일시" >
+              <q-field stack-label class="q-pb-sm" label="최종수정일시">
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">{{ date.formatDate(detailData.updtDt, 'YYYY/MM/DD HH:mm:ss') }}</div>
                 </template>
@@ -102,18 +84,17 @@
         </q-page-container>
         <q-footer>
           <q-toolbar class="bg-white">
-            <q-toolbar-title></q-toolbar-title>   
-            <div class="proc">
-              <q-btn push class="button" color="primary" label="수정" @click="showModifyDialog = true" />
-              <q-btn push class="button" color="negative" label="삭제" @click="removeMenuList" />
-            </div>
+            <q-toolbar-title></q-toolbar-title>
+            <q-btn push color="primary" v-if="showModifyField != true" class="q-mr-sm"  label="수정" @click="showModifyField=true, mReadonly=false" />
+            <q-btn push color="negative" v-if="showModifyField != true" label="삭제" @click="removeMenuList" />
+            <q-btn push color="primary" v-if="showModifyField == true" class="q-mr-sm" label="저장" @click="modifyMenu" />
+            <q-btn push color="primary" v-if="showModifyField == true" label="취소" @click="showModifyField=false, mReadonly=true"/>
           </q-toolbar>
-        </q-footer> 
+        </q-footer>
       </q-layout>
     </q-dialog>
   </div>
 
-    
   <div class="popup">
     <q-dialog
       v-model="showAddDialog"
@@ -130,10 +111,10 @@
           <q-card>
             <q-card-section>
               <q-form ref="addForm">
-                  <q-input outlined stack-label v-model="inputData.menuNm" label="메뉴명" :rules="[ required_rules ]" />
-                  <q-input outlined stack-label v-model="inputData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" />
-                  <q-input outlined stack-label v-model="inputData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" />
-                  <q-input outlined stack-label v-model="inputData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" style="padding-bottom: 20px;"/>
+                  <q-input outlined stack-label class="q-pb-lg" v-model="inputData.menuNm" label="메뉴명" :rules="[ required_rules ]" />
+                  <q-input outlined stack-label class="q-pb-lg" v-model="inputData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" />
+                  <q-input outlined stack-label class="q-pb-lg" v-model="inputData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" />
+                  <q-input outlined stack-label class="q-pb-lg" v-model="inputData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" />
                   <q-select outlined stack-label v-model="inputData.useAt" label="사용여부" :options="useAtInputOption"  option-label="name" option-value="code" />
               </q-form>
             </q-card-section>
@@ -143,45 +124,6 @@
           <q-toolbar class="bg-white">
             <q-toolbar-title></q-toolbar-title>
             <q-btn push color="primary" label="저장" @click="addMenu" />
-          </q-toolbar>
-        </q-footer>
-      </q-layout>
-    </q-dialog>
-  </div>
-
-
-  <div class="popup">
-    <q-dialog
-      v-model="showModifyDialog"
-      @hide="resetInputData"
-    >
-      <q-layout container>
-        <q-header >
-          <q-toolbar class="bg-primary" >
-            <q-toolbar-title>수정</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form ref="modifyForm">
-                <q-input outlined stack-label v-model="detailData.menuNm" label="메뉴명" :rules="[ required_rules ]" />
-                <q-input outlined stack-label v-model="detailData.menuUrl" label="메뉴URL" :rules="[ required_rules, menuUrl_rules]" />
-                <q-input outlined stack-label v-model="detailData.upperMenuSn" label="상위메뉴ID" :rules="[ number_rules ]" />
-                <q-input outlined stack-label v-model="detailData.menuSortOrdr" label="정렬순서" :rules="[ number_rules ]" style="padding-bottom: 20px;"/>
-                <q-select outlined stack-label v-model="detailData.useAt" label="사용여부" :options="useAtInputOption"  option-label="name" option-value="code" emit-values map-options/>
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title></q-toolbar-title>
-            <div class="proc">
-              <q-btn push class="button" color="primary" label="저장" @click="modifyMenu" />
-              <q-btn push v-close-popup class="button" color="primary" label="취소" />
-            </div>
           </q-toolbar>
         </q-footer>
       </q-layout>
@@ -207,6 +149,7 @@
   const addForm = ref<any>();
   const modifyForm = ref<any>();
   const searchForm = ref<any>();
+  const mReadonly = ref(true);
 
   interface Data {
     menuSn: number,
@@ -226,9 +169,9 @@
     menuSn: string,
     menuNm: string,
     menuUrl: string,
-    menuSortOrdr: string,
-    upperMenuSn: string,
-    useAt: string
+    menuSortOrdr: number,
+    upperMenuSn: number,
+    useAt: string,
   }
   
   let searchParam = ref<any>({
@@ -245,8 +188,8 @@
     menuSn: '',
     menuNm: '',
     menuUrl: '',
-    menuSortOrdr: '',
-    upperMenuSn: '',
+    menuSortOrdr: 99,
+    upperMenuSn: 1,
     useAt: ''
   })
 
@@ -255,8 +198,8 @@
     menuNm: '',
     menuUrl: '',
     menuDepth: 0,
-    menuSortOrdr: 0,
-    upperMenuSn: 0,
+    menuSortOrdr: 99,
+    upperMenuSn: 1,
     useAt: '',
     registUsrId: '',
     registDt: '',
@@ -266,9 +209,10 @@
 
   let showAddDialog = ref<boolean>(false);
 
-  let showModifyDialog = ref<boolean>(false);
-
   let showDetailDialog = ref<boolean>(false);
+
+  let showModifyField = ref<boolean>(false);
+
 
   const useAtSearchOption = [
     {name:"전체", code:""},
@@ -406,8 +350,21 @@
       }
 
       if(valid && upperMenuSnValid) {
+        
+        if(inputData.value.useAt) { 
+          inputData.value.useAt = inputData.value.useAt.code;
+        }
+        else {
+          inputData.value.useAt = 'N'
+        }
 
-        inputData.value.useAt = inputData.value.useAt.code;
+        if(!inputData.value.upperMenuSn) {
+          inputData.value.upperMenuSn = 1;
+        }
+
+        if(!inputData.value.menuSortOrdr) {
+          inputData.value.menuSortOrdr = 99;
+        }
 
         // 저장 API 호출
         await $fetch<ApiResponse<Data[]>> (
@@ -476,6 +433,14 @@
           detailData.value.useAt = detailData.value.useAt.code;
         }
 
+        if(!inputData.value.upperMenuSn) {
+          inputData.value.upperMenuSn = 1;
+        }
+
+        if(!inputData.value.menuSortOrdr) {
+          inputData.value.menuSortOrdr = 99;
+        }
+
         // 저장 API 호출
         await $fetch<ApiResponse<Data[]>> (
         "/playground/public/menu/modifyMenu", 
@@ -486,7 +451,9 @@
         .then((result) => {
           console.log(result);
           alert('수정 완료되었습니다.')
-          showModifyDialog.value = false;
+          showModifyField.value = false;
+          mReadonly.value = true;
+
           getMenuPageList()
         })
         .catch((error) => {
@@ -537,6 +504,7 @@ const required_rules = (val: string) => {
   }
 
 
+  // 메뉴 삭제
   const removeMenuList = async () => {
 
     if(selected.value.length < 1) {
@@ -544,7 +512,7 @@ const required_rules = (val: string) => {
         selected.value[0] = detailData.value;
       }
       else {
-        alert("삭제할 목록을 선택해주세요")
+        alert("삭제 대상 메뉴를 선택해주세요")
         return;
       }
     }
@@ -571,41 +539,70 @@ const required_rules = (val: string) => {
      console.error(error)
      alert('처리 중 오류가 발생하였습니다. 잠시 후 다시 시도 해 주세요.')
    }
- 
-}
-
-
-
-const resetInputData = () => {
-  inputData.value = {
-    menuSn: '',
-    menuNm: '',
-    menuUrl: '',
-    menuSortOrdr: '',
-    upperMenuSn: '',
-    useAt: ''
   }
-}
 
-const resetDetailData = () => {
-  detailData.value = {
-    menuSn: 0,
-    menuNm: '',
-    menuUrl: '',
-    menuDepth: 0,
-    menuSortOrdr: 0,
-    upperMenuSn: 0,
-    useAt: '',
-    registUsrId: '',
-    registDt: '',
-    updtUsrId: '',
-    updtDt: ''
+
+  // 메뉴 사용여부 변경
+  const modifyUseAtMenu = async () => {
+
+    if(selected.value.length < 1) {
+        alert("사용여부 변경 대상 메뉴를 선택해주세요")
+        return;
+    }
+    
+    try {
+        // 저장 API 호출
+        await $fetch<ApiResponse<Data[]>> (
+          "/playground/public/menu/modifyUseAtMenu", 
+          {
+              method: 'POST'
+              ,body: JSON.stringify(selected.value)
+          })
+          .then((result) => {
+            console.log(result);
+            alert('사용여부 변경이 완료되었습니다.')
+            resetSearchParam()
+          })
+          .catch((error) => {
+            console.error(error)
+            alert('사용여부 변경 중 오류가 발생하였습니다. 잠시 후 다시 시도 해 주세요.')
+          }
+        )} catch (error) {
+          console.error(error)
+          alert('처리 중 오류가 발생하였습니다. 잠시 후 다시 시도 해 주세요.')
+    }
   }
-}
 
-onMounted(() => {
-  getMenuPageList()
-})
+  const resetInputData = () => {
+    inputData.value = {
+      menuSn: '',
+      menuNm: '',
+      menuUrl: '',
+      menuSortOrdr: 99,
+      upperMenuSn: 1,
+      useAt: ''
+    }
+  }
+
+  const resetDetailData = () => {
+    detailData.value = {
+      menuSn: 0,
+      menuNm: '',
+      menuUrl: '',
+      menuDepth: 0,
+      menuSortOrdr: 99,
+      upperMenuSn: 1,
+      useAt: '',
+      registUsrId: '',
+      registDt: '',
+      updtUsrId: '',
+      updtDt: ''
+    }
+  }
+
+  onMounted(() => {
+    getMenuPageList()
+  })
 
 </script>
 
@@ -614,7 +611,7 @@ onMounted(() => {
     margin-top: 2rem;
     margin-left: 5rem;
     margin-right: 5rem;
-
+    
     .title {
       margin-top: 2rem;
     }
@@ -637,16 +634,22 @@ onMounted(() => {
       .button {
         margin-right: 0.5rem;
       }
-
-
     }
 
     .table {
-        margin-top: 1rem; 
+      margin-top: 1rem;
+      
+      .items-center {
+        padding : 0;
+        .flex-center {
+          padding : 0;
+        }
+      }
     }
 
     .proc {
       margin-top: 1rem;
+      padding-bottom: 1rem;
 
       .button {
         margin-right: 0.5rem;
@@ -654,15 +657,6 @@ onMounted(() => {
       .buttonR {
         margin-left: 0.5rem;
         float: right;
-      }
-    }
-
-    .items-center {
-      justify-content: center;
-      height : 5rem;
-
-      .flex-center {
-        padding : 0;
       }
     }
   }
