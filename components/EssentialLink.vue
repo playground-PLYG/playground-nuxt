@@ -7,6 +7,7 @@ export interface EssentialLinkProps {
   target?: string
   menuSn?: number
   upperMenuSn?: number
+  lwprtMenuHoldAt?: string
   open?: boolean
 }
 withDefaults(defineProps<EssentialLinkProps>(), {
