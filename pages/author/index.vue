@@ -73,193 +73,193 @@
       />
       <!--<q-btn push class="button" color="negative" label="삭제" @click="removeAuthor" />-->
     </div>
-  </div>
 
-  <div class="q-pa-md q-gutter-sm">
-    <q-dialog v-model="showUpdateDialog" @hide="onReset">
-      <q-card style="width: 600px; max-width: 100vw">
-        <q-toolbar class="bg-primary">
-          <q-toolbar-title style="color: white">권한</q-toolbar-title>
-          <q-btn
-            flat
-            v-close-popup
-            round
-            dense
-            icon=" close"
-            style="color: white"
-          />
-        </q-toolbar>
-        <q-card-section>
-          <q-form @submit="modifySubmit">
-            <q-input
-              v-model="param.authorId"
-              label="권한ID"
-              class="input"
-              :rules="[nm_rules]"
-              outlined
-              :readonly="readonly"
-            />
-            <q-input
-              v-model="param.authorNm"
-              label="권한명"
-              class="input"
-              :rules="[nm_rules]"
-              outlined
-              :readonly="readonly"
-            />
-            <q-select
-              outlined
-              v-model="param.deleteAt"
-              emit-value
-              map-options
-              :options="inputOptions"
-              label="삭제여부"
-              class="select"
-              :rules="[select_rules]"
-              :readonly="readonly"
-            />
-            <q-input
-              v-model="param.registDt"
-              label="등록일시"
-              class="input"
-              mask="####-##-## ##:##:##"
-              :rules="[nm_rules]"
-              outlined
-              :readonly="readonly"
-            />
-            <q-input
-              v-model="param.updtDt"
-              label="수정일시"
-              class="input"
-              mask="####-##-## ##:##:##"
-              :rules="[nm_rules]"
-              outlined
-              :readonly="readonly"
-            />
-            <q-toolbar class="bg-white">
-              <q-toolbar-title></q-toolbar-title>
-              <q-btn
-                v-if="!(modifyClick == '')"
-                push
-                color="primary"
-                class="buttonR"
-                label="취소"
-                @click="modifyCancel"
-              />
-              <q-btn
-                v-if="modifyClick == ''"
-                class="button"
-                push
-                color="primary"
-                label="수정"
-                @click="modifyAuthor"
-              />
-              <q-btn
-                v-if="!(modifyClick == '')"
-                class="buttonR"
-                push
-                color="primary"
-                label="저장"
-                type="submit"
-              />
-            </q-toolbar>
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-  </div>
-
-  <div class="popup">
-    <q-dialog v-model="showInsertDialog">
-      <q-layout container>
-        <q-header>
+    <div class="q-pa-md q-gutter-sm">
+      <q-dialog v-model="showUpdateDialog" @hide="onReset">
+        <q-card style="width: 600px; max-width: 100vw">
           <q-toolbar class="bg-primary">
-            <q-toolbar-title>등록</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
+            <q-toolbar-title style="color: white">권한</q-toolbar-title>
+            <q-btn
+              flat
+              v-close-popup
+              round
+              dense
+              icon=" close"
+              style="color: white"
+            />
           </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form @submit="onSubmit">
+          <q-card-section>
+            <q-form @submit="modifySubmit">
+              <q-input
+                v-model="param.authorId"
+                label="권한ID"
+                class="input"
+                :rules="[nm_rules]"
+                outlined
+                :readonly="readonly"
+              />
+              <q-input
+                v-model="param.authorNm"
+                label="권한명"
+                class="input"
+                :rules="[nm_rules]"
+                outlined
+                :readonly="readonly"
+              />
+              <q-select
+                outlined
+                v-model="param.deleteAt"
+                emit-value
+                map-options
+                :options="inputOptions"
+                label="삭제여부"
+                class="select"
+                :rules="[select_rules]"
+                :readonly="readonly"
+              />
+              <q-input
+                v-model="param.registDt"
+                label="등록일시"
+                class="input"
+                mask="####-##-## ##:##:##"
+                :rules="[nm_rules]"
+                outlined
+                :readonly="readonly"
+              />
+              <q-input
+                v-model="param.updtDt"
+                label="수정일시"
+                class="input"
+                mask="####-##-## ##:##:##"
+                :rules="[nm_rules]"
+                outlined
+                :readonly="readonly"
+              />
+              <q-toolbar class="bg-white">
+                <q-toolbar-title></q-toolbar-title>
+                <q-btn
+                  v-if="!(modifyClick == '')"
+                  push
+                  color="primary"
+                  class="buttonR"
+                  label="취소"
+                  @click="modifyCancel"
+                />
+                <q-btn
+                  v-if="modifyClick == ''"
+                  class="button"
+                  push
+                  color="primary"
+                  label="수정"
+                  @click="modifyAuthor"
+                />
+                <q-btn
+                  v-if="!(modifyClick == '')"
+                  class="buttonR"
+                  push
+                  color="primary"
+                  label="저장"
+                  type="submit"
+                />
+              </q-toolbar>
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+    </div>
+
+    <div class="popup">
+      <q-dialog v-model="showInsertDialog">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>등록</q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form @submit="onSubmit">
+                  <q-input
+                    v-model="param.authorId"
+                    label="권한ID"
+                    class="input"
+                    outlined
+                    :rules="[nm_rules]"
+                  />
+                  <q-input
+                    v-model="param.authorNm"
+                    label="권한명"
+                    class="input"
+                    outlined
+                    :rules="[nm_rules]"
+                  />
+                  <q-toolbar class="bg-white">
+                    <q-toolbar-title></q-toolbar-title>
+                    <q-btn push color="primary" label="등록" type="submit" />
+                  </q-toolbar>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
+
+    <div class="popup">
+      <q-dialog v-model="showMenuMapngDialog">
+        <q-layout container style="width: 800px; max-width: 100vw">
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>권한메뉴매핑</q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
                 <q-input
-                  v-model="param.authorId"
+                  v-model="MenuParam.authorId"
                   label="권한ID"
                   class="input"
                   outlined
-                  :rules="[nm_rules]"
+                  :readonly="true"
                 />
-                <q-input
-                  v-model="param.authorNm"
-                  label="권한명"
-                  class="input"
-                  outlined
-                  :rules="[nm_rules]"
+                <q-table
+                  :rows="resMenuData"
+                  row-key="menuSn"
+                  :columns="MenuColumns"
+                  v-model:selected="menuSelected"
+                  selection="single"
+                  :rows-per-page-options="[0]"
+                  @selection="clickMenuRow"
                 />
-                <q-toolbar class="bg-white">
-                  <q-toolbar-title></q-toolbar-title>
-                  <q-btn push color="primary" label="등록" type="submit" />
-                </q-toolbar>
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
-  </div>
-
-  <div class="popup">
-    <q-dialog v-model="showMenuMapngDialog">
-      <q-layout container style="width: 800px; max-width: 100vw">
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>권한메뉴매핑</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-input
-                v-model="MenuParam.authorId"
-                label="권한ID"
-                class="input"
-                outlined
-                :readonly="true"
-              />
-              <q-table
-                :rows="resMenuData"
-                row-key="menuSn"
-                :columns="MenuColumns"
-                v-model:selected="menuSelected"
-                selection="single"
-                :rows-per-page-options="[0]"
-                @selection="clickMenuRow"
-              />
-            </q-card-section>
-            <q-toolbar class="bg-white">
-              <q-toolbar-title></q-toolbar-title>
-              <div class="q-gutter-md row items-start">
-                <q-btn
-                  push
-                  color="primary"
-                  label="등록"
-                  type="submit"
-                  @click="addMenuMapng"
-                />
-                <q-btn
-                  push
-                  color="primary"
-                  label="삭제"
-                  type="submit"
-                  @click="removeMenuMapng"
-                />
-              </div>
-            </q-toolbar>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
+              </q-card-section>
+              <q-toolbar class="bg-white">
+                <q-toolbar-title></q-toolbar-title>
+                <div class="q-gutter-md row items-start">
+                  <q-btn
+                    push
+                    color="primary"
+                    label="등록"
+                    type="submit"
+                    @click="addMenuMapng"
+                  />
+                  <q-btn
+                    push
+                    color="primary"
+                    label="삭제"
+                    type="submit"
+                    @click="removeMenuMapng"
+                  />
+                </div>
+              </q-toolbar>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
@@ -269,7 +269,6 @@ import { useRouter } from 'vue-router'
 import { type ApiResponse } from '../../interface/server'
 import { useQuasar } from 'quasar'
 import { date, type QTableProps } from 'quasar'
-import type { PiniaVuePlugin } from 'pinia'
 
 const router = useRouter()
 const { loading } = useQuasar()
@@ -303,7 +302,7 @@ interface MenuData {
   authorMenuAddAt: string
 }
 
-let param = ref<AuthorData>({
+const param = ref<AuthorData>({
   authorId: '',
   authorNm: '',
   deleteAt: 'N',
@@ -311,13 +310,13 @@ let param = ref<AuthorData>({
   updtDt: ''
 })
 
-let searchParam = ref<AuthorData>({
+const searchParam = ref<AuthorData>({
   authorId: '',
   authorNm: '',
   deleteAt: ''
 })
 
-let MenuParam = ref<MenuData>({
+const MenuParam = ref<MenuData>({
   authorId: '',
   authorNm: '',
   menuSn: 0,
@@ -326,18 +325,18 @@ let MenuParam = ref<MenuData>({
   authorMenuAddAt: ''
 })
 
-let resData = ref<Data[]>([])
-let resMenuData = ref<MenuData[]>([])
+const resData = ref<Data[]>([])
+const resMenuData = ref<MenuData[]>([])
 
-let selected = ref<Data[]>()
-let menuSelected = ref<MenuData>()
+const selected = ref<Data[]>()
+const menuSelected = ref<MenuData>()
 
-let showInsertDialog = ref<boolean>(false)
-let showUpdateDialog = ref<boolean>(false)
-let showMenuMapngDialog = ref<boolean>(false)
-let readonly = ref(true)
-let menuClickYn = 'N'
+const showInsertDialog = ref<boolean>(false)
+const showUpdateDialog = ref<boolean>(false)
+const showMenuMapngDialog = ref<boolean>(false)
+const readonly = ref(true)
 const modifyClick = ref('')
+let menuClickYn = 'N'
 
 const searchOptions = [
   { label: '전체', value: '' },
@@ -625,7 +624,7 @@ onMounted(() => {
   getAuthorList()
 })
 </script>
-<style>
+<style lang="scss" scoped>
 .content {
   margin-top: 3rem;
   margin-left: 5rem;
