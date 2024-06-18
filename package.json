@@ -50,9 +50,11 @@
     "@vercel/speed-insights": "^1.0.10",
     "@vueuse/core": "^10.10.0",
     "@vueuse/nuxt": "^10.10.0",
+    "chart.js": "^4.4.3",
     "dayjs-nuxt": "^2.1.9",
     "hangul-util": "^0.1.4",
     "pinia": "^2.1.7",
-    "quasar": "^2.16.4"
+    "quasar": "^2.16.4",
+    "vue-chartjs": "^5.3.1"
   }
 }
