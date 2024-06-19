@@ -62,12 +62,12 @@
         :rows-per-page-options="[0]"
         @row-click="fn_openModifyCodePopup"
       >
-        <template v-slot:bottom>
+        <template #bottom>
           <pagination-layout
-            :totalPage="totalPages"
-            :currentPage="currentPage"
-            @send-event="fn_PageReset"
+            :total-page="totalPages"
+            :current-page="currentPage"
             style="margin: 0 auto"
+            @send-event="fn_PageReset"
           />
         </template>
       </q-table>
@@ -88,192 +88,195 @@
         @click="fn_removeCode"
       />
     </div>
-  </div>
-
-  <div class="popup">
-    <q-dialog ref="codeForm" v-model="isShowCodePopup" @hide="fn_codeReset">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>
-              {{ popupTitle }}
-            </q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form @submit="fu_handleSubmit">
-                <q-card-section class="q-pt-none">
-                  <q-input
-                    v-model="param.code"
-                    label="코드ID"
-                    class="input"
-                    outlined
-                    :rules="[codeid_rules]"
-                    :readonly="readonly"
-                  />
-                  <q-input
-                    v-model="param.codeName"
-                    label="코드명"
-                    class="input"
-                    outlined
-                    :rules="[codeNm_rules]"
-                    :readonly="readonly"
-                  />
-                  <q-checkbox
-                    v-model="groupCdCheck"
-                    left-label
-                    label="상위코드 선택"
-                    :disable="readonly"
-                  />
-                  <q-select
-                    v-if="groupCdCheck"
-                    v-model="param.upperCode"
-                    outlined
-                    :options="options"
-                    :rules="[upCode_rules]"
-                    @filter="Fn_upCodefilter"
-                    emit-value
-                    hide-selected
-                    fill-input
-                    use-input
-                    input-debounce="0"
-                    refresh
-                    :readonly="readonly"
-                  >
-                    <template v-slot:option="scope">
-                      <q-item v-bind="scope.itemProps">
-                        <q-item-section>
-                          <q-item-label>{{ scope.opt.value }}</q-item-label>
-                          <q-item-label caption>{{
-                            scope.opt.label
-                          }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                  <q-input
-                    v-model="param.order"
-                    label="정렬순번"
-                    type="number"
-                    class="input"
-                    outlined
-                    :rules="[sortSn_rules]"
-                    :readonly="readonly"
-                  />
-                  <q-field
-                    v-show="!isAdding"
-                    stack-label
-                    class="q-pb-sm"
-                    label="최초등록자"
-                  >
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ param.registUsrId }}
+    <div class="popup">
+      <q-dialog ref="codeForm" v-model="isShowCodePopup" @hide="fn_codeReset">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>
+                {{ popupTitle }}
+              </q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form @submit="fu_handleSubmit">
+                  <q-card-section class="q-pt-none">
+                    <q-input
+                      v-model="param.code"
+                      label="코드ID"
+                      class="input"
+                      outlined
+                      :rules="[codeid_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-input
+                      v-model="param.codeName"
+                      label="코드명"
+                      class="input"
+                      outlined
+                      :rules="[codeNm_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-checkbox
+                      v-model="groupCdCheck"
+                      left-label
+                      label="상위코드 선택"
+                      :disable="readonly"
+                    />
+                    <q-select
+                      v-if="groupCdCheck"
+                      v-model="param.upperCode"
+                      outlined
+                      :options="options"
+                      :rules="[upCode_rules]"
+                      emit-value
+                      fill-input
+                      hide-selected
+                      input-debounce="0"
+                      refresh
+                      use-input
+                      :readonly="readonly"
+                      @filter="Fn_upCodefilter"
+                    >
+                      <template #option="scope">
+                        <q-item v-bind="scope.itemProps">
+                          <q-item-section>
+                            <q-item-label>{{ scope.opt.value }}</q-item-label>
+                            <q-item-label caption>{{
+                              scope.opt.label
+                            }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                    <q-input
+                      v-model="param.order"
+                      label="정렬순번"
+                      type="number"
+                      class="input"
+                      outlined
+                      :rules="[sortSn_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최초등록자"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{ param.registUsrId }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최초등록일시"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{
+                            date.formatDate(
+                              param.registDt,
+                              'YYYY/MM/DD HH:mm:ss'
+                            )
+                          }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최종수정자"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{ param.updtUsrId }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최종수정일시"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{
+                            date.formatDate(param.updtDt, 'YYYY/MM/DD HH:mm:ss')
+                          }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-toolbar class="bg-white">
+                      <q-toolbar-title />
+                      <div class="proc">
+                        <q-btn
+                          v-show="readonly === true && !isAdding"
+                          push
+                          color="primary"
+                          class="q-mr-sm"
+                          label="수정"
+                          @click="fn_modify"
+                        />
+                        <q-btn
+                          v-show="isAdding"
+                          push
+                          color="primary"
+                          label="저장"
+                          type="submit"
+                        />
+                        <q-btn
+                          v-show="readonly === false && !isAdding"
+                          push
+                          class="q-mr-sm"
+                          color="primary"
+                          label="저장"
+                          type="submit"
+                        />
+                        <q-btn
+                          v-show="readonly === true && !isAdding"
+                          push
+                          class="button"
+                          color="negative"
+                          label="삭제"
+                          type="reset"
+                          @click="fn_removeCode"
+                        />
+                        <q-btn
+                          v-show="readonly === false && !isAdding"
+                          push
+                          color="primary"
+                          label="취소"
+                          @click="fn_cancel"
+                        />
                       </div>
-                    </template>
-                  </q-field>
-                  <q-field
-                    v-show="!isAdding"
-                    stack-label
-                    class="q-pb-sm"
-                    label="최초등록일시"
-                  >
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{
-                          date.formatDate(param.registDt, 'YYYY/MM/DD HH:mm:ss')
-                        }}
-                      </div>
-                    </template>
-                  </q-field>
-                  <q-field
-                    v-show="!isAdding"
-                    stack-label
-                    class="q-pb-sm"
-                    label="최종수정자"
-                  >
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ param.updtUsrId }}
-                      </div>
-                    </template>
-                  </q-field>
-                  <q-field
-                    v-show="!isAdding"
-                    stack-label
-                    class="q-pb-sm"
-                    label="최종수정일시"
-                  >
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{
-                          date.formatDate(param.updtDt, 'YYYY/MM/DD HH:mm:ss')
-                        }}
-                      </div>
-                    </template>
-                  </q-field>
-                  <q-toolbar class="bg-white">
-                    <q-toolbar-title></q-toolbar-title>
-                    <div class="proc">
-                      <q-btn
-                        push
-                        color="primary"
-                        class="q-mr-sm"
-                        label="수정"
-                        @click="fn_modify"
-                        v-show="readonly === true && !isAdding"
-                      />
-                      <q-btn
-                        push
-                        color="primary"
-                        label="저장"
-                        type="submit"
-                        v-show="isAdding"
-                      />
-                      <q-btn
-                        push
-                        class="q-mr-sm"
-                        color="primary"
-                        label="저장"
-                        type="submit"
-                        v-show="readonly === false && !isAdding"
-                      />
-                      <q-btn
-                        push
-                        class="button"
-                        color="negative"
-                        label="삭제"
-                        type="reset"
-                        @click="fn_removeCode"
-                        v-show="readonly === true && !isAdding"
-                      />
-                      <q-btn
-                        push
-                        color="primary"
-                        label="취소"
-                        @click="fn_cancel"
-                        v-show="readonly === false && !isAdding"
-                      />
-                    </div>
-                  </q-toolbar>
-                </q-card-section>
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
+                    </q-toolbar>
+                  </q-card-section>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { date, useQuasar, type QTableProps } from 'quasar'
-import { PageListInfo, type ApiResponse } from '../../interface/server'
+import { type QTableProps, date, useQuasar } from 'quasar'
+import type { PageListInfo } from '../../interface/server'
 import paginationLayout from '../../components/Pagination.vue'
+import { type ApiResponse } from '@/interface/server'
 const { loading } = useQuasar()
 
 const columns = ref<QTableProps['columns']>([
@@ -354,13 +357,13 @@ const selectedItems = ref<Data[]>([]) // 선택된 항목들
 const groupCdCheck = ref<boolean>(false) // 그룹 코드 사용 여부 체크
 const readonly = ref<boolean>(true)
 let uppercodeList: Option[] = [] // 상위 코드 목록
-let oldData = ref<Data>() //기존데이터
+const oldData = ref<Data>() //기존데이터
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
 const totalPages = ref<number>(0)
 const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
-let totalItems = ref<number | undefined>()
+const totalItems = ref<number | undefined>()
 
 const groupCdOptions = [
   { label: '전체', value: '' },
@@ -437,10 +440,7 @@ const sortSn_rules = (val: string) => {
 const options = ref(uppercodeList)
 
 //상위코드 검색필터
-const Fn_upCodefilter = async (
-  val: string,
-  update: (arg0: () => void) => void
-) => {
+const Fn_upCodefilter = (val: string, update: (arg0: () => void) => void) => {
   update(() => {
     // 소문자로 변환
     const needle = val.toLocaleLowerCase()
@@ -455,7 +455,7 @@ const Fn_upCodefilter = async (
 }
 
 // 코드 등록 팝업 열기
-const fn_openAddCodePopup = async () => {
+const fn_openAddCodePopup = () => {
   isShowCodePopup.value = true
   fn_openCodePopup(true)
   readonly.value = false
@@ -466,29 +466,25 @@ const fn_openModifyCodePopup = (_evt: Event, row: Data, _index: number) => {
   oldData.value = { ...row }
   param.value = { ...row }
 
-  console.log('oldData.value', oldData.value)
-
   groupCdCheck.value = param.value.groupCode === 'Y' ? false : true
   isShowCodePopup.value = true
   fn_openCodePopup(false)
 }
 
 // 코드 팝업 열기
-const fn_openCodePopup = async (adding: boolean) => {
+const fn_openCodePopup = (adding: boolean) => {
   isAdding.value = adding
-
-  console.log(' isAdding.value', adding)
   popupTitle.value = adding ? '코드 등록' : '코드 상세'
 }
 
 //코드 수정 활성화
-const fn_modify = async () => {
+const fn_modify = () => {
   readonly.value = false
   popupTitle.value = '코드 수정'
 }
 
 //코드 수정 취소
-const fn_cancel = async () => {
+const fn_cancel = () => {
   readonly.value = true
   popupTitle.value = '코드 상세'
 }
@@ -504,14 +500,10 @@ const fu_handleSubmit = () => {
 
 //코드 등록
 const fn_addCode = async () => {
-  console.log(' isAdding.value', isAdding)
-
   // 그룹 코드 사용 여부에 따라 그룹 코드 설정
   const isGroupCodeUsed = groupCdCheck.value
   param.value.groupCode = isGroupCodeUsed && param.value.upperCode ? 'N' : 'Y'
   param.value.upperCode = isGroupCodeUsed ? param.value.upperCode : ''
-
-  console.log('코드등록 ::::', param.value)
 
   loading.show()
 
@@ -533,14 +525,10 @@ const fn_addCode = async () => {
 
 // 코드 수정
 const fn_modifyCode = async () => {
-  console.log(' isAdding.value', isAdding)
-
   // 그룹 코드 사용 여부에 따라 그룹 코드 설정
   const isGroupCodeUsed = groupCdCheck.value
   param.value.groupCode = isGroupCodeUsed && param.value.upperCode ? 'N' : 'Y'
   param.value.upperCode = isGroupCodeUsed ? param.value.upperCode : ''
-
-  console.log('코드수정 ::::', param.value)
 
   //기존 row데이터와 수정된 param
   if (JSON.stringify(param.value) === JSON.stringify(oldData.value)) {
@@ -568,7 +556,6 @@ const fn_modifyCode = async () => {
 
 //코드 조회
 const fn_getCodeList = async () => {
-  console.log(JSON.stringify(codeSrchReq.value))
   await $fetch<ApiResponse<PageListInfo<Data>>>(
     '/playground/public/code/getCodePageList?page=' +
       (currentPage.value - 1) +
@@ -581,8 +568,6 @@ const fn_getCodeList = async () => {
   )
     .then((result) => {
       resData.value = result.data.content
-
-      console.log(' resData.value ', resData.value)
 
       totalItems.value = result.data.totalElements ?? 0
 
@@ -625,14 +610,11 @@ const fn_getUpCodeList = async () => {
   })
     .then((result) => {
       allCodeData.value = result.data
-      console.log('all searchData ::', allCodeData.value)
 
       // 그룹 코드인 항목만 필터링
       const filterOptions = allCodeData.value
         .filter((item) => item.groupCode === 'Y')
         .map((item) => ({ label: item.codeName, value: item.code }))
-
-      console.log('filterOptions ::', filterOptions)
 
       // 중복 제거 후 정렬
       const uniqueSort = [...new Set(filterOptions)].sort((a, b) =>
@@ -640,7 +622,6 @@ const fn_getUpCodeList = async () => {
       )
 
       uppercodeList = uniqueSort
-      console.log('uppercodeList ::', uppercodeList)
     })
     .catch((error) => {
       console.error(error)
@@ -650,14 +631,8 @@ const fn_getUpCodeList = async () => {
 
 //코드 삭제
 const fn_removeCode = async () => {
-  console.log('selectedItems', selectedItems.value)
-
   if (!isShowCodePopup.value) {
-    if (
-      !selectedItems ||
-      !selectedItems.value ||
-      selectedItems.value.length === 0
-    ) {
+    if (!selectedItems.value || selectedItems.value.length === 0) {
       return alert('삭제할 코드를 선택해 주세요.')
     }
   }
@@ -674,8 +649,6 @@ const fn_removeCode = async () => {
   ) {
     try {
       const itemsDelete = !isAdding.value ? [param.value] : selectedItems.value
-
-      console.log('itemsDelete', itemsDelete)
 
       loading.show()
 
