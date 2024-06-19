@@ -8,21 +8,26 @@ const authStore = useAuthStore()
 
 // api로 조회할 데이터 구조
 interface MenuData {
-  menuId: string
+  menuSn: number
   menuNm: string
   menuUrl: string
+  menuDepth: number
+  menuSortOrdr: number
+  menuUpperMenuSn: number
+  useAt: string
+  lwprtMenuHoldAt: string
 }
 
 interface Data {
   mberId: string
 }
 
-let param = ref<Data>({
+const param = ref<Data>({
   mberId: authStore.mberId
 })
 
-let essentialLinks = ref<EssentialLinkProps[]>([])
-let essentialLowerLinks = ref<EssentialLinkProps[]>([])
+const essentialLinks = ref<EssentialLinkProps[]>([])
+const essentialLowerLinks = ref<EssentialLinkProps[]>([])
 
 const iconList = ['']
 
@@ -49,9 +54,7 @@ const selectMenu = async () => {
   loading.hide()
 }
 
-const setMenu = (arr: object) => {
-  // const menu = Object.entries(resData)
-  // const menu = Object.keys(resData)
+const setMenu = (arr: MenuData) => {
   const menu = Object.values(arr)
 
   menu.forEach((item, idx) => {
@@ -68,7 +71,7 @@ const setMenu = (arr: object) => {
     if (item.upperMenuSn != null) {
       essentialLowerLinks.value.push(menuItem)
     } else {
-      menuItem.icon = 'chevron_right'
+      menuItem.icon = 'remove'
 
       if (menuItem.lwprtMenuHoldAt == 'Y') {
         menuItem.link = ''
@@ -78,7 +81,7 @@ const setMenu = (arr: object) => {
   })
 }
 
-const toggleMenu = (menuItem: object) => {
+const toggleMenu = (menuItem: EssentialLinkProps) => {
   menuItem.open = !menuItem.open
 }
 
@@ -130,6 +133,7 @@ onMounted(() => {
           </q-item>
           <template v-for="(menuChild, idx) in essentialLowerLinks" :key="idx">
             <q-slide-transition
+              class="slide-transition"
               v-show="menuItem.open"
               v-if="menuItem.menuSn == menuChild.upperMenuSn"
             >
@@ -172,8 +176,8 @@ onMounted(() => {
   </q-layout>
 </template>
 
-<style>
-.q-slide-transition {
+<style lang="scss" scoped>
+.slide-transition {
   transition: max-height 0.3s ease;
 }
 </style>
