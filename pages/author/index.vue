@@ -587,7 +587,7 @@ onMounted(() => {
   getAuthorList()
 })
 </script>
-<style>
+<style lang="scss" scoped>
 .content {
   margin-top: 3rem;
   margin-left: 5rem;
