@@ -20,11 +20,11 @@ import { useRuntimeConfig } from 'nuxt/app'
 import { onMounted, ref } from 'vue'
 const config = useRuntimeConfig()
 let marker: kakao.maps.Marker
-let rstrntMarker: kakao.maps.Marker
+let placeMarker: kakao.maps.Marker
 let mapWalker: kakao.maps.Marker
 let map: kakao.maps.Map
 let markerPosition: kakao.maps.LatLng
-let rstrntMarkerPosition: kakao.maps.LatLng
+let placeMarkerPosition: kakao.maps.LatLng
 let bounds: kakao.maps.LatLngBounds
 let infowindow: kakao.maps.InfoWindow
 const rvActive = ref<boolean>(false)
@@ -40,8 +40,8 @@ let rv: kakao.maps.Roadview
 
 const props = defineProps<{
   location: { x: number; y: number }
-  rstrnt: {
-    restaurantName: string
+  place: {
+    placeName: string
     kakaoMapId: string
     la: string
     lo: string
@@ -70,15 +70,28 @@ const loadMap = () => {
       center: new kakao.maps.LatLng(props.location.y, props.location.x), //지도의 중심좌표.
       level: 1 //지도의 레벨(확대, 축소 정도)
     }
+
     map = new kakao.maps.Map(container, options) //지도 생성 및 객체 리턴
+
+    // 지도 타입 변경 컨트롤을 생성한다
+    const mapTypeControl = new kakao.maps.MapTypeControl()
+
+    // 지도의 상단 우측에 지도 타입 변경 컨트롤을 추가한다
+    map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT)
+
+    // 지도에 확대 축소 컨트롤을 생성한다
+    const zoomControl = new kakao.maps.ZoomControl()
+
+    // 지도의 우측에 확대 축소 컨트롤을 추가한다
+    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT)
 
     infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
 
     markerPosition = new kakao.maps.LatLng(props.location.y, props.location.x)
 
-    rstrntMarkerPosition = new kakao.maps.LatLng(
-      Number(props.rstrnt.la),
-      Number(props.rstrnt.lo)
+    placeMarkerPosition = new kakao.maps.LatLng(
+      Number(props.place.la),
+      Number(props.place.lo)
     )
     const imageSrc =
       'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'
@@ -90,22 +103,22 @@ const loadMap = () => {
     marker = new kakao.maps.Marker({
       position: markerPosition
     })
-    rstrntMarker = new kakao.maps.Marker({
-      position: rstrntMarkerPosition,
+    placeMarker = new kakao.maps.Marker({
+      position: placeMarkerPosition,
       image: markerImage
     })
 
     marker.setMap(map) //현재 위치 마커 표시
-    rstrntMarker.setMap(map) //식당 위치 마커 표시
+    placeMarker.setMap(map) //식당 위치 마커 표시
 
     bounds = new kakao.maps.LatLngBounds()
 
     bounds.extend(markerPosition)
-    bounds.extend(rstrntMarkerPosition)
+    bounds.extend(placeMarkerPosition)
 
     map.setBounds(bounds, 100, 100, 100, 100)
 
-    displayInfowindow(rstrntMarker)
+    displayInfowindow(placeMarker)
 
     // 마커 이미지를 생성합니다
     const markImage = new kakao.maps.MarkerImage(
@@ -129,16 +142,16 @@ const loadMap = () => {
   })
 }
 
-const displayInfowindow = (rstrntMarker: kakao.maps.Marker) => {
+const displayInfowindow = (placeMarker: kakao.maps.Marker) => {
   const contents = document.createElement('div')
   contents.className = 'customoverlay'
 
   const childContent = `
-      <a href="https://map.kakao.com/link/map/${props.rstrnt.kakaoMapId}" target="_blank" >
+      <a href="https://map.kakao.com/link/map/${props.place.kakaoMapId}" target="_blank" >
         <span class="title">카카오맵 바로가기</span>
       </a>
-      <a href="https://place.map.kakao.com/${props.rstrnt.kakaoMapId}" target="_blank" id="info" class="q-mt-xs select-place">
-        <span class="title">${props.rstrnt.restaurantName}</span>
+      <a href="https://place.map.kakao.com/${props.place.kakaoMapId}" target="_blank" id="info" class="q-mt-xs select-place">
+        <span class="title">${props.place.placeName}</span>
       </a>
   `
 
@@ -147,14 +160,14 @@ const displayInfowindow = (rstrntMarker: kakao.maps.Marker) => {
   // 커스텀 오버레이를 생성합니다
   const customOverlay = new kakao.maps.CustomOverlay({
     map,
-    position: rstrntMarker.getPosition(),
+    position: placeMarker.getPosition(),
     content: contents,
     xAnchor: 1,
     yAnchor: 1
   })
   customOverlay.setMap(map)
   infowindow.setContent(contents)
-  infowindow.open(map, rstrntMarker)
+  infowindow.open(map, placeMarker)
 
   const content: HTMLElement = customOverlay.getContent() as HTMLElement
 
@@ -187,7 +200,7 @@ const toggleOverlay = (active: boolean) => {
     mapWalker.setMap(map)
     // marker.setMap(null)
     // 로드뷰의 위치를 현재 위치로 설정합니다
-    toggleRoadview(rstrntMarkerPosition)
+    toggleRoadview(placeMarkerPosition)
     // (현재 위치 좌표, 현재위치-음식점 중심 좌표 )
   } else {
     overlayOn = false

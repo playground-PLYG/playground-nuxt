@@ -1,5 +1,5 @@
 <template>
-  <ClientOnly>
+  <client-only>
     <div :class="['map_wrap', isMobile ? 'mobile' : '']">
       <div id="menu_wrap" class="bg_white">
         <div class="option">
@@ -76,7 +76,7 @@
         />
       </div>
     </div>
-  </ClientOnly>
+  </client-only>
 </template>
 
 <script setup lang="ts">
@@ -90,7 +90,7 @@ const { platform, notify, loading } = useQuasar()
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 let markers: kakao.maps.Marker[]
-let myMarker
+let myMarker: kakao.maps.Marker
 let infoWindow: kakao.maps.InfoWindow
 let ps: kakao.maps.services.Places
 let map: kakao.maps.Map
@@ -542,8 +542,6 @@ const fn_getMapCenter = (
 }
 
 const fn_setCurrentLocation = () => {
-  console.debug('fn_setCurrentLocation')
-
   if (navigator.geolocation) {
     loading.show()
 
@@ -577,7 +575,8 @@ const fn_setCurrentLocation = () => {
               '위치정보 조회 요청시간 초과되서 기본 위치로 이동합니다.'
             break
           default:
-            '위치 서비스를 사용 할 수 없어서 초기 위치로 이동합니다.'
+            errMessage =
+              '위치 서비스를 사용 할 수 없어서 초기 위치로 이동합니다.'
         }
 
         map.setCenter(
@@ -625,15 +624,13 @@ const fn_setCurrentLocation = () => {
   }
 
   #map {
+    width: 100%;
+    min-height: 500px;
+
     :deep(div button[draggable='false']) {
       margin: 0;
       padding: 0;
     }
-  }
-
-  #map {
-    width: 100%;
-    min-height: 500px;
   }
 
   .custom_control {
@@ -889,15 +886,13 @@ const fn_setCurrentLocation = () => {
   }
 
   #map {
+    width: 100%;
+    min-height: 300px;
+
     :deep(div button[draggable='false']) {
       margin: 0;
       padding: 0;
     }
-  }
-
-  #map {
-    width: 100%;
-    min-height: 300px;
   }
 
   .custom_control {

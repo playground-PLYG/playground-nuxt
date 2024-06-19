@@ -13,6 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@nuxt/devtools": "latest",
     "@nuxt/eslint": "^0.3.13",
     "@nuxt/eslint-config": "^0.3.13",
