@@ -134,10 +134,15 @@
           </q-toolbar>
           <q-card-section>
             <div class="map-location">
-              <MapLocation
+              <map-location
                 v-if="showMapLocation"
                 :location="currentLocation"
-                :rstrnt="param"
+                :place="{
+                  placeName: param.restaurantName,
+                  kakaoMapId: param.kakaoMapId,
+                  la: param.la,
+                  lo: param.lo
+                }"
               />
               <MapSearch
                 v-if="!showMapLocation"

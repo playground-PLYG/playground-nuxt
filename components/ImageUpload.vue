@@ -1,6 +1,6 @@
 <template>
-  <ClientOnly>
-    <div class="warp-img q-pa-md">
+  <client-only>
+    <div class="warp-img q-pa-md" v-show="fileProp.isVisible">
       <q-card>
         <q-card-section horizontal v-if="isViewUploader">
           <q-uploader
@@ -15,6 +15,7 @@
             @uploaded="fn_uploadCallback"
             @failed="fn_uploadCallback"
             @removed="fn_fileRemoved"
+            @added="fnFileAdded"
           />
         </q-card-section>
 
@@ -59,7 +60,7 @@
         </q-card-section>
       </q-card>
     </div>
-  </ClientOnly>
+  </client-only>
 </template>
 
 <script lang="ts" setup>
@@ -86,6 +87,7 @@ const maxFileSize = 8388608 // 8MB
  */
 interface FileProp {
   fileId?: number
+  isVisible?: boolean
 }
 
 interface FileInfo {
@@ -100,7 +102,10 @@ interface TmpFileInfo extends File {
   xhr?: XMLHttpRequest
 }
 
-const fileProp = withDefaults(defineProps<FileProp>(), { fileId: -1 })
+const fileProp = withDefaults(defineProps<FileProp>(), {
+  fileId: -1,
+  isVisible: true
+})
 
 const fileEmit = defineEmits<{
   /**
@@ -115,6 +120,10 @@ const fileEmit = defineEmits<{
    * 신규 업로드된 파일이 삭제되는 경우
    */
   fileRemoved: [fileId: number]
+  /**
+   * 신규 파일을 선책하는 경우
+   */
+  fileAdded: [file: File]
 }>()
 
 const { fileId } = toRefs(fileProp)
@@ -266,6 +275,20 @@ const fn_deleteExistFile = async () => {
 
   isViewUploader.value = true
 }
+
+const fnFileAdded = (files: readonly TmpFileInfo[]) => {
+  fileEmit('fileAdded', files[0])
+}
+
+const fn_triggerPickFile = () => {
+  uploader.value.pickFiles()
+}
+
+const fn_triggerUploadFile = () => {
+  uploader.value.upload()
+}
+
+defineExpose({ fn_triggerPickFile, fn_triggerUploadFile })
 </script>
 
 <style lang="scss" scoped>

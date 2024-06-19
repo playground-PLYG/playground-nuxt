@@ -24,7 +24,8 @@ export default defineNuxtConfig({
     '@nuxt/devtools',
     '@nuxt/eslint',
     '@vueuse/nuxt',
-    'nuxt-monaco-editor'
+    'nuxt-monaco-editor',
+    "@formkit/auto-animate/nuxt"
   ],
   quasar: {
     plugins: [
