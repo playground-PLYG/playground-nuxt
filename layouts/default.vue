@@ -27,7 +27,6 @@ let essentialLowerLinks = ref<EssentialLinkProps[]>([])
 const iconList = ['']
 
 const leftDrawerOpen = ref(false)
-const menuDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
@@ -69,7 +68,7 @@ const setMenu = (arr: object) => {
     if (item.upperMenuSn != null) {
       essentialLowerLinks.value.push(menuItem)
     } else {
-      menuItem.icon = ''
+      menuItem.icon = 'chevron_right'
 
       if (menuItem.lwprtMenuHoldAt == 'Y') {
         menuItem.link = ''
@@ -116,8 +115,13 @@ onMounted(() => {
           <q-item clickable :to="menuItem.link" @click="toggleMenu(menuItem)">
             <q-item-section avatar>
               <q-icon
-                v-if="menuItem.lwprtMenuHoldAt == 'Y'"
-                :name="menuItem.open ? 'expand_less' : 'expand_more'"
+                :name="
+                  menuItem.lwprtMenuHoldAt == 'N'
+                    ? menuItem.icon
+                    : menuItem.open
+                    ? 'expand_less'
+                    : 'expand_more'
+                "
               />
             </q-item-section>
             <q-item-section>
@@ -132,7 +136,7 @@ onMounted(() => {
               <q-list class="q-pl-md">
                 <q-item clickable v-ripple :to="menuChild.link">
                   <q-item-section avatar>
-                    <q-icon :name="menuChild.icon" />
+                    <q-icon :name="'arrow_right'" />
                   </q-item-section>
                   <q-item-section>
                     {{ menuChild.title }}
