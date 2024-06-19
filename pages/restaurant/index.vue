@@ -979,6 +979,7 @@ const fn_resetRestaurantSearchArea = () => {
 const fn_openRestaurantAddPopup = () => {
   // 상태 체크 및 초기화 addRestaurant
   isShowRestaurantAddPopup.value = !isShowRestaurantAddPopup.value
+  restaurantAddStep.value = 1
   isRestaurantAddPopupPlaceSelected.value = false
 }
 
