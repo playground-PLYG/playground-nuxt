@@ -352,7 +352,6 @@
                   <q-tab-panels
                     v-model="restaurantDetailTab"
                     animated
-                    swipeable
                     vertical
                     transition-prev="jump-up"
                     transition-next="jump-up"
