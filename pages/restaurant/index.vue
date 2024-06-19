@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="['page-wrap', isMobile ? 'mobile' : '']">
     <div class="content q-pa-md q-gutter-md">
       <div class="title">
         <div class="text-h4"><q-icon name="rss_feed" /> 식당 목록</div>
@@ -133,7 +133,8 @@
       <div class="content-body">
         <div
           :class="[
-            'row justify-center q-gutter-sm',
+            isMobile ? 'col' : 'row',
+            'justify-center q-gutter-sm',
             isRestaurantSelectMode ? 'restaurant-select-mode' : ''
           ]"
         >
@@ -1456,36 +1457,49 @@ const fn_getMenuList = async (restaurantSerialNo: number) => {
 </script>
 
 <style lang="scss" scoped>
-.content {
-  .search {
-    .search-card {
-      border: 1px solid lightgrey;
-      border-radius: 5px;
+.page-wrap {
+  .content {
+    .search {
+      .search-card {
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+      }
     }
-  }
 
-  .toolbar-area {
-    .toolbar-box {
-      border: 1px solid lightgrey;
-      border-radius: 5px;
+    .toolbar-area {
+      .toolbar-box {
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+      }
     }
-  }
 
-  .content-body {
-    .card-restaurant {
-      height: 400px;
-      width: 100%;
-      max-width: 300px;
-
-      .card-img {
+    .content-body {
+      .card-restaurant {
+        height: 400px;
         width: 100%;
-        height: 280px;
+        max-width: 300px;
+
+        .card-img {
+          width: 100%;
+          height: 280px;
+        }
       }
     }
   }
-}
 
-.detail-map {
-  border: 1px solid lightgray;
+  &.mobile .content .content-body {
+    .card-restaurant {
+      height: 450px;
+      max-width: 100%;
+    }
+
+    .card-img {
+      height: 380px;
+    }
+  }
+
+  .detail-map {
+    border: 1px solid lightgray;
+  }
 }
 </style>
