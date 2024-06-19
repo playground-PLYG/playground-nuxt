@@ -136,7 +136,7 @@ onMounted(() => {
     isDuplicateVote()
   } else {
     alert('로그인 후 투표가 가능합니다.')
-    router.push('/login')
+    router.push('/login?redirectUrl=vote' + location.search)
   }
 })
 
@@ -365,7 +365,7 @@ const addAnswer = async (resultList: answerType[]) => {
       console.log('##### addAnswer res :', res.data)
       if (res.data) {
         alert('투표가 완료 되었습니다.')
-        router.push('/')
+        router.push('/vote-manage')
       } else {
         alert('투표 중 오류가 발생했습니다.\n다시 시도해주세요.')
       }

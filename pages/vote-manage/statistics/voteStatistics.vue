@@ -1,26 +1,37 @@
 <template>
   <q-dialog ref="dialogRef" @hide="">
-    <q-card class="my-card" flat bordered>
-      <q-card-section>
-        <div class="text-h6">투표제목 : {{ voteSubject }}</div>
-      </q-card-section>
-      <q-card-section>
-        <div class="q-pa-md">
-          <div
-            v-for="(detail, i) in statResponse.staDetailList"
-            :key="detail.questionSsno"
-            :tag="detail.questionContents"
-            class="row items-start q-gutter-md"
-          >
-            <Doughnut
-              :data="doughChartData[i]"
-              :options="doughChartOptions[i]"
-            />
-            <q-separator />
+    <q-layout container>
+      <q-header>
+        <q-toolbar class="bg-primary">
+          <q-toolbar-title>투표통계</q-toolbar-title>
+          <q-btn v-close-popup flat round dense icon="close" />
+        </q-toolbar>
+      </q-header>
+      <q-card class="my-card" style="padding-top: 40px" flat bordered>
+        <q-card-section>
+          <div class="text-h6">투표제목 : {{ voteSubject }}</div>
+        </q-card-section>
+        <q-card-section>
+          <div class="q-pa-md">
+            <div
+              v-for="(detail, i) in statResponse.staDetailList"
+              :key="detail.questionSsno"
+              :tag="detail.questionContents"
+              class="row items-start q-gutter-md"
+            >
+              <Doughnut
+                :data="doughChartData[i]"
+                :options="doughChartOptions[i]"
+              />
+              <q-separator />
+            </div>
+            <div v-if="noCount" style="text-align: center">
+              투표 건 수가 없습니다.
+            </div>
           </div>
-        </div>
-      </q-card-section>
-    </q-card>
+        </q-card-section>
+      </q-card>
+    </q-layout>
   </q-dialog>
 </template>
 
@@ -71,9 +82,10 @@ let doughChartOptions = ref([
 const { loading } = useQuasar()
 
 let voteSsno = ref<number>(0)
+let noCount = ref<boolean>(false)
 
 const initFunc = (ssno: number, subject: string) => {
-  console.log('voteStatistics initFunc statisticsSsno : ', ssno)
+  console.log('voteStatistics initFunc statisticsSsno : ', ssno, subject)
   voteSsno.value = ssno
   settingStatisctics(ssno, subject)
 }
@@ -161,47 +173,51 @@ const settingStatisctics = async (ssno: number, subject: string) => {
         statResponse.value
       )
 
-      let chartList: any = []
-      let chartOptions: any = []
-      statResponse.value.staDetailList.forEach((sub) => {
-        let chartLabel: string[] = []
-        let chartValue: number[] = []
-        let chartDataSetting = {}
-        let chartOptionSetting = {}
+      if (statResponse.value.totalVoteCount == 0) {
+        noCount.value = true
+      } else {
+        let chartList: any = []
+        let chartOptions: any = []
+        statResponse.value.staDetailList.forEach((sub) => {
+          let chartLabel: string[] = []
+          let chartValue: number[] = []
+          let chartDataSetting = {}
+          let chartOptionSetting = {}
 
-        sub.staDetailDetailList.forEach((subsub) => {
-          chartLabel.push(subsub.itemName)
-          chartValue.push(subsub.itemCount)
-        })
+          sub.staDetailDetailList.forEach((subsub) => {
+            chartLabel.push(subsub.itemName)
+            chartValue.push(subsub.itemCount)
+          })
 
-        chartDataSetting = {
-          labels: chartLabel,
-          datasets: [
-            {
-              label: '득표 수  ',
-              data: chartValue,
-              backgroundColor: Object.values(CHART_COLORS)
-            }
-          ]
-        }
+          chartDataSetting = {
+            labels: chartLabel,
+            datasets: [
+              {
+                label: '득표 수  ',
+                data: chartValue,
+                backgroundColor: Object.values(CHART_COLORS)
+              }
+            ]
+          }
 
-        chartOptionSetting = {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: sub.questionContents
+          chartOptionSetting = {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: sub.questionContents
+              }
             }
           }
-        }
 
-        chartList.push(chartDataSetting)
-        chartOptions.push(chartOptionSetting)
-      })
+          chartList.push(chartDataSetting)
+          chartOptions.push(chartOptionSetting)
+        })
 
-      //doughnut
-      doughChartData.value = chartList
-      doughChartOptions.value = chartOptions
+        //doughnut
+        doughChartData.value = chartList
+        doughChartOptions.value = chartOptions
+      }
     })
     .catch((error) => {
       console.error(error)

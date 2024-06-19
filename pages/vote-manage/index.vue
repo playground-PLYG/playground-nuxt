@@ -110,7 +110,7 @@
         :columns="columns"
         row-key="voteSsno"
         v-model:selected="selected"
-        selection="multiple"
+        selection="single"
         :rows-per-page-options="[0]"
         @row-click="onClickVote"
       />
@@ -128,7 +128,7 @@
         push
         class="float-right"
         color="red"
-        :label="showVoteResultTitle"
+        label="투표결과보기"
         @click="onClickResult"
       />
     </div>
@@ -506,11 +506,7 @@ let selectedVote = ref<VoteDetailDataType>({
 let selectedQestn = ref<QuestionDetailDataType[]>([])
 
 const onClickVote = (evt: Object, row: ResponseData, index: number) => {
-  if (showVoteResult.value) {
-    getVoteResult(row)
-  } else {
-    getVoteDetail(row.voteSsno, row.voteKindCode)
-  }
+  getVoteDetail(row.voteSsno, row.voteKindCode)
 }
 
 const voteDetailComponent = ref()
@@ -569,35 +565,12 @@ const chgShowVoteRegist = (call: boolean) => {
   router.go(0)
 }
 
-let showVoteResult = ref<boolean>(false)
-let showVoteResultTitle = ref<string>('투표결과보기')
 const onClickResult = () => {
-  if (showVoteResult.value) {
-    searchParam.value = {
-      voteSubject: '',
-      voteKindCode: '',
-      anonymityVoteAlternativeBoo: false,
-      anonymityVoteAlternative: '',
-      voteBeginDate: '',
-      voteEndDate: ''
-    }
-    selectVoteList()
-
-    showVoteResultTitle.value = '투표결과보기'
-    showVoteResult.value = false
+  console.log(selected.value)
+  if (selected.value != undefined && selected.value.length == 1) {
+    getVoteResult(selected.value[0])
   } else {
-    searchParam.value = {
-      voteSubject: '',
-      voteKindCode: '',
-      anonymityVoteAlternativeBoo: false,
-      anonymityVoteAlternative: '',
-      voteBeginDate: '',
-      voteEndDate: dateUtil.getformatDate(new Date(), 'YYYY/MM/DD')
-    }
-    selectVoteList()
-
-    showVoteResultTitle.value = '전체보기'
-    showVoteResult.value = true
+    alert('결과를 확인할 투표를 한가지 선택해 주세요.')
   }
 }
 
@@ -606,6 +579,7 @@ const statisticsForm = ref()
 
 const getVoteResult = (row: ResponseData) => {
   console.log('getVoteResult ::: row : ', row)
+  /* 이 로직은 지울지 말지 판단이 필요하여 일단 주석만 해둔다
   let dateDiff = new Date(row.voteEndDate).getTime() - new Date().getTime()
   if (dateDiff >= 0) {
     $q.dialog({
@@ -622,6 +596,10 @@ const getVoteResult = (row: ResponseData) => {
     showVoteStatistics.value = true
     statisticsForm.value.initFunc(row.voteSsno, row.voteSubject)
   }
+    */
+  console.log('go Vote Result')
+  showVoteStatistics.value = true
+  statisticsForm.value.initFunc(row.voteSsno, row.voteSubject)
 }
 </script>
 <style lang="scss" scoped>
