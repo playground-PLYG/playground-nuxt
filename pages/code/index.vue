@@ -275,7 +275,6 @@
 import { onMounted, ref, watch } from 'vue'
 import { type QTableProps, date, useQuasar } from 'quasar'
 import type { PageListInfo } from '../../interface/server'
-import paginationLayout from '../../components/Pagination.vue'
 import { type ApiResponse } from '@/interface/server'
 const { loading } = useQuasar()
 
