@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/html-self-closing -->
 <template>
   <div class="content">
     <div class="title">
@@ -58,11 +59,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/useAuthStore'
-import { type ApiResponse } from '../../interface/server'
 import { useCookie } from 'nuxt/app'
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { type ApiResponse } from '../../interface/server'
+import { useAuthStore } from '../../stores/useAuthStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -85,19 +86,12 @@ const param = ref<Param>({
   mberPassword: ''
 })
 
-const resData = ref<ResData>({
-  token: '',
-  mberId: ''
-})
-
 async function kakao() {
   const client_id = '68ae4b196239138e24e76a6664659155'
   const redirect_uri = new URL(document.location.origin) + '/sign-up'
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&prompt=login`
   localStorage.setItem('snsLogin', 'KAKAO')
-  await navigateTo(kakaoURL, {
-    external: true
-  })
+  await router.push(kakaoURL)
 }
 
 async function naver() {
@@ -106,26 +100,12 @@ async function naver() {
   const state = 'RAMDOM_STATE'
   const naverURL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`
   localStorage.setItem('snsLogin', 'NAVER')
-  await navigateTo(naverURL, {
-    external: true
-  })
-}
-
-async function google() {
-  const client_id =
-    '398062070212-aqopvnd41jggo92j6grp5acvevkahca4.apps.googleusercontent.com'
-  const redirect_uri = new URL(document.location.origin) + 'sign-up'
-  const scope = 'email profile'
-  const googleURL = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}`
-  localStorage.setItem('snsLogin', 'GOOGLE')
-  await navigateTo(googleURL, {
-    external: true
-  })
+  await router.push(naverURL)
 }
 
 const login = async () => {
   loading.show()
-  const result = await $fetch<ApiResponse<ResData>>(
+  const _result = await $fetch<ApiResponse<ResData>>(
     '/playground/public/member/signIn',
     {
       method: 'POST',
@@ -138,7 +118,7 @@ const login = async () => {
       token.value = result.data.token
       authStore.mberId = result.data.mberId
       authStore.token = result.data.token
-      let queryString = location.search
+      const queryString = location.search
       const urlParams = new URLSearchParams(queryString)
       if (urlParams.get('redirectUrl')) {
         router.replace(StringToObject(urlParams.get('redirectUrl')))
@@ -146,7 +126,7 @@ const login = async () => {
         router.replace({ path: '/' })
       }
     })
-    .catch((err) => {
+    .catch((_err) => {
       loading.hide()
       return
     })
@@ -157,9 +137,9 @@ const StringToObject = (val: string | null) => {
   if (val == null) {
     return ''
   }
-  let queryParam: { [key: string]: any } = {}
-  let returnObj = { path: '', query: queryParam }
-  let queryAry = val.split('?')
+  const queryParam: { [key: string]: any } = {}
+  const returnObj = { path: '', query: queryParam }
+  const queryAry = val.split('?')
   returnObj.path = '/' + queryAry[0]
   queryAry?.forEach((element, index) => {
     if (index > 0) {

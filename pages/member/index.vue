@@ -6,8 +6,8 @@
     <div class="search">
       <div class="q-gutter-md row items-start">
         <q-input
-          outlined
           v-model="searchParam.mberId"
+          outlined
           label="회원아이디"
           round
           dense
@@ -15,8 +15,8 @@
           class="input"
         />
         <q-input
-          outlined
           v-model="searchParam.mberNm"
+          outlined
           label="회원명"
           round
           dense
@@ -28,9 +28,9 @@
           color="green-7"
           class="button"
           label="조회"
-          @click="memberSearch"
           value="memberSearch"
-        ></q-btn>
+          @click="memberSearch"
+        />
         <q-btn
           push
           color="green-7"
@@ -42,101 +42,103 @@
     </div>
     <div class="table">
       <q-table
+        v-model:selected="selected"
         flat
         bordered
         :rows="resData"
         row-key="mberId"
         :columns="columns"
         class="my-sticky-header-table"
-        v-model:selected="selected"
         selection="single"
         :rows-per-page-options="[0]"
       >
+        <template #bottom>
+          <pagination-layout
+            :total-page="totalPages"
+            :current-page="currentPage"
+            style="margin: 0 auto"
+            @send-event="pageReset"
+          />
+        </template>
       </q-table>
     </div>
     <div class="proc">
       <q-btn
         push
-        class="button"
+        class="buttonR"
         color="primary"
         label="회원권한등록"
         @click="clickMberAuthorAdd"
       />
     </div>
-  </div>
-
-  <div class="popup">
-    <q-dialog v-model="showAuthorMapngDialog">
-      <q-layout container style="width: 800px; max-width: 100vw">
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>회원권한매핑</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-input
-                v-model="AuthorParam.mberId"
-                label="회원아이디"
-                class="input"
-                outlined
-                :readonly="true"
-              />
-              <q-table
-                :rows="resAuthorData"
-                row-key="authorId"
-                :columns="AuthorColumns"
-                v-model:selected="authorSelected"
-                selection="single"
-                :rows-per-page-options="[0]"
-                @selection="clickAuthorRow"
-              />
-            </q-card-section>
-            <q-toolbar class="bg-white">
-              <q-toolbar-title></q-toolbar-title>
-              <div class="q-gutter-md row items-start">
-                <q-btn
-                  push
-                  color="primary"
-                  label="등록"
-                  type="submit"
-                  @click="addAuthorMapng"
-                />
-                <q-btn
-                  push
-                  color="primary"
-                  label="삭제"
-                  type="submit"
-                  @click="removeAuthorMapng"
-                />
-              </div>
+    <div class="popup">
+      <q-dialog v-model="showAuthorMapngDialog">
+        <q-layout container style="width: 800px; max-width: 100vw">
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>회원권한매핑</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
             </q-toolbar>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-input
+                  v-model="AuthorParam.mberId"
+                  label="회원아이디"
+                  class="input"
+                  outlined
+                  :readonly="true"
+                />
+                <q-table
+                  v-model:selected="authorSelected"
+                  :rows="resAuthorData"
+                  row-key="authorId"
+                  :columns="AuthorColumns"
+                  selection="single"
+                  :rows-per-page-options="[0]"
+                  @selection="clickAuthorRow"
+                />
+              </q-card-section>
+              <q-toolbar class="bg-white">
+                <q-toolbar-title />
+                <div class="q-gutter-md row items-start">
+                  <q-btn
+                    push
+                    color="primary"
+                    label="등록"
+                    type="submit"
+                    @click="addAuthorMapng"
+                  />
+                  <q-btn
+                    push
+                    color="primary"
+                    label="삭제"
+                    type="submit"
+                    @click="removeAuthorMapng"
+                  />
+                </div>
+              </q-toolbar>
+            </q-card>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { date, type QTableProps } from 'quasar'
-import { type ApiResponse } from '../../interface/server'
+import { type QTableProps, date } from 'quasar'
+import { type ApiResponse, type PageListInfo } from '../../interface/server'
+import paginationLayout from '../../components/PaginationComponent.vue'
 
 const router = useRouter()
 const { loading } = useQuasar()
 
 const columns = ref<QTableProps['columns']>([
-  {
-    name: 'index',
-    label: '순번',
-    field: 'index',
-    align: 'center'
-  },
   {
     name: 'mberId',
     align: 'center',
@@ -177,9 +179,21 @@ const columns = ref<QTableProps['columns']>([
     field: 'mberTelno'
   },
   { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'left' },
-  { name: 'registDt', label: '등록일시', field: 'registDt', align: 'left' },
+  {
+    name: 'registDt',
+    label: '등록일시',
+    field: 'registDt',
+    align: 'left',
+    format: (val) => `${date.formatDate(val, 'YYYY/MM/DD HH:mm:ss')}`
+  },
   { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'left' },
-  { name: 'updtDt', label: '수정일시', field: 'updtDt', align: 'left' }
+  {
+    name: 'updtDt',
+    label: '수정일시',
+    field: 'updtDt',
+    align: 'left',
+    format: (val) => `${date.formatDate(val, 'YYYY/MM/DD HH:mm:ss')}`
+  }
 ])
 
 const AuthorColumns = ref<QTableProps['columns']>([
@@ -214,7 +228,6 @@ interface Search {
 
 // api로 조회할 데이터 구조
 interface Data {
-  index: any
   mberId: string
   mberNm: string
   mberBymd: string
@@ -231,67 +244,88 @@ interface AuthorData {
   mberId?: string
   authorId?: string
   authorNm: string
-  mberAuthorAddAt: string
+  mberAuthorAddAt?: string
 }
 
-interface AuthorData {
-  mberId?: string
-  authorId?: string
-  authorNm: string
-  mberAuthorAddAt: string
-}
-
-const param = ref<Search>({
+const searchParam = ref<Search>({
   mberId: '',
   mberNm: ''
 })
 
-let searchParam = ref<Search>({
-  mberId: '',
-  mberNm: ''
-})
-
-let AuthorParam = ref<AuthorData>({
+const AuthorParam = ref<AuthorData>({
   mberId: '',
   authorId: '',
   authorNm: '',
   mberAuthorAddAt: ''
 })
 
-let resData = ref<Data[]>([])
-let resAuthorData = ref<AuthorData[]>([])
+const resData = ref<Data[]>([])
+const resAuthorData = ref<AuthorData[]>([])
 
-let selected = ref<Data[]>()
-let authorSelected = ref<AuthorData>()
+const selected = ref<Data[]>()
+const authorSelected = ref<AuthorData[]>([])
 
-let showAuthorMapngDialog = ref<boolean>(false)
+const showAuthorMapngDialog = ref<boolean>(false)
 let authorClickYn = 'N'
 
+// 페이징을 위한 파라미터
+const currentPage = ref<number>(1)
+const totalPages = ref<number>(0)
+const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
+const totalItems = ref<number>() // 데이터의 개수에 따라 페이지네이션 UI에 그려지는 숫자 리스트
+
 const reset = () => {
-  param.value = {
+  searchParam.value = {
     mberId: '',
     mberNm: ''
   }
   memberSearch()
 }
 
+// 목록조회 - 페이징
+const pageReset = (pageIdx: number, idx: string) => {
+  if (idx == 'pageNum') {
+    if (pageIdx == 0) {
+      currentPage.value = 1
+    } else {
+      currentPage.value = pageIdx
+    }
+  } else {
+    itemsPerPage.value = pageIdx
+  }
+}
+
+watch([currentPage, itemsPerPage], () => {
+  memberSearch()
+})
+
 const memberSearch = async () => {
   loading.show()
-  const result = await $fetch<ApiResponse<Data[]>>(
-    '/playground/public/member/getMberList',
+  const result = await $fetch<ApiResponse<PageListInfo<Data>>>(
+    '/playground/public/member/getMberPageList?page=' +
+      (currentPage.value - 1) +
+      '&size=' +
+      itemsPerPage.value,
     {
       method: 'POST',
       body: JSON.stringify(searchParam.value)
     }
   )
-  resData.value = result.data
+  resData.value = result.data.content
 
-  // for (let i = 0; i < result.data.length; i++) {
-  //     resData.value = result.data.slice(0).map(r => ({ ...r }))
-  // }
-  resData.value.forEach((row, index) => {
-    row.index = index + 1
-  })
+  // resData.value = result.data.content.map((item, index) => {
+  //   return { ...item, index: index + 1 }
+  // })
+
+  totalItems.value =
+    result.data.totalElements !== undefined ? result.data.totalElements : 0
+  if (totalItems.value) {
+    totalPages.value = Math.ceil(
+      totalItems.value / itemsPerPage.value !== 0
+        ? Math.ceil(totalItems.value / itemsPerPage.value)
+        : 1
+    )
+  }
   loading.hide()
 }
 
@@ -321,7 +355,12 @@ const clickMberAuthorAdd = async () => {
   loading.hide()
 }
 
-const clickAuthorRow = async (details: any) => {
+const clickAuthorRow = (details: {
+  rows: readonly AuthorData[]
+  keys: readonly any[]
+  added: boolean
+  evt: Event
+}) => {
   if (details.added == true) {
     AuthorParam.value = details.rows[0]
     authorClickYn = 'Y'
@@ -364,11 +403,11 @@ const removeAuthorMapng = async () => {
     alert('삭제할 권한을 선택해주시기 바랍니다.')
     return
   }
-
-  if (authorSelected.value?.mberAuthorAddAt == 'N') {
+  if (authorSelected.value[0].mberAuthorAddAt == 'N') {
     alert('매핑되지 않은 권한은 삭제 불가합니다.')
     return
   }
+
   loading.show()
   await $fetch<ApiResponse<AuthorData[]>>(
     '/playground/public/author/removeMberAuthor',
@@ -394,51 +433,56 @@ onMounted(() => {
 </script>
 <style>
 .content {
-  margin-top: 3rem;
+  margin-top: 2rem;
   margin-left: 5rem;
   margin-right: 5rem;
-}
 
-.title {
-  margin-top: 3rem;
-}
+  .title {
+    margin-top: 2rem;
+  }
 
-.search {
-  margin-top: 2rem;
-}
+  .search {
+    margin-top: 2rem;
 
-.search .select {
-  display: inline-block;
-  vertical-align: middle;
-  width: 15%;
-  padding-right: 0.5rem;
-}
+    .input {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
+    .select {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
+    .button {
+      margin-right: 0.5rem;
+    }
+  }
 
-.search .input {
-  display: inline-block;
-  vertical-align: middle;
-  width: 15%;
-  padding-right: 0.5rem;
-}
+  .table {
+    margin-top: 1rem;
 
-.search .button {
-  margin-right: 0.5rem;
-}
+    .items-center {
+      padding: 0;
+      .flex-center {
+        padding: 0;
+      }
+    }
+  }
 
-.table {
-  margin-top: 1rem;
-}
+  .proc {
+    margin-top: 1rem;
+    padding-bottom: 1rem;
 
-.proc {
-  margin-top: 1rem;
-}
-
-.proc .button {
-  margin-right: 0.5rem;
-}
-
-.proc .buttonR {
-  margin-left: 0.5rem;
-  float: right;
+    .button {
+      margin-right: 0.5rem;
+    }
+    .buttonR {
+      margin-left: 0.5rem;
+      float: right;
+    }
+  }
 }
 </style>
