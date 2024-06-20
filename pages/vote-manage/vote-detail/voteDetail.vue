@@ -434,6 +434,7 @@ import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { type ApiResponse } from '../../../interface/server'
 const { loading } = useQuasar()
+const $q = useQuasar()
 
 interface VoteDetailDataType {
   voteSsno: number
@@ -606,7 +607,10 @@ const setEditMode = () => {
     })
 
     if (chkBoolean) {
-      alert('항목은 최소 한개가 존재해야 합니다.')
+      $q.dialog({
+        title: '알림',
+        message: '질문은 최소 한개가 존재해야 합니다.'
+      })
       return false
     } else {
       isEditConfirm.value = true
@@ -631,7 +635,10 @@ const addVoteItem = (voteSsno: number, questionSsno: number) => {
     item_name == '' ||
     item_name == undefined
   ) {
-    alert('[추가할 항목과 이름을 작성해 주세요.]')
+    $q.dialog({
+      title: '알림',
+      message: '[추가할 항목과 이름을 작성해 주세요.]'
+    })
     return false
   }
 
@@ -646,7 +653,6 @@ const addVoteItem = (voteSsno: number, questionSsno: number) => {
   })
 
   showQuestionData.value = qestnList
-
   addVoteItemData.value.itemSsno = 0
   addVoteItemData.value.itemName = ''
   addTempleteClose.value = true
@@ -662,7 +668,10 @@ const delVoteItem = (
   qestnList.forEach((qes) => {
     if (qes.voteSsno == voteSsno && qes.questionSsno == questionSsno) {
       if (qes.voteIemResponseList.length <= 1) {
-        alert('항목은 최소 한개가 존재해야 합니다.')
+        $q.dialog({
+          title: '알림',
+          message: '항목은 최소 한개가 존재해야 합니다.'
+        })
         return false
       } else {
         qes.voteIemResponseList = qes.voteIemResponseList.filter((iem) => {
@@ -699,7 +708,10 @@ let isDelQuestion = ref<boolean>(false)
 const delQuestion = (voteSsno: number, questionSsno: number) => {
   let qestnList = showQuestionData.value
   if (qestnList.length <= 1) {
-    alert('질문은 최소 한개가 존재해야 합니다.')
+    $q.dialog({
+      title: '알림',
+      message: '질문은 최소 한개가 존재해야 합니다.'
+    })
     return false
   } else {
     qestnList = qestnList.filter((qes) => {

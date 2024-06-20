@@ -163,7 +163,7 @@ import voteDetail from './vote-detail/voteDetail.vue'
 import voteRegistForm from './vote-detail/voteRegistForm.vue'
 import voteStatistics from './statistics/voteStatistics.vue'
 import { useRouter } from 'vue-router'
-import { dateUtil } from '~/utils/dateUtil'
+// import { dateUtil } from '~/utils/dateUtil'
 const { loading } = useQuasar()
 const $q = useQuasar()
 
@@ -566,11 +566,14 @@ const chgShowVoteRegist = (call: boolean) => {
 }
 
 const onClickResult = () => {
-  console.log(selected.value)
   if (selected.value != undefined && selected.value.length == 1) {
     getVoteResult(selected.value[0])
   } else {
-    alert('결과를 확인할 투표를 한가지 선택해 주세요.')
+    $q.dialog({
+      title: '알림',
+      message: '결과를 확인할 투표를 한가지 선택해 주세요.'
+    })
+    return false
   }
 }
 
@@ -583,7 +586,7 @@ const getVoteResult = (row: ResponseData) => {
   let dateDiff = new Date(row.voteEndDate).getTime() - new Date().getTime()
   if (dateDiff >= 0) {
     $q.dialog({
-      title: 'Alert',
+      title: '알림',
       message: '투표가 종류된 후에 결과를 확인 할 수 있습니다.'
     })
       .onOk(() => {})
@@ -597,7 +600,6 @@ const getVoteResult = (row: ResponseData) => {
     statisticsForm.value.initFunc(row.voteSsno, row.voteSubject)
   }
     */
-  console.log('go Vote Result')
   showVoteStatistics.value = true
   statisticsForm.value.initFunc(row.voteSsno, row.voteSubject)
 }
