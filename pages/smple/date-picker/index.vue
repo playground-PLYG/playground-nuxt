@@ -80,30 +80,30 @@ const param = ref<Data>({
 })
 
 const setDateValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setTimeValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setDateTimeValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setDateFromValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setDateToValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setDateTimeFromValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 
 const setDateTimeToValue = (val: string) => {
-  console.log('setDateValue :::: ', val)
+  console.debug('setDateValue :::: ', val)
 }
 </script>

@@ -2,7 +2,7 @@ import { useCookie, useFetch } from 'nuxt/app'
 import { type ApiResponse, type IFetchOptions } from '../interface/server'
 
 export default class ApiService {
-  private static async fetch<T>(
+  private static fetch<T>(
     url: string,
     fetchOptions: IFetchOptions
   ): Promise<ApiResponse<T>> {
@@ -26,19 +26,17 @@ export default class ApiService {
         onRequest({ options }) {
           Object.assign(options, optionsInit)
         },
-        onRequestError({ error }) {},
-        async onResponse({ request, response, options }) {
+        onRequestError() { },
+        onResponse({ response }) {
           const { status, _data } = response
 
           if (status === 200) {
-            console.log('response', status)
             resolve(_data)
           }
         },
         onResponseError({ response }) {
-          const { status, _data } = response
+          const { _data } = response
 
-          console.log('responseError')
           reject(_data)
         },
         watch: fetchOptions.watch

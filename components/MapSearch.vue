@@ -4,14 +4,14 @@
       <div id="menu_wrap" class="bg_white">
         <div class="option">
           <div>
-            <q-form @submit="searchPlaces" class="q-pa-xs q-gutter-sm row">
+            <q-form class="q-pa-xs q-gutter-sm row" @submit="searchPlaces">
               <div class="col-8">
                 <q-input
+                  v-model="keyword"
                   dense
                   standout
                   flat
                   outlined
-                  v-model="keyword"
                   type="text"
                   maxlength="15"
                   label="검색어"
@@ -59,14 +59,14 @@
             </div>
           </div>
         </div>
-        <hr />
+        <hr >
         <div id="placesList" class="q-pa-none q-ma-none" />
         <div id="pagination" />
       </div>
 
-      <div ref="mapArea" id="map" />
+      <div id="map" ref="mapArea" />
 
-      <div class="custom_control" v-if="isMobile">
+      <div v-if="isMobile" class="custom_control">
         <q-btn
           round
           push
@@ -81,7 +81,8 @@
 
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
-import { SliderMarkerLabelDefinitionRequiredValue, useQuasar } from 'quasar'
+import type { SliderMarkerLabelDefinitionRequiredValue} from 'quasar';
+import { useQuasar } from 'quasar'
 import { onMounted, ref, watch } from 'vue'
 
 const config = useRuntimeConfig()
@@ -518,7 +519,7 @@ const fn_getMapCenter = (
   }
 
   let correctionX = 0
-  let correctionY = 0
+  const correctionY = 0
 
   switch (mapLevel) {
     case 1:

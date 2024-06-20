@@ -87,13 +87,12 @@ export default createConfigForNuxt({
         'error',
         {
           html: {
-            void: 'never',
+            void: 'any',
             normal: 'always',
             component: 'always'
           },
           svg: 'always',
-          math: 'always',
-          img: 'never'
+          math: 'always'
         }
       ]
     }

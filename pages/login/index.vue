@@ -61,6 +61,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { type ApiResponse } from '../../interface/server'
 import { useCookie } from 'nuxt/app'
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -139,7 +141,7 @@ const login = async () => {
       let queryString = location.search
       const urlParams = new URLSearchParams(queryString)
       if (urlParams.get('redirectUrl')) {
-        router.replace({ path: '/' + urlParams.get('redirectUrl') })
+        router.replace(StringToObject(urlParams.get('redirectUrl')))
       } else {
         router.replace({ path: '/' })
       }
@@ -148,6 +150,24 @@ const login = async () => {
       loading.hide()
       return
     })
+}
+
+//redirectUrl로 받은 파라미터 변환
+const StringToObject = (val: string | null) => {
+  if (val == null) {
+    return ''
+  }
+  let queryParam: { [key: string]: any } = {}
+  let returnObj = { path: '', query: queryParam }
+  let queryAry = val.split('?')
+  returnObj.path = '/' + queryAry[0]
+  queryAry?.forEach((element, index) => {
+    if (index > 0) {
+      queryParam[element.split('=')[0]] = element.split('=')[1]
+    }
+  })
+
+  return returnObj
 }
 
 const idRules = (val: string) => {
