@@ -1,185 +1,323 @@
 <template>
-  <div class="q-pa-md">
-    <div class="q-gutter-md row items-start">
-      <q-input
-        v-model="param.codeId"
-        outlined
-        label="코드ID"
-        round
-        dense
-        flat
-      />
-      <q-input
-        v-model="param.codeNm"
-        outlined
-        label="코드명"
-        round
-        dense
-        flat
-      />
-      <q-input
-        v-model="param.upperCodeId"
-        outlined
-        label="상위코드명"
-        round
-        dense
-        flat
-      />
-      <!-- <q-select filled round dense flat v-model="param.upCdId" :options="arr" stack-label label="상위코드ID"
-                :display-value="`${param.upCdId ? param.upCdId : '코드선택'}`" style="width: 200px">
-                <template v-slot:append>
-                    <q-icon v-if="param.upCdId !== null" class="cursor-pointer" name="clear"
-                        @click.stop.prevent="param.upCdId = ''" />
-                </template>
-            </q-select> -->
-
-      <q-select
-        v-model="param.groupCodeAt"
-        outlined
-        :options="groupCdOptions"
-        label="그룹코드여부"
-        style="width: 200px"
-        round
-        dense
-        flat
+  <div class="content">
+    <div class="title">
+      <div class="text-h4"><q-icon name="school" /> 코드관리</div>
+    </div>
+    <div class="search">
+      <q-form
+        ref="searchForm"
+        @submit="fn_srchCodeList"
+        @reset="fn_codeSrchReset"
       >
-        <template v-if="param.groupCodeAt" #append>
-          <q-icon
-            name="clear"
-            class="cursor-pointer"
-            @click.stop.prevent="param.groupCodeAt = ''"
+        <q-input
+          v-model="codeSrchReq.code"
+          outlined
+          stack-label
+          label="코드ID"
+          round
+          dense
+          flat
+          class="input"
+        />
+        <q-input
+          v-model="codeSrchReq.codeName"
+          outlined
+          stack-label
+          label="코드명"
+          round
+          dense
+          flat
+          class="input"
+        />
+        <q-select
+          v-model="codeSrchReq.groupCode"
+          outlined
+          stack-label
+          :options="groupCdOptions"
+          label="그룹코드여부"
+          emit-value
+          map-options
+          round
+          dense
+          flat
+          class="input"
+        />
+        <q-btn push class="button" color="green-7" label="조회" type="submit" />
+        <q-btn
+          push
+          class="button"
+          color="green-7"
+          label="초기화"
+          type="reset"
+        />
+      </q-form>
+    </div>
+    <div class="table">
+      <q-table
+        v-model:selected="selectedItems"
+        :rows="resData"
+        :columns="columns"
+        row-key="codeSerialNo"
+        selection="multiple"
+        :rows-per-page-options="[0]"
+        @row-click="fn_openModifyCodePopup"
+      >
+        <template #bottom>
+          <pagination-layout
+            :total-page="totalPages"
+            :current-page="currentPage"
+            style="margin: 0 auto"
+            @send-event="fn_PageReset"
           />
         </template>
-      </q-select>
+      </q-table>
+    </div>
+    <div class="proc">
       <q-btn
+        push
+        class="button"
         color="primary"
-        label="조회"
-        value="codeSearch"
-        @click="codeSearch"
+        label="등록"
+        @click="fn_openAddCodePopup"
+      />
+      <q-btn
+        push
+        class="button"
+        color="negative"
+        label="삭제"
+        @click="fn_removeCode"
       />
     </div>
-  </div>
-
-  <div class="q-pa-md">
-    <!-- <q-table title="코드관리" :rows="resData" :columns="columns" @row-click="clickRow"> -->
-
-    <q-table
-      v-model:selected="selected"
-      flat
-      bordered
-      title="코드관리"
-      :rows="resData"
-      row-key="codeSn"
-      :columns="columns"
-      class="my-sticky-header-table"
-      selection="single"
-    >
-      <template #top-right>
-        <q-btn color="primary" label="등록/수정" @click="insert" />
-        &ensp;
-        <q-btn color="primary" label="삭제" type="reset" @click="codeDelete" />
-      </template>
-    </q-table>
-  </div>
-
-  <template>
-    <div class="q-pa-md q-gutter-sm">
-      <q-dialog v-model="prompt" persistent>
-        <q-card style="min-width: 350px">
-          <q-form class="q-gutter-md" @submit="insertCode">
-            <q-card-section>
-              <div class="text-h6">코드 등록/수정</div>
-            </q-card-section>
-            <div />
-            <q-card-section class="q-pt-none">
-              <q-input
-                v-model="insertParam.codeId"
-                dense
-                autofocus
-                label="코드ID"
-                filled
-                :rules="[codeid_rules]"
-                :readonly="readonly"
-              />
-              <q-input
-                v-model="insertParam.codeNm"
-                dense
-                autofocus
-                label="코드명"
-                filled
-                :rules="[codeNm_rules]"
-              />
-              <q-checkbox
-                v-model="groupCdCheck"
-                left-label
-                label="상위코드 선택"
-              />
-              <q-select
-                v-if="groupCdCheck"
-                v-model="insertParam.upperCodeId"
-                filled
-                :options="arr"
-                hint="상위코드를 선택하세요"
-              />
-              <q-input
-                v-model="insertParam.sortOrdr"
-                dense
-                type="number"
-                autofocus
-                label="정렬순번"
-                filled
-                :rules="[sortSn_rules]"
-              />
-            </q-card-section>
-            <q-card-actions align="right" class="text-primary">
-              <q-btn
-                v-close-popup
-                flat
-                label="닫기"
-                type="reset"
-                @click="codeReset"
-              />
-              <q-btn flat label="등록" type="submit" />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+    <div class="popup">
+      <q-dialog ref="codeForm" v-model="isShowCodePopup" @hide="fn_codeReset">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>
+                {{ popupTitle }}
+              </q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form @submit="fu_handleSubmit">
+                  <q-card-section class="q-pt-none">
+                    <q-input
+                      v-model="param.code"
+                      label="코드ID"
+                      class="input"
+                      outlined
+                      :rules="[codeid_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-input
+                      v-model="param.codeName"
+                      label="코드명"
+                      class="input"
+                      outlined
+                      :rules="[codeNm_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-checkbox
+                      v-model="groupCdCheck"
+                      left-label
+                      label="상위코드 선택"
+                      :disable="readonly"
+                    />
+                    <q-select
+                      v-if="groupCdCheck"
+                      v-model="param.upperCode"
+                      outlined
+                      :options="options"
+                      :rules="[upCode_rules]"
+                      emit-value
+                      fill-input
+                      hide-selected
+                      input-debounce="0"
+                      refresh
+                      use-input
+                      :readonly="readonly"
+                      @filter="Fn_upCodefilter"
+                    >
+                      <template #option="scope">
+                        <q-item v-bind="scope.itemProps">
+                          <q-item-section>
+                            <q-item-label>{{ scope.opt.value }}</q-item-label>
+                            <q-item-label caption>{{
+                              scope.opt.label
+                            }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                    <q-input
+                      v-model="param.order"
+                      label="정렬순번"
+                      type="number"
+                      class="input"
+                      outlined
+                      :rules="[sortSn_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최초등록자"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{ param.registUsrId }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최초등록일시"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{
+                            date.formatDate(
+                              param.registDt,
+                              'YYYY/MM/DD HH:mm:ss'
+                            )
+                          }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최종수정자"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{ param.updtUsrId }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-field
+                      v-show="!isAdding"
+                      stack-label
+                      class="q-pb-sm"
+                      label="최종수정일시"
+                    >
+                      <template #control>
+                        <div class="self-center full-width no-outline">
+                          {{
+                            date.formatDate(param.updtDt, 'YYYY/MM/DD HH:mm:ss')
+                          }}
+                        </div>
+                      </template>
+                    </q-field>
+                    <q-toolbar class="bg-white">
+                      <q-toolbar-title />
+                      <div class="proc">
+                        <q-btn
+                          v-show="readonly === true && !isAdding"
+                          push
+                          color="primary"
+                          class="q-mr-sm"
+                          label="수정"
+                          @click="fn_modify"
+                        />
+                        <q-btn
+                          v-show="isAdding"
+                          push
+                          color="primary"
+                          label="저장"
+                          type="submit"
+                        />
+                        <q-btn
+                          v-show="readonly === false && !isAdding"
+                          push
+                          class="q-mr-sm"
+                          color="primary"
+                          label="저장"
+                          type="submit"
+                        />
+                        <q-btn
+                          v-show="readonly === true && !isAdding"
+                          push
+                          class="button"
+                          color="negative"
+                          label="삭제"
+                          type="reset"
+                          @click="fn_removeCode"
+                        />
+                        <q-btn
+                          v-show="readonly === false && !isAdding"
+                          push
+                          color="primary"
+                          label="취소"
+                          @click="fn_cancel"
+                        />
+                      </div>
+                    </q-toolbar>
+                  </q-card-section>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+        </q-layout>
       </q-dialog>
     </div>
-  </template>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { type QTableProps, date } from 'quasar'
-import { type ApiResponse } from '../../interface/server'
+import { onMounted, ref, watch } from 'vue'
+import { type QTableProps, date, useQuasar } from 'quasar'
+import type { PageListInfo } from '../../interface/server'
+import paginationLayout from '../../components/Pagination.vue'
+import { type ApiResponse } from '@/interface/server'
+const { loading } = useQuasar()
 
 const columns = ref<QTableProps['columns']>([
   {
-    name: 'codeId',
+    name: 'codeSerialNo',
+    align: 'left',
+    label: '코드일련번호',
+    field: 'codeSerialNo',
+    sortable: true
+  },
+  {
+    name: 'code',
     align: 'left',
     label: '코드ID',
-    field: 'codeId',
+    field: 'code',
     sortable: true
   },
-  { name: 'codeNm', align: 'center', label: '코드명', field: 'codeNm' },
   {
-    name: 'upperCodeId',
+    name: 'codeName',
+    align: 'center',
+    label: '코드명',
+    field: 'codeName'
+  },
+  {
+    name: 'upperCode',
     align: 'center',
     label: '상위코드ID',
-    field: 'upperCodeId',
+    field: 'upperCode',
     sortable: true
   },
   {
-    name: 'groupCodeAt',
+    name: 'groupCode',
     align: 'center',
     label: '그룹코드사용여부',
-    field: 'groupCodeAt'
+    field: 'groupCode'
   },
   {
-    name: 'sortOrdr',
+    name: 'order',
     align: 'center',
     label: '정렬순번',
-    field: 'sortOrdr',
+    field: 'order',
     sortable: true
   },
   {
@@ -188,101 +326,92 @@ const columns = ref<QTableProps['columns']>([
     label: '등록자',
     field: 'registUsrId'
   },
-  { name: 'registDt', align: 'center', label: '등록일시', field: 'registDt' },
-  { name: 'updtUsrId', align: 'center', label: '수정자', field: 'updtUsrId' },
-  { name: 'updtDt', align: 'center', label: '수정일시', field: 'updtDt' }
+  {
+    name: 'registDt',
+    align: 'center',
+    label: '등록일시',
+    field: 'registDt',
+    format: (val) => `${date.formatDate(val, 'YYYY/MM/DD HH:mm:ss')}`
+  },
+  {
+    name: 'updtUsrId',
+    align: 'center',
+    label: '수정자',
+    field: 'updtUsrId'
+  },
+  {
+    name: 'updtDt',
+    align: 'center',
+    label: '수정일시',
+    field: 'updtDt',
+    format: (val) => `${date.formatDate(val, 'YYYY/MM/DD HH:mm:ss')}`
+  }
 ])
 
-//let insertForm = ref<any>(null);
-const prompt = ref(false)
+const isShowCodePopup = ref<boolean>(false) // 코드 팝업 표시 여부
+const isAdding = ref<boolean>(true) // 코드 추가 여부
+const popupTitle = ref<string>('메뉴 등록')
 const resData = ref<Data[]>([])
-const searchData = ref<Data[]>()
-let selected = ref<Data[]>()
-let groupCdCheck = ref(false)
-let arr = []
-const readonly = ref(false)
+const allCodeData = ref<Data[]>()
+const selectedItems = ref<Data[]>([]) // 선택된 항목들
+const groupCdCheck = ref<boolean>(false) // 그룹 코드 사용 여부 체크
+const readonly = ref<boolean>(true)
+let uppercodeList: Option[] = [] // 상위 코드 목록
+const oldData = ref<Data>() //기존데이터
 
-// const clickRow = (evt: any, row: any, index: any) => {
-//     updateParam.value = { ...row }
-//     console.log("###", updateParam.value)
-//     insert()
-// }
+// 페이징을 위한 파라미터
+const currentPage = ref<number>(1)
+const totalPages = ref<number>(0)
+const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
+const totalItems = ref<number | undefined>()
 
-//그룹코드여부
-const groupCdOptions = ['Y', 'N']
+const groupCdOptions = [
+  { label: '전체', value: '' },
+  { label: 'Y', value: 'Y' },
+  { label: 'N', value: 'N' }
+]
 
-// api로 조회할 검색 조건 데이터 구조
-interface Search {
-  codeId: string
-  codeNm: string
-  upperCodeId: string
-  groupCodeAt: string
-  sortOrdr?: number
-  registUsrId: string
-  updtUsrId: string
+//상위코드 선택옵션 데이터타입
+interface Option {
+  label: string
+  value: string
 }
 
-// api로 조회할 데이터 구조
 interface Data {
-  codesn: string
-  codeId: string
-  codeNm: string
-  upperCodeId: string
-  groupCodeAt: string
-  sortOrdr?: number
+  codeSerialNo?: string
+  code: string
+  codeName: string
+  upperCode: string
+  groupCode: string
+  order?: number
   registUsrId: string
-  updtUsrId: string
   registDt: string
+  updtUsrId: string
   updtDt: string
 }
 
-const param = ref<Search>({
-  codeId: '',
-  codeNm: '',
-  upperCodeId: '',
-  groupCodeAt: '',
-  registUsrId: '',
-  updtUsrId: ''
+const codeSrchReq = ref<Pick<Data, 'code' | 'codeName' | 'groupCode'>>({
+  code: '',
+  codeName: '',
+  groupCode: ''
 })
 
-const deleteData = ref<Search>({
-  codeId: '',
-  codeNm: '',
-  upperCodeId: '',
-  groupCodeAt: '',
+const param = ref<Data>({
+  codeSerialNo: '',
+  code: '',
+  codeName: '',
+  upperCode: '',
+  groupCode: '',
+  order: 0,
   registUsrId: '',
-  updtUsrId: ''
-})
-
-const insertParam = ref<Search>({
-  codeId: '',
-  codeNm: '',
-  upperCodeId: '',
-  groupCodeAt: '',
-  registUsrId: '',
-  updtUsrId: ''
-})
-
-const updateParam = ref<Search>({
-  codeId: '',
-  codeNm: '',
-  upperCodeId: '',
-  groupCodeAt: '',
-  registUsrId: '',
-  updtUsrId: ''
+  registDt: '',
+  updtUsrId: '',
+  updtDt: ''
 })
 
 const codeid_rules = (val: string) => {
   if (!val) {
     return '코드ID를 입력해주세요.'
-  }
-  const kor = val.match(/[ㄱ-ㅎ|ㅏ-ㅣ가-힣]/g)
-  if (kor) {
-    return '한글은 입력할 수 없습니다.'
-  }
-  const special = val.match(/[{}[\]/?.,;:|)*~`!^\-+<>@#$%&\\=('"]/g)
-  if (special) {
-    return '특수문자는 입력할 수 없습니다.'
   }
   return true
 }
@@ -291,242 +420,349 @@ const codeNm_rules = (val: string) => {
   if (!val) {
     return '코드명을 입력해주세요.'
   }
-  const special = val.match(/[{}[\]/?,;:|)*~`!^\-+<>@#$%&\\=('"]/g)
-  if (special) {
-    return '특수문자는 입력할 수 없습니다.'
+  return true
+}
+
+const upCode_rules = (val: string) => {
+  if (!val) {
+    return '코드를 선택해주세요.'
   }
   return true
 }
 
 const sortSn_rules = (val: string) => {
   if (!val) {
-    return '정렬순번을 입력해주세요. 숫자만 입력 가능 합니다.'
+    return '정렬순번을 입력해주세요.'
   }
   return true
 }
 
-//코드 조회
-const codeSearch = async () => {
-  const result = await $fetch<ApiResponse<Data[]>>(
-    '/playground/public/code/codeSearch',
-    {
-      method: 'POST',
-      body: JSON.stringify(param.value)
-    }
-  )
-  resData.value = result.data
-}
+const options = ref(uppercodeList)
 
-//상위 코드 조회
-const SearchAll = async () => {
-  const result = await $fetch<ApiResponse<Data[]>>(
-    '/playground/public/code/selectUpCodeid',
-    {
-      method: 'GET'
-    }
-  )
-  searchData.value = result.data
+//상위코드 검색필터
+const Fn_upCodefilter = (val: string, update: (arg0: () => void) => void) => {
+  update(() => {
+    // 소문자로 변환
+    const needle = val.toLocaleLowerCase()
 
-  console.log(':::::::::::searchData', searchData)
-
-  arr.length = 0
-
-  searchData.value.forEach((item) => {
-    if (item.groupCodeAt == 'Y') {
-      const upcodeid = item.codeNm
-      arr.push(upcodeid)
-    }
-  })
-
-  //중복 제거
-  const set = new Set(arr)
-  const uniqueArr = [...set]
-  //정렬
-  arr = uniqueArr.sort()
-}
-
-//코드 삭제
-const codeDelete = async () => {
-  let codeId = ''
-
-  selected.value?.forEach(async (item) => {
-    deleteData.value = { ...item }
-  })
-  codeId = deleteData.value.codeId
-
-  if (codeId == '' || codeId == null || codeId == undefined) {
-    alert('삭제할 코드를 선택하세요.')
-  } else if (
-    !confirm('코드ID : ' + codeId + '  해당 코드를 삭제하시겠습니까?')
-  ) {
-  } else {
-    const result = await $fetch<ApiResponse<Data[]>>(
-      '/playground/public/code/codeDelete',
-      {
-        method: 'POST',
-        body: JSON.stringify(deleteData.value)
-      }
-    )
-    alert('삭제되었습니다.')
-    codeReset()
-  }
-}
-
-const insert = async () => {
-  prompt.value = true
-
-  let findSn = ''
-
-  //객체 복사 , update시 코드,상위코드 readonly(sn 값이 있으면)
-  if (selected.value !== null) {
-    selected.value?.forEach((item) => {
-      updateParam.value = { ...item }
-      findSn = item.codesn
+    options.value = uppercodeList.filter((v) => {
+      // 상위코드를 소문자로 변환
+      const vlaLower = v.value.toLocaleLowerCase()
+      //해당 값이 있는지 확인
+      return vlaLower.includes(needle)
     })
-    if (findSn !== '') {
-      readonly.value = true
-      insertParam.value = updateParam.value
+  })
+}
 
-      //상위코드값이 저장되어 있으면 코드 값 보이게
-      if (updateParam.value.upperCodeId !== '') {
-        groupCdCheck.value = true
-      } else {
-        groupCdCheck.value = false
-      }
-    } else {
-      readonly.value = false
-    }
+// 코드 등록 팝업 열기
+const fn_openAddCodePopup = () => {
+  isShowCodePopup.value = true
+  fn_openCodePopup(true)
+  readonly.value = false
+}
+
+//코드 수정
+const fn_openModifyCodePopup = (_evt: Event, row: Data, _index: number) => {
+  oldData.value = { ...row }
+  param.value = { ...row }
+
+  groupCdCheck.value = param.value.groupCode === 'Y' ? false : true
+  isShowCodePopup.value = true
+  fn_openCodePopup(false)
+}
+
+// 코드 팝업 열기
+const fn_openCodePopup = (adding: boolean) => {
+  isAdding.value = adding
+  popupTitle.value = adding ? '코드 등록' : '코드 상세'
+}
+
+//코드 수정 활성화
+const fn_modify = () => {
+  readonly.value = false
+  popupTitle.value = '코드 수정'
+}
+
+//코드 수정 취소
+const fn_cancel = () => {
+  readonly.value = true
+  popupTitle.value = '코드 상세'
+}
+
+//submit 이벤트 핸들러
+const fu_handleSubmit = () => {
+  if (isAdding.value) {
+    fn_addCode()
+  } else {
+    fn_modifyCode()
   }
-
-  // if (updateParam.value.cdId !== '') {
-  //     readonly.value = true
-
-  //     insertParam.value = updateParam.value
-
-  //     //상위코드값이 저장되어 있으면 코드 값 보이게
-  //     if (updateParam.value.upCdId !== '') {
-  //         groupCdCheck.value = true
-  //     }
-  //     else { groupCdCheck.value = false }
-  // } else {
-  //     readonly.value = false
-  // }
 }
 
 //코드 등록
-const insertCode = async () => {
-  //ID중복체크
-  let findId = ''
-  let findUpCdId = ''
+const fn_addCode = async () => {
+  // 그룹 코드 사용 여부에 따라 그룹 코드 설정
+  const isGroupCodeUsed = groupCdCheck.value
+  param.value.groupCode = isGroupCodeUsed && param.value.upperCode ? 'N' : 'Y'
+  param.value.upperCode = isGroupCodeUsed ? param.value.upperCode : ''
 
-  if (insertParam.value !== null) {
-    resData.value?.forEach((item) => {
-      if (
-        item.codeId == insertParam.value.codeId &&
-        item.upperCodeId == insertParam.value.upperCodeId
-      ) {
-        findId = item.codeId
-        findUpCdId = item.upperCodeId
-      }
+  loading.show()
+
+  await $fetch<ApiResponse<Data[]>>('/playground/public/code/addCode', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
+  })
+    .then(() => {
+      alert('등록되었습니다.')
+      fn_codeReset()
     })
-    if (readonly.value != true) {
-      // if (insertParam.value.cdId == '' || insertParam.value.cdNm == '' || insertParam.value.sortSn == '') {
-      //     alert('필수 항목을 모두 입력해주세요')
-      //     return
-      // } else {
-      if (
-        insertParam.value.codeId == findId &&
-        insertParam.value.upperCodeId == findUpCdId
-      ) {
-        alert('이미 등록된 코드입니다.')
-        return
-      } else {
-        submit()
-      }
-      // }
-    } else {
-      // readonly.value = true 일시, cdid 중복 체크 X
-      selected.value?.forEach((item) => {
-        updateParam.value = { ...item }
-      })
+    .catch((error) => {
+      console.error(error)
+      alert('등록되지 않았습니다.')
+    })
 
-      if (
-        updateParam.value.codeNm == insertParam.value.codeNm &&
-        updateParam.value.sortOrdr == insertParam.value.sortOrdr &&
-        updateParam.value.upperCodeId == insertParam.value.upperCodeId
-      ) {
-        alert('변경된 내용이 없습니다.')
-        return
-      }
-      submit()
-    }
-  }
+  loading.hide()
 }
 
-const submit = async () => {
-  //그룹코드사용여부
-  const bool = groupCdCheck.value
-  if (bool === true) {
-    insertParam.value.groupCodeAt = 'N'
-    if (insertParam.value.upperCodeId == '') {
-      insertParam.value.groupCodeAt = 'Y'
-    }
-  } else {
-    insertParam.value.groupCodeAt = 'Y'
-    insertParam.value.upperCodeId = ''
+// 코드 수정
+const fn_modifyCode = async () => {
+  // 그룹 코드 사용 여부에 따라 그룹 코드 설정
+  const isGroupCodeUsed = groupCdCheck.value
+  param.value.groupCode = isGroupCodeUsed && param.value.upperCode ? 'N' : 'Y'
+  param.value.upperCode = isGroupCodeUsed ? param.value.upperCode : ''
+
+  //기존 row데이터와 수정된 param
+  if (JSON.stringify(param.value) === JSON.stringify(oldData.value)) {
+    alert('변경된 내용이 없습니다.')
+    return
   }
 
-  const result = await $fetch<ApiResponse<Data[]>>(
-    '/playground/public/code/codeSave',
+  loading.show()
+
+  await $fetch<ApiResponse<Data[]>>('/playground/public/code/addCode', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
+  })
+    .then(() => {
+      alert('수정되었습니다.')
+      fn_codeReset()
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('수정되지 않았습니다.')
+    })
+
+  loading.hide()
+}
+
+//코드 조회
+const fn_getCodeList = async () => {
+  await $fetch<ApiResponse<PageListInfo<Data>>>(
+    '/playground/public/code/getCodePageList?page=' +
+      (currentPage.value - 1) +
+      '&size=' +
+      itemsPerPage.value,
     {
       method: 'POST',
-      body: JSON.stringify(insertParam.value)
+      body: JSON.stringify(codeSrchReq.value)
     }
   )
-  alert('등록되었습니다.')
-  prompt.value = false
-  codeReset()
+    .then((result) => {
+      resData.value = result.data.content
+
+      totalItems.value = result.data.totalElements ?? 0
+
+      totalPages.value = Math.ceil(
+        totalItems.value / itemsPerPage.value !== 0
+          ? Math.ceil(totalItems.value / itemsPerPage.value)
+          : 1
+      )
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('코드리스트가 조회되지 않았습니다.')
+    })
 }
 
-const codeReset = () => {
-  groupCdCheck = ref(false)
+// 목록조회 - 조회버튼 클릭
+const fn_srchCodeList = () => {
+  currentPage.value = 1
 
-  selected = ref<Data[]>()
+  fn_getCodeList()
+}
 
-  deleteData.value = {
-    codeId: '',
-    codeNm: '',
-    upperCodeId: '',
-    groupCodeAt: '',
-    sortOrdr: 0,
-    registUsrId: '',
-    updtUsrId: ''
+// 목록조회 - 페이징
+const fn_PageReset = (pageIdx: number, idx: string) => {
+  if (idx === 'pageNum') {
+    currentPage.value = pageIdx === 0 ? 1 : pageIdx
+  } else {
+    itemsPerPage.value = pageIdx
   }
-  insertParam.value = {
-    codeId: '',
-    codeNm: '',
-    upperCodeId: '',
-    groupCodeAt: '',
-    sortOrdr: 0,
-    registUsrId: '',
-    updtUsrId: ''
+}
+
+watch([currentPage, itemsPerPage], () => {
+  fn_getCodeList()
+})
+
+//상위 코드 조회
+const fn_getUpCodeList = async () => {
+  await $fetch<ApiResponse<Data[]>>('/playground/public/code/getAllCodeList', {
+    method: 'GET'
+  })
+    .then((result) => {
+      allCodeData.value = result.data
+
+      // 그룹 코드인 항목만 필터링
+      const filterOptions = allCodeData.value
+        .filter((item) => item.groupCode === 'Y')
+        .map((item) => ({ label: item.codeName, value: item.code }))
+
+      // 중복 제거 후 정렬
+      const uniqueSort = [...new Set(filterOptions)].sort((a, b) =>
+        a.value.localeCompare(b.value)
+      )
+
+      uppercodeList = uniqueSort
+    })
+    .catch((error) => {
+      console.error(error)
+      alert('조회되지 않았습니다.')
+    })
+}
+
+//코드 삭제
+const fn_removeCode = async () => {
+  if (!isShowCodePopup.value) {
+    if (!selectedItems.value || selectedItems.value.length === 0) {
+      return alert('삭제할 코드를 선택해 주세요.')
+    }
+  }
+  const codeNames = selectedItems?.value
+    ?.map((item) => item.codeName)
+    .join(', ')
+
+  const paramCodeName = !isAdding.value ? param.value.codeName : ''
+
+  if (
+    confirm(
+      `선택한 코드를 정말 삭제하시겠습니까?\n\n 코드 : ${codeNames}${paramCodeName}`
+    )
+  ) {
+    try {
+      const itemsDelete = !isAdding.value ? [param.value] : selectedItems.value
+
+      loading.show()
+
+      await $fetch<ApiResponse<Data[]>>('/playground/public/code/removeCode', {
+        method: 'POST',
+        body: JSON.stringify(itemsDelete)
+      })
+      alert('삭제되었습니다.')
+      fn_codeReset()
+    } catch (error) {
+      console.error(error)
+      alert('삭제되지 않았습니다.')
+    }
+
+    loading.hide()
+  } else {
+    alert('삭제가 취소되었습니다.')
+    selectedItems.value = []
+  }
+}
+
+// 목록조회 - 검색조건 초기화
+const fn_codeSrchReset = () => {
+  codeSrchReq.value = {
+    code: '',
+    codeName: '',
+    groupCode: ''
   }
 
-  updateParam.value = {
-    codeId: '',
-    codeNm: '',
-    upperCodeId: '',
-    groupCodeAt: '',
-    sortOrdr: 0,
+  currentPage.value = 1
+
+  fn_getCodeList()
+}
+
+const fn_codeReset = () => {
+  readonly.value = true
+  isShowCodePopup.value = false
+  groupCdCheck.value = false
+  selectedItems.value = []
+
+  param.value = {
+    codeSerialNo: '',
+    code: '',
+    codeName: '',
+    upperCode: '',
+    groupCode: '',
+    order: 0,
     registUsrId: '',
-    updtUsrId: ''
+    registDt: '',
+    updtUsrId: '',
+    updtDt: ''
   }
-  codeSearch()
-  SearchAll()
+  fn_getCodeList()
+  fn_getUpCodeList()
 }
 
 onMounted(() => {
-  SearchAll()
-  codeSearch()
+  fn_getUpCodeList()
+  fn_getCodeList()
 })
 </script>
+
+<style lang="scss" scoped>
+.content {
+  margin-top: 2rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
+
+  .title {
+    margin-top: 2rem;
+  }
+
+  .search {
+    margin-top: 2rem;
+
+    .input {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
+    .select {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
+    .button {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .table {
+    margin-top: 1rem;
+
+    .items-center {
+      padding: 0;
+      .flex-center {
+        padding: 0;
+      }
+    }
+  }
+
+  .proc {
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+
+    .button {
+      margin-right: 0.5rem;
+    }
+    .buttonR {
+      margin-left: 0.5rem;
+      float: right;
+    }
+  }
+}
+</style>
