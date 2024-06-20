@@ -220,7 +220,7 @@
                   <map-search
                     :location="currentLocationCoordinate"
                     keyword="맛집"
-                    :searchRadius="300"
+                    :search-radius="300"
                     @marker-click="fn_selectedAddRestaurant"
                   />
                 </q-step>
@@ -232,7 +232,7 @@
                   :done="restaurantAddStep > 2"
                 >
                   <q-field label="식당명" stack-label readonly>
-                    <template v-slot:control>
+                    <template #control>
                       <div class="self-center full-width no-outline">
                         {{ addRestaurant.restaurantName }}
                       </div>
@@ -240,7 +240,7 @@
                   </q-field>
 
                   <q-field label="식당유형" stack-label readonly>
-                    <template v-slot:control>
+                    <template #control>
                       <div class="self-center full-width no-outline">
                         {{ addRestaurant.restaurantKindCodeName }}
                       </div>
@@ -248,7 +248,7 @@
                   </q-field>
 
                   <q-field label="식당거리" stack-label readonly>
-                    <template v-slot:control>
+                    <template #control>
                       <div class="self-center full-width no-outline">
                         {{ addRestaurant.restaurantDistance }} m
                       </div>
@@ -258,15 +258,15 @@
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="restaurantAddStep = 1"
                       color="primary"
                       label="다시 선택"
                       class="q-ml-sm"
+                      @click="restaurantAddStep = 1"
                     />
                     <q-btn
-                      @click="restaurantAddStep = 3"
                       color="primary"
                       label="다음"
+                      @click="restaurantAddStep = 3"
                     />
                   </q-stepper-navigation>
                 </q-step>
@@ -277,17 +277,17 @@
                   icon="add_photo_alternate"
                 >
                   <image-upload
-                    @fileUploaded="fn_fileUploaded"
-                    @fileRemoved="fn_fileRemoved"
+                    @file-uploaded="fn_fileUploaded"
+                    @file-removed="fn_fileRemoved"
                   />
 
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="restaurantAddStep = 2"
                       color="primary"
                       label="이전 단계"
                       class="q-ml-sm"
+                      @click="restaurantAddStep = 2"
                     />
                     <q-btn
                       color="primary"
@@ -328,23 +328,23 @@
           <q-page-container class="bg-white">
             <q-page padding>
               <q-splitter v-model="restaurantDetailSplitter" disable>
-                <template v-slot:before>
+                <template #before>
                   <q-tabs
+                    v-if="!isMobile"
                     v-model="restaurantDetailTab"
                     vertical
                     class="text-light-blue-8"
-                    v-if="!isMobile"
                   >
                     <q-tab name="basic" icon="info" label="정보" />
                     <q-tab name="menu" icon="restaurant_menu" label="메뉴" />
                   </q-tabs>
                 </template>
 
-                <template v-slot:after>
+                <template #after>
                   <q-tabs
+                    v-if="isMobile"
                     v-model="restaurantDetailTab"
                     class="text-light-blue-8"
-                    v-if="isMobile"
                   >
                     <q-tab name="basic" icon="info" label="정보" />
                     <q-tab name="menu" icon="menu" label="메뉴" />
@@ -360,7 +360,7 @@
                       <div class="text-h4 q-mb-md">기본정보</div>
                       <div class="detail-info q-mb-md">
                         <q-field label="식당명" stack-label readonly>
-                          <template v-slot:control>
+                          <template #control>
                             <div class="self-center full-width no-outline">
                               {{ restaurantDetail.restaurantName }}
                             </div>
@@ -368,7 +368,7 @@
                         </q-field>
 
                         <q-field label="식당유형" stack-label readonly>
-                          <template v-slot:control>
+                          <template #control>
                             <div class="self-center full-width no-outline">
                               {{ restaurantDetail.restaurantKindCodeName }}
                             </div>
@@ -376,7 +376,7 @@
                         </q-field>
 
                         <q-field label="식당거리" stack-label readonly>
-                          <template v-slot:control>
+                          <template #control>
                             <div class="self-center full-width no-outline">
                               {{ restaurantDetail.restaurantDistance }} m
                             </div>
@@ -399,9 +399,9 @@
                       <div class="detail-img">
                         <div class="q-my-xs row full-width justify-end">
                           <q-btn
-                            @click="fn_changeRestaurantDetailImage"
                             color="primary"
                             label="사진 변경"
+                            @click="fn_changeRestaurantDetailImage"
                           />
                         </div>
 
@@ -414,14 +414,13 @@
                             border: '1px solid lightgray'
                           }"
                           no-native-menu
-                        >
-                        </q-img>
+                        />
 
                         <image-upload
                           ref="restaurantDetailImageUpload"
-                          :isVisible="false"
-                          @fileAdded="fn_restaurantDetailImageAdded"
-                          @fileUploaded="fn_restaurantDetailImageUploaded"
+                          :is-visible="false"
+                          @file-added="fn_restaurantDetailImageAdded"
+                          @file-uploaded="fn_restaurantDetailImageUploaded"
                         />
                       </div>
                     </q-tab-panel>
@@ -443,14 +442,15 @@
                                 <q-btn
                                   color="primary"
                                   size="sm"
-                                  @click="fn_deleteMenu(menu)"
                                   class="q-mr-xs"
+                                  @click="fn_deleteMenu(menu)"
                                   >삭제</q-btn
                                 >
                                 <q-btn
                                   v-if="!menu.isModifyMenu"
                                   color="primary"
                                   size="sm"
+                                  class="q-mr-xs"
                                   @click="
                                     () => {
                                       menu.modifyMenuName = menu.menuName
@@ -458,7 +458,6 @@
                                       menu.isModifyMenu = true
                                     }
                                   "
-                                  class="q-mr-xs"
                                   >수정</q-btn
                                 >
 
@@ -466,8 +465,8 @@
                                   v-if="menu.isModifyMenu"
                                   color="primary"
                                   size="sm"
-                                  @click="menu.isModifyMenu = false"
                                   class="q-mr-xs"
+                                  @click="menu.isModifyMenu = false"
                                   >취소</q-btn
                                 >
 
@@ -503,11 +502,10 @@
                                   lazy-rules="ondemand"
                                   maxlength="200"
                                   :rules="[rulsAddMenuMenuName]"
-                                >
-                                </q-input>
+                                />
                               </div>
 
-                              <div class="col-1"></div>
+                              <div class="col-1"/>
 
                               <div class="col-5 text-right">
                                 <q-input
@@ -529,8 +527,7 @@
                                   maxlength="15"
                                   min="0"
                                   :rules="[rulsAddMenuMenuPrice]"
-                                >
-                                </q-input>
+                                />
                               </div>
                             </div>
                           </q-card-section>
@@ -546,7 +543,7 @@
                                 }}
                               </div>
 
-                              <div class="col-6 text-right"></div>
+                              <div class="col-6 text-right"/>
                             </div>
                           </q-card-section>
 
@@ -562,12 +559,12 @@
                                 class="card-hashtag"
                               >
                                 <q-chip
+                                  v-auto-animate
                                   removable
-                                  @remove="fn_removeHashtag(hashtag)"
                                   color="primary"
                                   text-color="white"
                                   outline
-                                  v-auto-animate
+                                  @remove="fn_removeHashtag(hashtag)"
                                 >
                                   {{ hashtag.hashtagName }}
                                 </q-chip>
@@ -576,11 +573,11 @@
                               <div class="q-ma-xs row">
                                 <div class="row">
                                   <q-input
-                                    v-auto-animate
                                     v-if="menu.isHashtagAddMode"
-                                    v-model="menu.addMenuHashtag.hashtagName"
                                     :ref=" (el: QInput) => { inp_addHashtages[
                                   menu.restaurantMenuSerialNo ] = el } "
+                                    v-model="menu.addMenuHashtag.hashtagName"
+                                    v-auto-animate
                                     outlined
                                     round
                                     dense
@@ -627,7 +624,7 @@
                                       menu.addMenuHashtag.hashtagName = ''
                                     }
                                   "
-                                ></q-btn>
+                                />
                               </div>
                             </div>
                           </q-card-section>
@@ -658,11 +655,10 @@
                                 lazy-rules="ondemand"
                                 maxlength="200"
                                 :rules="[rulsAddMenuMenuName]"
-                              >
-                              </q-input>
+                              />
                             </div>
 
-                            <div class="col-1"></div>
+                            <div class="col-1"/>
 
                             <div class="col-5 text-right">
                               <q-input
@@ -678,8 +674,7 @@
                                 maxlength="15"
                                 min="0"
                                 :rules="[rulsAddMenuMenuPrice]"
-                              >
-                              </q-input>
+                              />
                             </div>
                           </div>
                         </q-card-section>
@@ -699,10 +694,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { QInput, useQuasar } from 'quasar'
+import { josa } from 'hangul-util'
 import { type ApiResponse, type Code } from '@/interface/server'
 import { codeUtil } from '@/utils/code'
 import { imageUtil } from '~/utils/image'
-import { josa } from 'hangul-util'
 
 const { loading, platform } = useQuasar()
 
@@ -1157,7 +1152,7 @@ const fn_restaurantDetailImageUploaded = async (fileId: number) => {
       restaurantDetail.value.imageFileId = fileId
       restaurantDetail.value.imageUrl = imageUtil.getImageUrl(fileId)
 
-      let restaurant = restaurantResList.value.find(
+      const restaurant = restaurantResList.value.find(
         (restaurant) =>
           restaurant.restaurantSerialNo ==
           restaurantDetail.value.restaurantSerialNo

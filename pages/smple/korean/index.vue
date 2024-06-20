@@ -47,15 +47,16 @@
 
                 <q-separator inset class="q-my-lg" />
 
-                <p class="test-result" v-html="testStr1_3"></p>
+                <!-- eslint-disable vue/no-v-html -->
+                <p class="test-result" v-html="testStr1_3" />
               </div>
 
               <q-separator inset vertical class="q-mx-lg" />
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode1"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '190px' }"
@@ -112,8 +113,8 @@
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode2"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '230px' }"
@@ -175,8 +176,8 @@
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode3"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '180px' }"
@@ -204,11 +205,17 @@
 
             <div class="q-pa-md row">
               <div class="col-4">
-                <p class="test-result">
+                <div class="test-result">
                   기준
                   <br />
+
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_1" :key="index" style="width: 55px;" class="q-pr-xs">
+                    <span
+                      v-for="(_txt, index) in testStr4_1"
+                      :key="index"
+                      style="width: 55px"
+                      class="q-pr-xs"
+                    >
                       <q-input
                         v-model="testStr4_1[index]"
                         outlined
@@ -225,7 +232,12 @@
                   정렬 전
                   <br />
                   <div class="row">
-                    <span v-for="(txt, index) in testStr4_2" :key="index" style="width: 55px;" class="q-pr-xs">
+                    <span
+                      v-for="(_txt, index) in testStr4_2"
+                      :key="index"
+                      style="width: 55px"
+                      class="q-pr-xs"
+                    >
                       <q-input
                         v-model="testStr4_2[index]"
                         outlined
@@ -242,15 +254,15 @@
                   정렬 후
                   <br />
                   {{ testStr4_3 }}
-                </p>
+                </div>
               </div>
 
               <q-separator inset vertical class="q-mx-lg" />
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode4"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '260px' }"
@@ -313,8 +325,8 @@
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode5"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '180px' }"
@@ -375,8 +387,8 @@
 
               <div class="col-7">
                 <code-editor
-                  class="editor"
                   v-model="testCode6"
+                  class="editor"
                   lang="typescript"
                   :options="editorOptions"
                   :style="{ height: '180px' }"
@@ -391,15 +403,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import {
-  makeRegexByCho,
+  formatDate,
+  formatJosa,
   formatNumber,
   formatNumberAll,
-  formatDate,
-  sortByGroups,
-  formatJosa,
-  josa
+  josa,
+  makeRegexByCho,
+  sortByGroups
 } from 'hangul-util'
 
 const editorOptions = ref({
@@ -444,7 +456,7 @@ watch(testStr1_1, (newVal) => {
 // 초성 정규식 매칭 - end
 
 // 숫자 to 한글 - start
-const testStr2_1 = ref<string>(123456)
+const testStr2_1 = ref<number>(123456)
 const testStr2_2 = ref<string>(formatNumber(testStr2_1.value))
 const testStr2_3 = ref<string>(formatNumberAll(testStr2_1.value))
 const testCode2 = ref<string>(`import { formatDate } from 'hangul-util'
@@ -459,14 +471,14 @@ formatNumber(${testStr2_1.value})
  */
 formatNumberAll(${testStr2_1.value})`)
 
-watch(testStr2_1, (newVal) => {
+watch(testStr2_1, () => {
   testStr2_2.value = formatNumber(testStr2_1.value)
   testStr2_3.value = formatNumberAll(testStr2_1.value)
 })
 // 숫자 to 한글 - end
 
 // 날짜 포맷 - start
-const testStr3_1 = ref<date>(new Date())
+const testStr3_1 = ref<Date>(new Date())
 const testStr3_2 = ref<string>('YYYY년 MM월 DD일 (dd) HH시 mm분 ss초')
 const testStr3_3 = ref<string>(formatDate(testStr3_1.value, testStr3_2.value))
 const testCode3 = ref<string>(`import { formatDate } from 'hangul-util'
@@ -478,7 +490,7 @@ formatNumber(new Date())
 
 formatDate(new Date(), '${testStr3_2.value}')`)
 
-watch([testStr3_1, testStr3_2], (newVal) => {
+watch([testStr3_1, testStr3_2], () => {
   testStr3_3.value = formatDate(testStr3_1.value, testStr3_2.value)
 })
 // 날짜 포맷 - end
@@ -494,20 +506,24 @@ const testCode4 = ref<string>(`import { sortByGroups } from 'hangul-util'
 /**
  * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
  */
-sortByGroups(['${testStr4_2.value.join('\', \'')}'], 
-              ['${testStr4_1.value.join('\', \'')}'])`)
+sortByGroups(['${testStr4_2.value.join("', '")}'], 
+              ['${testStr4_1.value.join("', '")}'])`)
 
-watch([testStr4_1, testStr4_2], (a) => {
-  testStr4_3.value = sortByGroups(testStr4_2.value, testStr4_1.value)
+watch(
+  [testStr4_1, testStr4_2],
+  () => {
+    testStr4_3.value = sortByGroups(testStr4_2.value, testStr4_1.value)
 
-  testCode4.value = `import { sortByGroups } from 'hangul-util'
+    testCode4.value = `import { sortByGroups } from 'hangul-util'
 
 /**
  * sortByGroups(array?: any[], groups?: (number | string)[], orderASC?: boolean, compare?: string): any[]
  */
-sortByGroups(['${testStr4_2.value.join('\', \'')}'], 
-              ['${testStr4_1.value.join('\', \'')}'])`
-}, {deep: true})
+sortByGroups(['${testStr4_2.value.join("', '")}'], 
+              ['${testStr4_1.value.join("', '")}'])`
+  },
+  { deep: true }
+)
 // 문자 배열 조건 정렬 - end
 
 // 조사 포맷 - start

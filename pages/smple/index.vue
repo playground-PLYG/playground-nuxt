@@ -1,211 +1,213 @@
 <template>
-  <!-- 메인 영역 시작 -->
-  <div class="content">
-    <div class="title">
-      <div class="text-h4"><q-icon name="chat" /> 샘플</div>
+  <div>
+    <!-- 메인 영역 시작 -->
+    <div class="content">
+      <div class="title">
+        <div class="text-h4"><q-icon name="chat" /> 샘플</div>
+      </div>
+      <div class="table">
+        <q-table
+          v-model:selected="selected"
+          :rows="resData"
+          :columns="columns"
+          row-key="sampleSsno"
+          selection="multiple"
+          :rows-per-page-options="[0]"
+          @row-click="clickRow"
+        >
+          <!-- v-slot:bottom의 의미를 모르겠음 페이징이 가운데 정렬안되는 문제도 있는데.. -->
+          <template #bottom>
+            <paginationLayout
+              :total-page="totalPages"
+              :current-page="currentPage"
+              @send-event="reset"
+            />
+          </template>
+        </q-table>
+      </div>
+      <div class="proc">
+        <!-- <q-btn push class="button" color="primary" label="등록" @click="showInsertDialog = true"/> -->
+        <q-btn
+          push
+          class="button"
+          color="primary"
+          label="수정"
+          @click="clickBtnModify"
+        />
+        <q-btn push class="button" color="negative" label="삭제" />
+        <q-btn
+          push
+          class="button"
+          color="primary"
+          label="샘플상세리스트조회"
+          @click="clickBtnDetailList"
+        />
+      </div>
     </div>
-    <div class="table">
-      <q-table
-        v-model:selected="selected"
-        :rows="resData"
-        :columns="columns"
-        row-key="sampleSsno"
-        selection="multiple"
-        :rows-per-page-options="[0]"
-        @row-click="clickRow"
-      >
-        <!-- v-slot:bottom의 의미를 모르겠음 페이징이 가운데 정렬안되는 문제도 있는데.. -->
-        <template #bottom>
-          <paginationLayout
-            :total-page="totalPages"
-            :current-page="currentPage"
-            @send-event="reset"
-          />
-        </template>
-      </q-table>
-    </div>
-    <div class="proc">
-      <!-- <q-btn push class="button" color="primary" label="등록" @click="showInsertDialog = true"/> -->
-      <q-btn
-        push
-        class="button"
-        color="primary"
-        label="수정"
-        @click="clickBtnModify"
-      />
-      <q-btn push class="button" color="negative" label="삭제" />
-      <q-btn
-        push
-        class="button"
-        color="primary"
-        label="샘플상세리스트조회"
-        @click="clickBtnDetailList"
-      />
-    </div>
-  </div>
-  <!-- 메인 영역 종료 -->
+    <!-- 메인 영역 종료 -->
 
-  <!-- 팝업 영역 상세조회 Detail-->
-  <div class="popup">
-    <q-dialog v-model="showDetailDialog">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>상세조회</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-field
-                stack-label
-                label="샘플일련번호"
-                style="padding-bottom: 20px"
-              >
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ param.sampleSsno }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field
-                stack-label
-                label="샘플1차내용"
-                style="padding-bottom: 20px"
-              >
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ param.sampleContent1 }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field
-                stack-label
-                label="샘플2차내용"
-                style="padding-bottom: 20px"
-              >
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ param.sampleContent2 }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field
-                stack-label
-                label="샘플3차내용"
-                style="padding-bottom: 20px"
-              >
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ param.sampleContent3 }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field stack-label label="시간" style="padding-bottom: 20px">
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ date.formatDate(param.useDate, 'YYYY-MM-DD HH:mm') }}
-                  </div>
-                </template>
-              </q-field>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title />
-            <div class="proc">
-              <!-- <q-btn push class="button" color="primary" label="수정" @click="clickBtnModify" /> -->
-              <q-btn push class="button" color="negative" label="삭제" />
-            </div>
-          </q-toolbar>
-        </q-footer>
-      </q-layout>
-    </q-dialog>
-  </div>
-  <!-- 팝업 영역 종료 -->
-  <!-- 수정 팝업 -->
-  <div class="popup">
-    <q-dialog v-model="showUpdateDialog" @hide="onReset">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>수정</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form ref="updateForm">
-                <q-input
-                  v-model="param.sampleContent1"
-                  outlined
+    <!-- 팝업 영역 상세조회 Detail-->
+    <div class="popup">
+      <q-dialog v-model="showDetailDialog">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>상세조회</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-field
                   stack-label
-                  label="1차내용"
-                />
-                <q-input
-                  v-model="param.sampleContent2"
-                  outlined
+                  label="샘플일련번호"
+                  style="padding-bottom: 20px"
+                >
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ param.sampleSsno }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field
                   stack-label
-                  label="2차내용"
-                />
-                <q-input
-                  v-model="param.sampleContent3"
-                  outlined
+                  label="샘플1차내용"
+                  style="padding-bottom: 20px"
+                >
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ param.sampleContent1 }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field
                   stack-label
-                  label="3차내용"
+                  label="샘플2차내용"
+                  style="padding-bottom: 20px"
+                >
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ param.sampleContent2 }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field
+                  stack-label
+                  label="샘플3차내용"
+                  style="padding-bottom: 20px"
+                >
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ param.sampleContent3 }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field stack-label label="시간" style="padding-bottom: 20px">
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ date.formatDate(param.useDate, 'YYYY-MM-DD HH:mm') }}
+                    </div>
+                  </template>
+                </q-field>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+          <q-footer>
+            <q-toolbar class="bg-white">
+              <q-toolbar-title />
+              <div class="proc">
+                <!-- <q-btn push class="button" color="primary" label="수정" @click="clickBtnModify" /> -->
+                <q-btn push class="button" color="negative" label="삭제" />
+              </div>
+            </q-toolbar>
+          </q-footer>
+        </q-layout>
+      </q-dialog>
+    </div>
+    <!-- 팝업 영역 종료 -->
+    <!-- 수정 팝업 -->
+    <div class="popup">
+      <q-dialog v-model="showUpdateDialog" @hide="onReset">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>수정</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form ref="updateForm">
+                  <q-input
+                    v-model="param.sampleContent1"
+                    outlined
+                    stack-label
+                    label="1차내용"
+                  />
+                  <q-input
+                    v-model="param.sampleContent2"
+                    outlined
+                    stack-label
+                    label="2차내용"
+                  />
+                  <q-input
+                    v-model="param.sampleContent3"
+                    outlined
+                    stack-label
+                    label="3차내용"
+                  />
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+          <q-footer>
+            <q-toolbar class="bg-white">
+              <q-toolbar-title />
+              <div class="proc">
+                <q-btn
+                  push
+                  color="primary"
+                  label="저장"
+                  @click="onUpdateSubmit"
                 />
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title />
-            <div class="proc">
-              <q-btn
-                push
-                color="primary"
-                label="저장"
-                @click="onUpdateSubmit"
-              />
-              <q-btn
-                push
-                color="primary"
-                label="취소"
-                @click="closeUpdateDialog"
-              />
-            </div>
-          </q-toolbar>
-        </q-footer>
-      </q-layout>
-    </q-dialog>
+                <q-btn
+                  push
+                  color="primary"
+                  label="취소"
+                  @click="closeUpdateDialog"
+                />
+              </div>
+            </q-toolbar>
+          </q-footer>
+        </q-layout>
+      </q-dialog>
+    </div>
+    <!-- 수정 팝업 -->
+    <!-- 팝업 상세 목록 -->
+    <div class="popup">
+      <q-dialog v-model="showDetailListDialog">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>샘플 상세 목록 조회</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <div class="table">
+            <q-table
+              style="padding-top: 50px"
+              :rows="resDetailList"
+              :columns="detailColumns"
+              row-key="sampleDetailSsno"
+            />
+          </div>
+        </q-layout>
+      </q-dialog>
+    </div>
+    <!-- 팝업 상세 목록 종료 -->
   </div>
-  <!-- 수정 팝업 -->
-  <!-- 팝업 상세 목록 -->
-  <div class="popup">
-    <q-dialog v-model="showDetailListDialog">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>샘플 상세 목록 조회</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <div class="table">
-          <q-table
-            style="padding-top: 50px"
-            :rows="resDetailList"
-            :columns="detailColumns"
-            row-key="sampleDetailSsno"
-          />
-        </div>
-      </q-layout>
-    </q-dialog>
-  </div>
-  <!-- 팝업 상세 목록 종료 -->
 </template>
 
 <script setup lang="ts">
@@ -217,7 +219,7 @@ import {
   type ApiResponse
 } from '../../interface/server'
 
-import paginationLayout from '@/components/Pagination.vue'
+import paginationLayout from '~/components/PaginationComponent.vue'
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -446,7 +448,6 @@ const clickBtnModify = () => {
 }
 
 const clickBtnDetailList = async () => {
-  console.log(selected.value)
   if (selected.value == undefined || selected.value.length > 1) {
     $q.dialog({
       title: '알림',
@@ -465,12 +466,9 @@ const clickBtnDetailList = async () => {
       }
     )
       .then((result) => {
-        console.log(result)
         resDetailList.value = result.data
       })
-      .catch((error) => {
-        console.log(error)
-      })
+      .catch((_error) => {})
       .finally(() => {
         showDetailListDialog.value = true
       })
@@ -510,7 +508,7 @@ const onUpdateSubmit = async () => {
   //console.log(param.value.beginEndDate.to)
   //updateparam.value.beginDate = param.value.beginEndDate.from
   //updateparam.value.endDate = param.value.beginEndDate.to
-  console.log(updateparam)
+
   try {
     // 저장 API 호출
     await $fetch<ApiResponse<Data[]>>('/playground/public/sample/modifySmple', {

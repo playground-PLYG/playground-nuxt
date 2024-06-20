@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 
 interface Props {
   totalPage: number
@@ -45,7 +45,6 @@ const movePage = (evt: any) => {
 }
 
 const pageSizeUpdate = (evt: any) => {
-  console.log(evt)
   emit('send-event', evt, 'pageSize')
   pageSize.value = evt
 }

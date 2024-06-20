@@ -17,8 +17,8 @@
         <div class="row justify-center q-pa-md">
           <div class="col-5">
             <code-editor
-              class="editor"
               v-model="sampleCodeTemplate"
+              class="editor"
               lang="html"
               :options="editorOptions"
               :style="{ height: '230px' }"
@@ -29,8 +29,8 @@
 
           <div class="col-5">
             <code-editor
-              class="editor"
               v-model="sampleCodeScript"
+              class="editor"
               lang="typescript"
               :options="editorOptions"
               :style="{ height: '540px' }"
@@ -50,9 +50,9 @@
 
         <image-upload
           :file-id="0"
-          @fileDeleted="fn_fileDeleted"
-          @fileUploaded="fn_fileUploaded"
-          @fileRemoved="fn_fileRemoved"
+          @file-deleted="fn_fileDeleted"
+          @file-uploaded="fn_fileUploaded"
+          @file-removed="fn_fileRemoved"
         />
       </div>
 
@@ -68,9 +68,9 @@
 
         <image-upload
           :file-id="1"
-          @fileDeleted="fn_fileDeleted"
-          @fileUploaded="fn_fileUploaded"
-          @fileRemoved="fn_fileRemoved"
+          @file-deleted="fn_fileDeleted"
+          @file-uploaded="fn_fileUploaded"
+          @file-removed="fn_fileRemoved"
         />
       </div>
 
@@ -84,9 +84,9 @@
         <q-separator inset />
 
         <image-upload
-          @fileDeleted="fn_fileDeleted"
-          @fileUploaded="fn_fileUploaded"
-          @fileRemoved="fn_fileRemoved"
+          @file-deleted="fn_fileDeleted"
+          @file-uploaded="fn_fileUploaded"
+          @file-removed="fn_fileRemoved"
         />
       </div>
     </div>

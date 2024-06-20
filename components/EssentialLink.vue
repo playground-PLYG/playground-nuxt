@@ -13,7 +13,11 @@ export interface EssentialLinkProps {
 withDefaults(defineProps<EssentialLinkProps>(), {
   caption: '',
   link: '#',
-  icon: ''
+  icon: '',
+  target: undefined,
+  menuSn: undefined,
+  upperMenuSn: undefined,
+  lwprtMenuHoldAt: undefined
 })
 </script>
 <template>

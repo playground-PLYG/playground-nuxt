@@ -1,8 +1,8 @@
 <template>
   <client-only>
-    <div class="warp-img q-pa-md" v-show="fileProp.isVisible">
+    <div v-show="fileProp.isVisible" class="warp-img q-pa-md">
       <q-card>
-        <q-card-section horizontal v-if="isViewUploader">
+        <q-card-section v-if="isViewUploader" horizontal>
           <q-uploader
             ref="uploader"
             class="full-width"
@@ -20,9 +20,9 @@
         </q-card-section>
 
         <q-card-section
+          v-if="!isViewUploader"
           horizontal
           class="card-file-info"
-          v-if="!isViewUploader"
         >
           <q-item class="full-width">
             <q-item-section :class="[fileView.isExist ? 'col-6' : 'col-11']">

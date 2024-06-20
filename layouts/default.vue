@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
+import { onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
 import { type ApiResponse } from '../interface/server'
 import { useAuthStore } from '../stores/useAuthStore'
+import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
 const { loading } = useQuasar()
 const authStore = useAuthStore()
 
@@ -111,7 +112,7 @@ onMounted(() => {
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list bordered>
-        <q-item-label header v-if="authStore.mberId">
+        <q-item-label v-if="authStore.mberId" header>
           {{ authStore.mberId }}님 반가워요!
         </q-item-label>
         <template v-for="(menuItem, index) in essentialLinks" :key="index">
@@ -133,12 +134,12 @@ onMounted(() => {
           </q-item>
           <template v-for="(menuChild, idx) in essentialLowerLinks" :key="idx">
             <q-slide-transition
-              class="slide-transition"
               v-show="menuItem.open"
               v-if="menuItem.menuSn == menuChild.upperMenuSn"
+              class="slide-transition"
             >
               <q-list class="q-pl-md">
-                <q-item clickable v-ripple :to="menuChild.link">
+                <q-item v-ripple clickable :to="menuChild.link">
                   <q-item-section avatar>
                     <q-icon :name="'arrow_right'" />
                   </q-item-section>
@@ -151,8 +152,8 @@ onMounted(() => {
           </template>
         </template>
         <q-item
-          clickable
           v-if="authStore.isLogin"
+          clickable
           exact
           @click="authStore.logout()"
         >
@@ -161,7 +162,7 @@ onMounted(() => {
           </q-item-section>
           <q-item-section> Logout </q-item-section>
         </q-item>
-        <q-item clickable v-else to="/login" exact>
+        <q-item v-else clickable to="/login" exact>
           <q-item-section avatar>
             <q-icon name="login" />
           </q-item-section>
