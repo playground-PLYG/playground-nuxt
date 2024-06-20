@@ -399,6 +399,7 @@ import { ref } from 'vue'
 import { type ApiResponse } from '../../../interface/server'
 import { useQuasar } from 'quasar'
 const { loading } = useQuasar()
+const $q = useQuasar()
 
 interface VoteDetailDataType {
   voteSsno: number
@@ -497,7 +498,10 @@ const setInsertData = () => {
     registVoteData.value.voteSubject == undefined ||
     registVoteData.value.voteSubject == null
   ) {
-    alert('투표제목을 입력해주세요.')
+    $q.dialog({
+      title: '알림',
+      message: '투표제목을 입력해주세요.'
+    })
     return false
   }
 
@@ -516,7 +520,10 @@ const setInsertData = () => {
     registDateTime.value.finishTime == undefined ||
     registDateTime.value.finishTime == null
   ) {
-    alert('투표시작 일시 혹은 투표종료 일시를 선택해주세요.')
+    $q.dialog({
+      title: '알림',
+      message: '투표시작 일시 혹은 투표종료 일시를 선택해주세요.'
+    })
     return false
   }
 
@@ -540,7 +547,10 @@ const setInsertData = () => {
     reqVote.voteKindName == undefined ||
     reqVote.voteKindName == null
   ) {
-    alert('투표종류를 선택해주세요.')
+    $q.dialog({
+      title: '알림',
+      message: '투표종류를 선택해주세요.'
+    })
     return false
   } else {
     for (const cd of codeDataList) {
@@ -553,7 +563,10 @@ const setInsertData = () => {
   // 3. 등록하기 버튼 클릭시 qestnRequestList 돌려서 voteIemrequestList 0개 있는거 파악해서 alert 뿌리기
   let qestnListLength: number = registVoteData.value.qestnRequestList.length
   if (qestnListLength == 0) {
-    alert('질문은 최소 한개가 존재해야 합니다.')
+    $q.dialog({
+      title: '알림',
+      message: '질문은 최소 한개가 존재해야 합니다.'
+    })
     return false
   }
 
@@ -565,10 +578,12 @@ const setInsertData = () => {
   })
 
   if (!isLengthZero) {
-    console.log('final registVoteData : ', registVoteData.value)
     insertVote()
   } else {
-    alert('투표항목은 최소 한개가 존재해야 합니다.')
+    $q.dialog({
+      title: '알림',
+      message: '투표항목은 최소 한개가 존재해야 합니다.'
+    })
     return false
   }
 }
@@ -588,7 +603,10 @@ const insertVote = async () => {
       if (res.data) {
         emits('chgShowVoteRegist', false)
       } else {
-        alert('투표등록 중 오류가 발생했습니다.\n 다시 시도해주세요.')
+        $q.dialog({
+          title: '알림',
+          message: '투표등록 중 오류가 발생했습니다.\n 다시 시도해주세요.'
+        })
       }
       loading.hide()
     })
@@ -615,7 +633,10 @@ const addQuestion = () => {
 const delQuestion = (questionSsno: number) => {
   let qestnList = registVoteData.value.qestnRequestList
   if (qestnList.length <= 1) {
-    alert('질문은 최소 한개가 존재해야 합니다.')
+    $q.dialog({
+      title: '알림',
+      message: '질문은 최소 한개가 존재해야 합니다.'
+    })
     return false
   } else {
     qestnList = qestnList.filter((qes) => {
@@ -634,7 +655,10 @@ const addVoteItem = (questionSsno: number) => {
     valItemName == '' ||
     valItemName == undefined
   ) {
-    alert('[추가할 항목과 이름을 작성해 주세요.]')
+    $q.dialog({
+      title: '알림',
+      message: '[추가할 항목과 이름을 작성해 주세요.]'
+    })
     return false
   }
 
@@ -658,7 +682,10 @@ const delVoteItem = (questionSsno: number, itemSsno: number) => {
   qestnList.forEach((qes) => {
     if (qes.questionSsno == questionSsno) {
       if (qes.voteIemRequestList.length <= 1) {
-        alert('항목은 최소 한개가 존재해야 합니다.')
+        $q.dialog({
+          title: '알림',
+          message: '항목은 최소 한개가 존재해야 합니다.'
+        })
         return false
       } else {
         qes.voteIemRequestList = qes.voteIemRequestList.filter((iem) => {

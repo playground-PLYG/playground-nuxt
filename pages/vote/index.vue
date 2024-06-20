@@ -124,9 +124,10 @@ const { loading } = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
 const voteSsno = router.currentRoute.value.query.ssno
+const $q = useQuasar()
 
 onMounted(() => {
-  console.group('##### authStore #####')
+  console.group('##### 로그인 정보 확인 #####')
   console.log('mberId : ', authStore.mberId)
   console.log('token : ', authStore.token)
   console.log('isLogin : ', authStore.isLogin)
@@ -135,7 +136,10 @@ onMounted(() => {
   if (authStore?.isLogin) {
     isDuplicateVote()
   } else {
-    alert('로그인 후 투표가 가능합니다.')
+    $q.dialog({
+      title: '알림',
+      message: '로그인 후 투표가 가능합니다.'
+    })
     router.push('/login?redirectUrl=vote' + location.search)
   }
 })
@@ -202,7 +206,10 @@ const isDuplicateVote = async () => {
     .then((result) => {
       console.log('######### isDuplicateVote : result : ', result.data) // true(중복투표) false(처음투표)
       if (result.data) {
-        alert('이미 투표를 완료 하셨습니다.\n 홈으로 이동합니다.')
+        $q.dialog({
+          title: '알림',
+          message: '이미 투표를 완료 하셨습니다.\n 홈으로 이동합니다.'
+        })
         router.push('/')
       } else {
         setKindCode()
@@ -364,10 +371,16 @@ const addAnswer = async (resultList: answerType[]) => {
     .then((res) => {
       console.log('##### addAnswer res :', res.data)
       if (res.data) {
-        alert('투표가 완료 되었습니다.')
+        $q.dialog({
+          title: '알림',
+          message: '투표가 완료 되었습니다.'
+        })
         router.push('/vote-manage')
       } else {
-        alert('투표 중 오류가 발생했습니다.\n다시 시도해주세요.')
+        $q.dialog({
+          title: '알림',
+          message: '투표 중 오류가 발생했습니다.\n다시 시도해주세요.'
+        })
       }
     })
     .catch((error) => {
