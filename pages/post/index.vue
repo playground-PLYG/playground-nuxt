@@ -1,23 +1,51 @@
 <template>
   <div class="content">
     <div class="title">
-      <div class="text-h4">
-        <q-icon name="messenger" /> {{ noticeStore.boardNm }}
+      <div class="text-h4"><q-icon name="messenger" /> 공지사항</div>
+    </div>
+    <div class="search">
+      <div class="q-gutter-md row items-start">
+        <q-input
+          outlined
+          v-model="param.noticeSj"
+          label="제목"
+          round
+          dense
+          flat
+          class="input"
+        />
+
+        <q-btn
+          push
+          color="green-7"
+          class="button"
+          label="조회"
+          @click="getPostList"
+          value="getPostList"
+        ></q-btn>
+        <q-btn
+          push
+          color="green-7"
+          class="button"
+          label="초기화"
+          @click="resetForm"
+        />
       </div>
     </div>
     <div class="search">
       <div class="table-container">
         <q-table
           flat
+          bordered
           :rows="post"
           :columns="columns"
           row-key="boardNm"
           :rows-per-page-options="[0]"
           @row-click="rowClick"
-          hide-pagination
         />
       </div>
-      <div class="right-align">
+
+      <div class="left-align">
         <q-btn color="blue" label="게시물 작성" @click="insert" />
       </div>
     </div>
@@ -75,7 +103,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { type ApiResponse } from '@/interface/server'
 import { useNoticeStore } from '@/stores/useNoticeStore'
-import { type QTableProps } from 'quasar'
+import { type QTableProps, date } from 'quasar'
 
 interface Post {
   boardId: string
@@ -83,10 +111,12 @@ interface Post {
   noticeSj: string
 }
 interface Data {
-  boardId: String
+  boardId: string
+  noticeSj: string
 }
 const param = ref<Data>({
-  boardId: 'smile' // 임시 하드코딩
+  boardId: 'smile', // 임시 하드코딩
+  noticeSj: ''
 })
 
 const insertPost = ref<Post>({
@@ -103,12 +133,23 @@ const noticeStore = useNoticeStore()
 const router = useRouter()
 
 const columns = ref<QTableProps['columns']>([
+  { name: 'noticeNo', label: '순번', field: 'noticeNo', align: 'center' },
   { name: 'noticeSj', label: '제목', field: 'noticeSj', align: 'center' },
+  { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'left' },
   {
-    name: 'registUsrId',
-    label: '작성자ID',
-    field: 'registUsrId',
-    align: 'center'
+    name: 'registDt',
+    label: '등록일시',
+    field: 'registDt',
+    align: 'left',
+    format: (val) => (val ? date.formatDate(val, 'YYYY-MM-DD HH:mm') : val)
+  },
+  { name: 'updtUsrId', label: '수정자', field: 'updtUsrId', align: 'left' },
+  {
+    name: 'updtDt',
+    label: '수정일시',
+    field: 'updtDt',
+    align: 'left',
+    format: (val) => (val ? date.formatDate(val, 'YYYY-MM-DD HH:mm') : val)
   }
 ])
 
@@ -117,7 +158,7 @@ onMounted(() => {
 })
 
 const getPostList = async () => {
-  // param.value.boardId = noticeStore.boardId; //임시 주석
+  //param.value.boardId = noticeStore.boardId //임시 주석
   await $fetch<ApiResponse<Post[]>>('/playground/public/post/getPostList', {
     method: 'POST',
     body: JSON.stringify(param.value)
@@ -151,12 +192,7 @@ const createPost = async () => {
     body: JSON.stringify(insertPost.value)
   })
     .then((result) => {
-      prompt.value = false
-      insertPost.value = {
-        boardId: '',
-        noticeCn: '',
-        noticeSj: ''
-      }
+      closePost()
     })
     .catch((error) => {
       console.log(error)
@@ -185,12 +221,17 @@ const content_rules = (val: string) => {
   }
   return true
 }
+
+const resetForm = () => {
+  param.value.noticeSj = ''
+  getPostList()
+}
 </script>
 
 <style lang="scss" scoped>
-.right-align {
+.left-align {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin-top: 1rem;
 }
 </style>

@@ -76,7 +76,6 @@ let doughChartOptions = ref([
     }
   }
 ])
-
 // ############################################################
 
 const { loading } = useQuasar()
