@@ -79,8 +79,10 @@
         color="primary"
         label="등록"
         @click="
-          showAddDialog = true
-          showModifyField = false
+          () => {
+            showAddDialog = true
+            showModifyField = false
+          }
         "
       />
       <q-btn
