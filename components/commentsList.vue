@@ -1,13 +1,9 @@
 <template>
   <div class="comment">
-    <div class="content">
-      <div class="text">
-        <strong>{{ comment.registUsrId }}</strong
-        >:
-        {{
-          comment.deleteChk === 'Y' ? '삭제된 댓글입니다' : comment.commentCn
-        }}
-      </div>
+    <div class="text">
+      <strong>{{ comment.registUsrId }}</strong
+      >:
+      {{ comment.deleteChk === 'Y' ? '삭제된 댓글입니다' : comment.commentCn }}
     </div>
     <div v-if="comment.deleteChk === 'N'">
       <a class="cmtButton" @click="reInsert">답글</a>
@@ -18,7 +14,7 @@
       v-if="comment.commentList && comment.commentList.length"
       class="replies"
     >
-      <comment-item
+      <comments-list
         v-for="childComment in comment.commentList"
         :key="childComment.commentNo"
         :comment="childComment"
@@ -45,10 +41,10 @@
           </q-card-section>
           <q-card-actions align="right" class="text-primary">
             <q-btn
+              v-close-popup
               flat
               label="닫기"
               type="reset"
-              v-close-popup
               @click="closeComment"
             />
             <q-btn
@@ -65,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps } from 'vue'
+import { defineProps, ref } from 'vue'
 import { type ApiResponse } from '@/interface/server'
 
 const props = defineProps<{ comment: Comment }>()
@@ -88,11 +84,11 @@ interface CommentData {
   upperCommentNo: number | null
 }
 
-let prompt = ref(false)
-let isEdit = ref(false)
-let isDel = ref(false)
+const prompt = ref(false)
+const isEdit = ref(false)
+const isDel = ref(false)
 
-let insertComment = ref<CommentData>({
+const insertComment = ref<CommentData>({
   boardId: '',
   noticeNo: 0,
   commentCn: '',
@@ -126,7 +122,7 @@ const createReComment = async () => {
     method: 'POST',
     body: JSON.stringify(commentToAdd)
   })
-    .then((result) => {
+    .then(() => {
       prompt.value = false
       window.location.reload()
     })
@@ -167,7 +163,7 @@ const modifyComment = async () => {
       body: JSON.stringify(commentUpdate)
     }
   )
-    .then((result) => {
+    .then(() => {
       prompt.value = false
       window.location.reload()
     })
@@ -194,13 +190,13 @@ const removeComment = async () => {
       body: JSON.stringify(commentRemove)
     }
   )
-    .then((result) => {
+    .then(() => {
       prompt.value = false
       isDel.value = false
       window.location.reload()
     })
     .catch((error) => {
-      console.log('error :: ', error)
+      console.log(error)
     })
 }
 </script>
@@ -209,11 +205,7 @@ const removeComment = async () => {
 .comment {
   padding: 5px;
   border-radius: 40px;
-  .content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+
   .text {
     flex-grow: 1;
   }
