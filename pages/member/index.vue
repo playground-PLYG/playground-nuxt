@@ -431,7 +431,7 @@ onMounted(() => {
   memberSearch()
 })
 </script>
-<style>
+<style lang="scss" scoped>
 .content {
   margin-top: 2rem;
   margin-left: 5rem;
