@@ -11,20 +11,19 @@
         :columns="columns"
         row-key="boardNm"
         :rows-per-page-options="[0]"
-        @row-click="rowClick"
         hide-pagination
+        @row-click="rowClick"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { type QTableProps } from 'quasar'
 import { type ApiResponse } from '@/interface/server'
 import { useNoticeStore } from '@/stores/useNoticeStore'
-//import axios from 'axios';
-import { type QTableProps } from 'quasar'
 
 interface Notice {
   boardId: string
@@ -58,7 +57,7 @@ const getNoticeList = async () => {
     })
 }
 
-const rowClick = (evt: Event, row: any, index: number) => {
+const rowClick = (evt: Event, row: any) => {
   noticeStore.boardId = row.boardId
   noticeStore.boardNm = row.boardNm
   router.push({ path: '/post' })

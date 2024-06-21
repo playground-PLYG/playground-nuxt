@@ -16,8 +16,11 @@
     <q-card>
       <q-card-section>
         댓글
-        <div v-for="comment in comments" :key="comment.commentNo">
-          <comments-list :comment="comment" />
+        <div v-if="comments.length === 0">댓글이 없습니다.</div>
+        <div v-else>
+          <div v-for="comment in comments" :key="comment.commentNo">
+            <comments-list :comment="comment" />
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -39,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useNoticeStore } from '@/stores/useNoticeStore'
 import { type ApiResponse } from '@/interface/server'
 import CommentsList from '@/components/commentsList.vue'
@@ -91,6 +94,7 @@ const getCommentList = async () => {
       console.error(error)
     })
 }
+
 const addComment = async () => {
   if (!newComment.value.trim()) {
     alert('댓글을 입력하세요.')
@@ -108,7 +112,7 @@ const addComment = async () => {
     method: 'POST',
     body: JSON.stringify(commentToAdd)
   })
-    .then((result) => {
+    .then(() => {
       getCommentList()
     })
     .catch((error) => {
