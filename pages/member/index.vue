@@ -4,41 +4,39 @@
       <div class="text-h4"><q-icon name="record_voice_over" /> 회원관리</div>
     </div>
     <div class="search">
-      <div class="q-gutter-md row items-start">
-        <q-input
-          v-model="searchParam.mberId"
-          outlined
-          label="회원아이디"
-          round
-          dense
-          flat
-          class="input"
-        />
-        <q-input
-          v-model="searchParam.mberNm"
-          outlined
-          label="회원명"
-          round
-          dense
-          flat
-          class="input"
-        />
-        <q-btn
-          push
-          color="green-7"
-          class="button"
-          label="조회"
-          value="memberSearch"
-          @click="memberSearch"
-        />
-        <q-btn
-          push
-          color="green-7"
-          class="button"
-          label="초기화"
-          @click="reset"
-        />
-      </div>
+      <q-input
+        v-model="searchParam.mberId"
+        outlined
+        label="회원아이디"
+        round
+        dense
+        flat
+        class="input"
+      />
+      <q-input
+        v-model="searchParam.mberNm"
+        outlined
+        label="회원명"
+        round
+        dense
+        flat
+        class="input"
+      />
+      <q-btn
+        push
+        color="green-7"
+        class="button"
+        label="조회"
+        value="memberSearch"
+        @click="memberSearch"
+      />
+      <q-btn
+        push
+        color="green-7"
+        class="button"
+        label="초기화"
+        @click="reset"
+      />
     </div>
     <div class="table">
       <q-table
@@ -431,7 +429,7 @@ onMounted(() => {
   memberSearch()
 })
 </script>
-<style>
+<style lang="scss" scoped>
 .content {
   margin-top: 2rem;
   margin-left: 5rem;

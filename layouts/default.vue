@@ -151,17 +151,21 @@ onMounted(() => {
             </q-slide-transition>
           </template>
         </template>
-        <q-item
-          v-if="authStore.isLogin"
-          clickable
-          exact
-          @click="authStore.logout()"
-        >
-          <q-item-section avatar>
-            <q-icon name="logout" />
-          </q-item-section>
-          <q-item-section> Logout </q-item-section>
-        </q-item>
+        <div v-if="authStore.isLogin">
+          <q-item clickable exact to="/my-page">
+            <q-item-section avatar>
+              <q-icon name="remove" />
+            </q-item-section>
+            <q-item-section> 내 정보 </q-item-section>
+          </q-item>
+          <q-item clickable exact @click="authStore.logout()">
+            <q-item-section avatar>
+              <q-icon name="logout" />
+            </q-item-section>
+            <q-item-section> Logout </q-item-section>
+          </q-item>
+        </div>
+
         <q-item v-else clickable to="/login" exact>
           <q-item-section avatar>
             <q-icon name="login" />
