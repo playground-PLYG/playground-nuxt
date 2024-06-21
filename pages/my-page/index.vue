@@ -176,10 +176,7 @@
                     <q-btn-toggle
                       v-model="modifyInfo.mberSexdstnCode"
                       class="input"
-                      :options="[
-                        { label: '남자', value: 'M' },
-                        { label: '여자', value: 'F' }
-                      ]"
+                      :options="selectOptions"
                       padding="11px"
                       style="margin-bottom: 20px"
                     />
@@ -194,7 +191,7 @@
                       <div class="proc">
                         <q-btn
                           push
-                          class="q-mr-sm, buttonR"
+                          class="buttonR"
                           color="primary"
                           label="저장"
                           type="submit"
@@ -220,9 +217,10 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useQuasar } from 'quasar'
+import { QBtnToggle, useQuasar } from 'quasar'
 import { type ApiResponse } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { codeUtil } from '@/utils/code'
 
 const { loading } = useQuasar()
 const authStore = useAuthStore()
@@ -255,6 +253,11 @@ interface author {
   authorId: string
 }
 
+interface SelectOption {
+  label: string
+  value: string
+}
+
 const authorList = ref<author[]>([])
 const user = ref<User>()
 const modifyInfo = ref<ModifyInfo>({
@@ -265,10 +268,21 @@ const modifyInfo = ref<ModifyInfo>({
   mberTelno: ''
 })
 const isShowEditPopup = ref<boolean>(false)
+const sexdstnCodeOptions = ref<Code[]>([])
+const selectOptions = ref<SelectOption[]>([])
 
 onMounted(() => {
   getMyInfo()
+  getCodeList()
 })
+
+const getCodeList = async () => {
+  sexdstnCodeOptions.value = await codeUtil.getCodeGroupList('SEX_DSTN_CODE')
+  selectOptions.value = sexdstnCodeOptions.value.map((option) => ({
+    label: option.codeName,
+    value: option.code
+  }))
+}
 
 const getMyInfo = async () => {
   loading.show()
@@ -292,7 +306,10 @@ const getMyInfo = async () => {
       } else {
         authorList.value = [{ authorId: 'ROLE_USER', authorNm: '일반 사용자' }]
       }
-      user.value.mberGender = res.data.mberSexdstnCode == 'F' ? '여자' : '남자'
+      const option = sexdstnCodeOptions.value.find(
+        (option) => option.code === user.value.mberSexdstnCode
+      )
+      user.value.mberGender = option.codeName
     })
     .catch((err) => {
       console.error(err)
