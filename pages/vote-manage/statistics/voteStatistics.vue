@@ -7,27 +7,85 @@
           <q-btn v-close-popup flat round dense icon="close" />
         </q-toolbar>
       </q-header>
-      <q-card class="my-card" style="padding-top: 40px" flat bordered>
+      <q-card class="my-card" flat bordered>
         <q-card-section>
-          <div class="text-h6">투표제목 : {{ voteSubject }}</div>
+          <div class="text-h5 text-weight-bold" style="padding-top: 40px">
+            {{ voteSubject }}
+          </div>
         </q-card-section>
         <q-card-section>
-          <div class="q-pa-md">
+          <div class="q-pa-md example-row-equal-width">
             <div
+              class="row"
+              v-if="!noCount"
               v-for="(detail, i) in statResponse.staDetailList"
               :key="detail.questionSsno"
               :tag="detail.questionContents"
-              class="row items-start q-gutter-md"
             >
-              <Doughnut
-                :data="doughChartData[i]"
-                :options="doughChartOptions[i]"
-              />
-              <q-separator />
+              <div class="col">
+                <div class="col text-h6 q-pb-xs text-weight-bold">
+                  {{ detail.questionContents }}
+                </div>
+                <q-separator />
+                <div class="col q-pb-sm">
+                  <span class="text-subtitle1">1. 최고득표 항목명 </span>
+                  <span class="text-caption"> (득표수, 득표율)</span>
+                  <br />
+                  <span class="q-pl-md text-weight-bold">
+                    {{ detail.questionTopItemName }}
+                  </span>
+                  <span class="text-caption text-weight-bold">
+                    {{
+                      ' (' +
+                      detail.questionTopItemCount +
+                      ', ' +
+                      detail.questionTopPercentage +
+                      ')'
+                    }}
+                  </span>
+                </div>
+                <q-separator />
+                <div class="col q-pb-xs">
+                  <span class="text-subtitle1">2. 총 투표수 : </span>
+                  <span class="text-weight-bold">{{
+                    detail.questionTotalCount
+                  }}</span>
+                </div>
+                <q-separator />
+                <div class="col q-pb-xs">
+                  <span class="text-subtitle1"
+                    >3. 항목명 / 득표수 / 특표율
+                  </span>
+                  <br />
+                  <div class="text-caption text-weight-bold q-pl-md">
+                    <span v-for="ddtail in detail.staDetailDetailList">
+                      -
+                      {{
+                        ddtail.itemName +
+                        ' / (' +
+                        ddtail.itemCount +
+                        ') / (' +
+                        (ddtail.itemCount / detail.questionTotalCount) * 100 +
+                        '%)'
+                      }}<br />
+                    </span>
+                  </div>
+                </div>
+                <q-separator />
+              </div>
+              <div class="col">
+                <Doughnut
+                  :data="doughChartData[i]"
+                  :options="doughChartOptions[i]"
+                />
+              </div>
             </div>
-            <div v-if="noCount" style="text-align: center">
+            <div v-else-if="noCount" style="text-align: center">
               투표 건 수가 없습니다.
             </div>
+            <!-- <div v-if="noCount" style="text-align: center">
+              투표 건 수가 없습니다.
+            </div> -->
           </div>
         </q-card-section>
       </q-card>
@@ -115,6 +173,10 @@ interface statDetailResponseType {
   questionSsno: number
   questionContents: string
   staDetailDetailList: statDetailDetailResponseType[]
+  questionTotalCount: number
+  questionTopItemName?: string
+  questionTopItemCount?: number
+  questionTopPercentage?: string
 }
 
 interface statDetailDetailResponseType {
@@ -132,6 +194,10 @@ let statResponse = ref<statResponseType>({
     {
       questionSsno: 0,
       questionContents: '',
+      questionTotalCount: 1,
+      questionTopItemName: '',
+      questionTopItemCount: 0,
+      questionTopPercentage: '0%',
       staDetailDetailList: [
         {
           itemSsno: 0,
@@ -175,18 +241,52 @@ const settingStatisctics = async (ssno: number, subject: string) => {
       if (statResponse.value.totalVoteCount == 0) {
         noCount.value = true
       } else {
+        noCount.value = false
         let chartList: any = []
         let chartOptions: any = []
-        statResponse.value.staDetailList.forEach((sub) => {
+        statResponse.value.staDetailList.forEach((sub, idx) => {
           let chartLabel: string[] = []
           let chartValue: number[] = []
           let chartDataSetting = {}
           let chartOptionSetting = {}
 
+          let itemTotalCount: number = 0
+          let qTopItemName: string = ''
+          let qTopItemNameArr: string[] = []
+          let qTopItemCount: number = -1
+
           sub.staDetailDetailList.forEach((subsub) => {
             chartLabel.push(subsub.itemName)
             chartValue.push(subsub.itemCount)
+            itemTotalCount += subsub.itemCount
+            if (subsub.itemCount > qTopItemCount) {
+              qTopItemCount = subsub.itemCount
+            }
           })
+
+          sub.staDetailDetailList.forEach((top) => {
+            if (qTopItemCount == top.itemCount) {
+              qTopItemNameArr.push(top.itemName)
+            }
+          })
+
+          sub.questionTotalCount = itemTotalCount
+          sub.questionTopItemCount = qTopItemCount
+
+          sub.questionTopPercentage =
+            String((qTopItemCount / itemTotalCount) * 100) + '%'
+
+          if (qTopItemNameArr.length > 1) {
+            qTopItemNameArr.forEach((na) => {
+              qTopItemName += na + ','
+            })
+            sub.questionTopItemName = qTopItemName.substring(
+              0,
+              qTopItemName.length - 1
+            )
+          } else {
+            sub.questionTopItemName = qTopItemNameArr[0]
+          }
 
           chartDataSetting = {
             labels: chartLabel,
@@ -200,15 +300,23 @@ const settingStatisctics = async (ssno: number, subject: string) => {
           }
 
           chartOptionSetting = {
-            responsive: true,
+            responsive: true, // 그래프가 브라우저 크기에 맞게 반응하도록 설정
+            maintainAspectRatio: false, // 그래프의 가로세로 비율 유지 여부 설정
             plugins: {
-              title: {
-                display: true,
-                text: sub.questionContents
+              legend: {
+                position: 'right',
+                labels: {
+                  boxWidth: 4,
+                  padding: 15,
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  font: {
+                    size: 10
+                  }
+                }
               }
             }
           }
-
           chartList.push(chartDataSetting)
           chartOptions.push(chartOptionSetting)
         })
@@ -233,8 +341,5 @@ defineExpose({
 <style lang="scss" scoped>
 .my-card {
   width: 100%;
-  .select {
-    width: 200%;
-  }
 }
 </style>
