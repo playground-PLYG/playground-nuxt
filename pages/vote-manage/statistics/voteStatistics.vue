@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="">
+  <q-dialog ref="dialogRef">
     <q-layout container>
       <q-header>
         <q-toolbar class="bg-primary">
@@ -16,15 +16,14 @@
         <q-card-section>
           <div class="q-pa-md example-row-equal-width">
             <div
-              class="row"
-              v-if="!noCount"
               v-for="(detail, i) in statResponse.staDetailList"
               :key="detail.questionSsno"
+              class="row"
               :tag="detail.questionContents"
             >
               <div class="col">
                 <div class="col text-h6 q-pb-xs text-weight-bold">
-                  {{ detail.questionContents }}
+                  {{ 'Q' + (i + 1) + '.' + detail.questionContents }}
                 </div>
                 <q-separator />
                 <div class="col q-pb-sm">
@@ -58,7 +57,10 @@
                   </span>
                   <br />
                   <div class="text-caption text-weight-bold q-pl-md">
-                    <span v-for="ddtail in detail.staDetailDetailList">
+                    <span
+                      v-for="ddtail in detail.staDetailDetailList"
+                      :key="ddtail.itemSsno"
+                    >
                       -
                       {{
                         ddtail.itemName +
@@ -72,6 +74,22 @@
                   </div>
                 </div>
                 <q-separator />
+                <div class="col q-pb-xs">
+                  <span class="text-subtitle1">4. 항목별 투표자 </span>
+                  <br />
+                  <div class="text-caption text-weight-bold q-pl-md">
+                    <span
+                      v-for="ddtail in detail.staDetailDetailList"
+                      :key="ddtail.itemSsno"
+                    >
+                      -
+                      {{ ddtail.itemName + ' / (' + ddtail.selUserId + ')'
+                      }}<br />
+                    </span>
+                  </div>
+                </div>
+                <q-separator />
+                <br />
               </div>
               <div class="col">
                 <Doughnut
@@ -80,12 +98,9 @@
                 />
               </div>
             </div>
-            <div v-else-if="noCount" style="text-align: center">
+            <div v-if="noCount" style="text-align: center">
               투표 건 수가 없습니다.
             </div>
-            <!-- <div v-if="noCount" style="text-align: center">
-              투표 건 수가 없습니다.
-            </div> -->
           </div>
         </q-card-section>
       </q-card>
@@ -96,22 +111,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { type ApiResponse } from '../../../interface/server'
 
 // ################# VUE Chart 관련 내용 이하 #################
 import { Doughnut } from 'vue-chartjs'
 import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
+  ArcElement,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  ArcElement
+  Title,
+  Tooltip
 } from 'chart.js'
+import { type ApiResponse } from '../../../interface/server'
 ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, ArcElement)
 
-let doughChartData = ref([
+const doughChartData = ref([
   {
     labels: ['January', 'February', 'March', 'April', 'May'],
     datasets: [
@@ -123,7 +138,7 @@ let doughChartData = ref([
   }
 ])
 
-let doughChartOptions = ref([
+const doughChartOptions = ref([
   {
     responsive: true,
     plugins: {
@@ -138,8 +153,8 @@ let doughChartOptions = ref([
 
 const { loading } = useQuasar()
 
-let voteSsno = ref<number>(0)
-let noCount = ref<boolean>(false)
+const voteSsno = ref<number>(0)
+const noCount = ref<boolean>(false)
 
 const initFunc = (ssno: number, subject: string) => {
   console.log('voteStatistics initFunc statisticsSsno : ', ssno, subject)
@@ -154,7 +169,7 @@ interface statRequestType {
   answerUserId?: string
 }
 
-let statRequest = ref<statRequestType>({
+const statRequest = ref<statRequestType>({
   voteSsno: 0,
   questionSsno: 0,
   itemSsno: 0,
@@ -183,9 +198,11 @@ interface statDetailDetailResponseType {
   itemSsno: number
   itemCount: number
   itemName: string
+  selUserIdList?: string[]
+  selUserId?: string
 }
 
-let statResponse = ref<statResponseType>({
+const statResponse = ref<statResponseType>({
   totalVoteCount: 0,
   totalVoterCount: 0,
   questionCount: 0,
@@ -219,7 +236,7 @@ const CHART_COLORS = {
   yellow: 'rgb(255, 205, 86)'
 }
 
-let voteSubject = ref<string>('')
+const voteSubject = ref<string>('')
 const settingStatisctics = async (ssno: number, subject: string) => {
   loading.show()
   statRequest.value.voteSsno = ssno
@@ -242,17 +259,17 @@ const settingStatisctics = async (ssno: number, subject: string) => {
         noCount.value = true
       } else {
         noCount.value = false
-        let chartList: any = []
-        let chartOptions: any = []
-        statResponse.value.staDetailList.forEach((sub, idx) => {
-          let chartLabel: string[] = []
-          let chartValue: number[] = []
+        const chartList: any = []
+        const chartOptions: any = []
+        statResponse.value.staDetailList.forEach((sub) => {
+          const chartLabel: string[] = []
+          const chartValue: number[] = []
           let chartDataSetting = {}
           let chartOptionSetting = {}
 
-          let itemTotalCount: number = 0
+          const qTopItemNameArr: string[] = []
           let qTopItemName: string = ''
-          let qTopItemNameArr: string[] = []
+          let itemTotalCount: number = 0
           let qTopItemCount: number = -1
 
           sub.staDetailDetailList.forEach((subsub) => {
@@ -262,6 +279,17 @@ const settingStatisctics = async (ssno: number, subject: string) => {
             if (subsub.itemCount > qTopItemCount) {
               qTopItemCount = subsub.itemCount
             }
+
+            let userIdString: string = ''
+            subsub.selUserIdList?.forEach((use, idx) => {
+              if (subsub.selUserIdList?.length == idx + 1) {
+                userIdString += use
+              } else {
+                userIdString += use + ', '
+              }
+            })
+
+            subsub.selUserId = userIdString
           })
 
           sub.staDetailDetailList.forEach((top) => {
@@ -277,13 +305,14 @@ const settingStatisctics = async (ssno: number, subject: string) => {
             String((qTopItemCount / itemTotalCount) * 100) + '%'
 
           if (qTopItemNameArr.length > 1) {
-            qTopItemNameArr.forEach((na) => {
-              qTopItemName += na + ','
+            qTopItemNameArr.forEach((na, idx) => {
+              if (qTopItemNameArr.length == idx + 1) {
+                qTopItemName += na
+              } else {
+                qTopItemName += na + ','
+              }
             })
-            sub.questionTopItemName = qTopItemName.substring(
-              0,
-              qTopItemName.length - 1
-            )
+            sub.questionTopItemName = qTopItemName
           } else {
             sub.questionTopItemName = qTopItemNameArr[0]
           }
