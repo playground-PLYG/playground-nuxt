@@ -77,8 +77,9 @@ interface Param {
 }
 
 interface ResData {
-  token: string
+  accessToken: string
   mberId: string
+  refreshToken: string
 }
 
 const param = ref<Param>({
@@ -114,11 +115,13 @@ const login = async () => {
   )
     .then((result) => {
       loading.hide()
-      const token = useCookie('token')
-      token.value = result.data.token
-      authStore.mberId = result.data.mberId
-      authStore.token = result.data.token
-      const queryString = location.search
+      const accessToken = useCookie('token')
+      const refreshToken = useCookie('refreshToken')
+      accessToken.value = result.data.accessToken
+      refreshToken.value = result.data.refreshToken
+      authStore.mberId = result.data.mberId == null ? '' : result.data.mberId
+      authStore.token = result.data.accessToken
+      let queryString = location.search
       const urlParams = new URLSearchParams(queryString)
       if (urlParams.get('redirectUrl')) {
         router.replace(StringToObject(urlParams.get('redirectUrl')))
