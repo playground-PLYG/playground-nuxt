@@ -268,6 +268,7 @@ const selectAllVote = async () => {
     }
   )
     .then((res) => {
+      console.log('VOTE TEST')
       let resData = res.data.content
       resData.forEach((item: ResponseData, index: number) => {
         let kindNm: string = ''
