@@ -1,7 +1,7 @@
 <template>
   <q-input v-bind="attrs" outlined round dense flat class="dk-input">
-    <template v-for="(_, name) in slots" :key="name">
-      <slot :name="name" v-bind="slots[name]" />
+    <template v-for="(slot, name) in slots" :key="name">
+      <slot :name="name" v-bind="slot" />
     </template>
   </q-input>
 </template>
