@@ -82,7 +82,10 @@ const setMenu = (arr: MenuData) => {
   })
 }
 
+let menuTitle = 'Playground'
+
 const toggleMenu = (menuItem: EssentialLinkProps) => {
+  menuTitle = menuItem.title
   menuItem.open = !menuItem.open
 }
 
@@ -104,7 +107,7 @@ onMounted(() => {
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Playground </q-toolbar-title>
+        <q-toolbar-title> {{ menuTitle }} </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
@@ -176,7 +179,9 @@ onMounted(() => {
     </q-drawer>
 
     <q-page-container>
-      <slot />
+      <div>
+        <slot />
+      </div>
     </q-page-container>
   </q-layout>
 </template>

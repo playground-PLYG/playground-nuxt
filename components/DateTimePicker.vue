@@ -3,7 +3,11 @@
     <template #prepend>
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-          <q-date v-model="_datetime" mask="YYYY-MM-DDTHH:mm">
+          <q-date
+            v-model="_datetime"
+            :options="props.dateOptions"
+            mask="YYYY-MM-DD HH:mm"
+          >
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Close" color="primary" flat />
             </div>
@@ -15,7 +19,11 @@
     <template #append>
       <q-icon name="access_time" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-          <q-time v-model="_datetime" mask="YYYY-MM-DDTHH:mm">
+          <q-time
+            v-model="_datetime"
+            :options="props.timeOptions"
+            mask="YYYY-MM-DD HH:mm"
+          >
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Close" color="primary" flat />
             </div>
@@ -35,6 +43,14 @@ interface Data {
   datetime?: string
   date?: string
   time?: string
+  dateOptions: readonly any[] | ((date: string) => boolean) | undefined
+  timeOptions:
+    | ((
+        hr: number,
+        min: number | null,
+        sec: number | null
+      ) => boolean | null | undefined)
+    | undefined
 }
 
 const $q = useQuasar()

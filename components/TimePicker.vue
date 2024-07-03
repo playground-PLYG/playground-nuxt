@@ -3,7 +3,7 @@
     <template #append>
       <q-icon name="access_time" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-          <q-time v-model="_time" mask="HH:mm">
+          <q-time v-model="_time" v-bind="$attrs" mask="HH:mm">
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Close" color="primary" flat />
             </div>
