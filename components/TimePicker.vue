@@ -1,5 +1,5 @@
 <template>
-  <q-input v-model="_time" mask="##:##" filled>
+  <q-input v-model="_time" mask="##:##" outline>
     <template #append>
       <q-icon name="access_time" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">

@@ -1,5 +1,5 @@
 <template>
-  <q-input v-model="_date" mask="####-##-##" filled>
+  <q-input v-model="_date" mask="####-##-##" outline>
     <template #prepend>
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
