@@ -314,6 +314,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, date } from 'quasar'
 import { type ApiResponse } from '../../interface/server'
+import paginationLayout from '~/components/PaginationComponent.vue'
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -502,7 +503,7 @@ const resetSearchParam = () => {
 }
 
 // 상세조회 - 목록 선택
-const clickRow = async (evt: any, row: any, index: any) => {
+const clickRow = async (evt: any, row: any) => {
   selected = ref<Data[]>([])
 
   const menuSn = row.menuSn
@@ -636,8 +637,7 @@ const modifyMenu = async () => {
         method: 'POST',
         body: JSON.stringify(detailData.value)
       })
-        .then((result) => {
-          console.log(result)
+        .then(() => {
           alert('수정 완료되었습니다.')
           showModifyField.value = false
           mReadonly.value = true
@@ -676,11 +676,10 @@ const number_rules = (val: string) => {
 }
 
 const menuUrl_rules = (val: string) => {
-  const kor = val.match(/[ㄱ-ㅎ|ㅏ-ㅣ가-힣]/g)
-  const special = val.match(/[{}[\]?.,;:|)*~`!^+<>@#$%&\\=('"]/g)
+  const chk = val.match(/^[a-z\\/_-]*$/)
 
-  if (kor || special) {
-    return "영문 및 특수문자('_', '-')를 입력해주세요."
+  if (!chk) {
+    return "영문 소문자 및 특수문자('_', '-')로 입력해주세요."
   }
 
   return true
@@ -703,8 +702,7 @@ const removeMenuList = async () => {
       method: 'POST',
       body: JSON.stringify(selected.value)
     })
-      .then((result) => {
-        console.log(result)
+      .then(() => {
         alert('삭제 완료되었습니다.')
         showDetailDialog.value = false
         resetSearchParam()
@@ -735,8 +733,7 @@ const modifyUseAtMenu = async () => {
         body: JSON.stringify(selected.value)
       }
     )
-      .then((result) => {
-        console.log(result)
+      .then(() => {
         alert('사용여부 변경이 완료되었습니다.')
         resetSearchParam()
       })
