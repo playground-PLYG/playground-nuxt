@@ -1,6 +1,6 @@
 <template>
   <div class="row">
-    <q-input v-model="_dateFromText" filled>
+    <q-input v-model="_dateFromText" outline>
       <template #prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -32,8 +32,8 @@
         </q-icon>
       </template>
     </q-input>
-    <div class="q-pa-xs q-mt-md">~</div>
-    <q-input v-model="_dateToText" filled>
+    <div class="q-pa-xs q-mt-md q-ml-md q-mr-md">~</div>
+    <q-input v-model="_dateToText" outline>
       <template #prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy cover transition-show="scale" transition-hide="scale">
