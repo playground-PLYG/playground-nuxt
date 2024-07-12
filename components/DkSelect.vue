@@ -1,5 +1,5 @@
 <template>
-  <q-select outlined v-bind="attrs" class="dk-select" />
+  <q-select outlined v-bind="attrs" dense class="dk-select" />
 </template>
 
 <script setup lang="ts">
