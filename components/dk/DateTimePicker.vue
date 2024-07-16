@@ -43,8 +43,8 @@ interface Data {
   datetime?: string
   date?: string
   time?: string
-  dateOptions: readonly any[] | ((date: string) => boolean) | undefined
-  timeOptions:
+  dateOptions?: readonly any[] | ((date: string) => boolean) | undefined
+  timeOptions?:
     | ((
         hr: number,
         min: number | null,

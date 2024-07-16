@@ -1,21 +1,20 @@
 <template>
   <!-- 메인 영역 start -->
   <div>
-    <!-- 조회조건 영역 start -->
     <div class="mobile-content-area">
       <div class="text-h6 q-mb-sm">투표제목</div>
       <dk-input v-model="text" label="제목" clearable :max-length="20" />
 
       <!-- 시작시간 종료시간 옵션 줘야함 -->
       <div class="text-h6">시작시간</div>
-      <date-time-picker
+      <dk-date-time-picker
         :datetime="param.val"
         :date="param.date"
         :time="param.time"
         @send-date="setStartDateTimeValue"
       />
       <div class="text-h6 q-mt-md">종료시간</div>
-      <date-time-picker
+      <dk-date-time-picker
         :datetime="param.val"
         :date="param.date"
         :time="param.time"
@@ -105,73 +104,14 @@
         />
       </div>
     </div>
-    <!-- 조회조건 영역 end -->
 
     <!-- 식당 팝업 start -->
-    <dk-dialog
-      v-model="dialog"
-      header-label="식당 선택"
+    <vote-rstrnt-list
+      v-model="openYn"
+      @select-rstrnt="rstrntSelect"
       @close-callback="dialogCloseCallback"
-    >
-      <template #body>
-        <div class="row">
-          <dk-select
-            v-model="select3"
-            :options="selectOption3"
-            class="col-4 q-pr-sm"
-            label="종류"
-          />
-          <dk-input
-            v-model="text"
-            label="식당"
-            class="col-8"
-            clearable
-            :max-length="20"
-          >
-            <template #append>
-              <q-icon name="search" @click="fn_searchRstrnt" />
-            </template>
-          </dk-input>
-        </div>
-        <q-separator spaced="12px" />
-        <div id="scroll-target-id" style="overflow: auto">
-          <q-infinite-scroll scroll-target="#scroll-target-id" @load="onLoad">
-            <div
-              v-for="(rstrnt, index) in rstrnt"
-              :key="index"
-              class="rstrnt-list"
-            >
-              <q-card flat bordered class="q-mb-sm">
-                <q-card-section horizontal class="rstrnt-card">
-                  <q-img
-                    class="col"
-                    src="https://cdn.quasar.dev/img/parallax1.jpg"
-                  />
-                </q-card-section>
+    />
 
-                <q-separator />
-
-                <q-card-actions class="justify-flex-start">
-                  <dk-btn
-                    flat
-                    round
-                    color="blue"
-                    icon="info"
-                    @click="fn_rstrntDetail"
-                  />
-                  {{ rstrnt.rstrntName }}
-                </q-card-actions>
-              </q-card>
-            </div>
-            <template #loading>
-              <div class="row justify-center q-my-md">
-                <q-spinner-dots color="primary" size="40px" />
-              </div>
-            </template>
-          </q-infinite-scroll>
-        </div>
-      </template>
-    </dk-dialog>
     <!-- 식당 팝업 end -->
   </div>
   <!-- 메인 영역 end -->
@@ -200,14 +140,6 @@ const selectOption2 = [
   { label: '즉시', value: '코드값1' },
   { label: '투표 1시간 전', value: '코드값2' },
   { label: '투표 시작 시', value: '코드값3' }
-]
-
-const select3 = ref()
-const selectOption3 = [
-  { label: '한식', value: '코드값1' },
-  { label: '중식', value: '코드값2' },
-  { label: '양식', value: '코드값3' },
-  { label: '일식', value: '코드값4' }
 ]
 
 //체크박스 옵션
@@ -263,50 +195,19 @@ const setEndDateTimeValue = (val: string) => {
 }
 
 const fn_openRstrnt = () => {
-  dialog.value = true
+  openYn.value = true
 }
 
 //식당 팝업
-const dialog = ref(false)
+const openYn = ref<boolean>(false)
 
 const dialogCloseCallback = () => {
-  dialog.value = false
+  openYn.value = false
 }
 
-const fn_searchRstrnt = () => {
-  alert('식당 검색')
-}
-
-interface rstrntData {
-  rstrntName: string
-}
-
-const rstrnt = ref<rstrntData[]>([
-  { rstrntName: '가쯔야' },
-  { rstrntName: '스시' },
-  { rstrntName: '인천집' },
-  { rstrntName: '향설주랑' },
-  { rstrntName: '장군보쌈' },
-  { rstrntName: '동원' }
-])
-
-const fn_rstrntDetail = () => {
-  alert('상세보기')
-}
-
-const onLoad = (index: number, done: (stop?: boolean) => void) => {
-  setTimeout(() => {
-    rstrnt.value.push(
-      { rstrntName: '순대국' },
-      { rstrntName: '김밥천국' },
-      { rstrntName: '알돈' },
-      { rstrntName: '온센' },
-      { rstrntName: '쭈담' },
-      { rstrntName: '돈수백' }
-    )
-
-    done() //done(true) 주면 완전 멈춤
-  }, 2000)
+const rstrntSelect = (data: object) => {
+  openYn.value = false
+  console.log(data)
 }
 </script>
 
@@ -320,26 +221,6 @@ const onLoad = (index: number, done: (stop?: boolean) => void) => {
 
   :deep(.dk-input) {
     margin-bottom: 15px;
-  }
-}
-
-.rstrnt-card {
-  max-height: 100px;
-}
-
-// 아래 부분 임시로 만든거임 각 기기별로 화면 나눠서 적정하게 짤라지도록 해야 infinite-scroll가능
-#scroll-target-id {
-  max-height: 510px;
-}
-
-@media all and (min-height: 768px) and (max-height: 1024px) {
-  #scroll-target-id {
-    max-height: 680px;
-  }
-}
-@media all and (min-height: 1024) {
-  #scroll-target-id {
-    max-height: 840px;
   }
 }
 </style>

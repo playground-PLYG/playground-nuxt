@@ -18,7 +18,8 @@
       <div class="dk-dialog-body">
         <slot name="body" />
       </div>
-      <div class="dk-dialog-footer">
+
+      <div v-if="footerYn" class="dk-dialog-footer">
         <slot name="footer" />
       </div>
     </div>
@@ -33,10 +34,13 @@ const attrs = useAttrs() as unknown as QDialogProps
 
 interface Data {
   headerLabel?: string
+  footerVisible?: boolean
 }
 
 const props = defineProps<Data>()
 const emit = defineEmits(['close-callback'])
+
+const footerYn = props.footerVisible || false
 
 const fn_closeCallback = () => {
   emit('close-callback')
