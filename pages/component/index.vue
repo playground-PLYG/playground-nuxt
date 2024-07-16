@@ -125,13 +125,13 @@
 
     <!-- Date Picker Start -->
     <div class="text-h6 bg-secondary">datePicker</div>
-    <date-picker :date="param.date" @send-date="setDateValue" />
+    <dk-date-picker :date="param.date" @send-date="setDateValue" />
 
     <div class="text-h6 bg-secondary">timePicker</div>
-    <time-picker :date="param.time" @send-date="setTimeValue" />
+    <dk-time-picker :date="param.time" @send-date="setTimeValue" />
 
     <div class="text-h6 bg-secondary">datetimePicker</div>
-    <date-time-picker
+    <dk-date-time-picker
       :datetime="param.dateTime"
       :date="param.date"
       :time="param.time"
@@ -141,7 +141,7 @@
     />
 
     <div class="text-h6 bg-secondary">dateFromToPicker</div>
-    <date-from-to-picker
+    <dk-date-from-to-picker
       :from="param.dateFrom"
       :to="param.dateTo"
       @send-from-date="setDateFromValue"
@@ -149,7 +149,7 @@
     />
 
     <div class="text-h6 bg-secondary">dateTimeFromToPicker</div>
-    <date-time-from-to-picker
+    <dk-date-time-from-to-picker
       :from="param.dateFrom"
       :to="param.dateTo"
       @send-from-date="setDateTimeFromValue"

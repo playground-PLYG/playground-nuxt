@@ -39,83 +39,88 @@
 
         <dk-tab-panels v-model="tab" animated class="text-blue vote-list">
           <dk-tab-panel name="ing">
-            <q-intersection
+            <div
               v-for="(votelist, voteIndex) in resData"
               :key="voteIndex"
               transition="flip-right"
               class="vote-item"
             >
-              <q-item v-ripple clickable>
-                <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white"> Q </q-avatar>
-                </q-item-section>
+              <q-card flat bordered class="q-mb-sm">
+                <q-item v-ripple clickable>
+                  <q-item-section avatar>
+                    <q-avatar color="primary" text-color="white"> Q </q-avatar>
+                  </q-item-section>
 
-                <q-item-section>
-                  <q-item-label>투표{{ voteIndex }} 번</q-item-label>
-                  <q-item-label caption lines="1"
-                    >{{ votelist.beginDate }}
-                    {{ votelist.endDate }}</q-item-label
-                  >
-                </q-item-section>
+                  <q-item-section>
+                    <q-item-label>투표{{ voteIndex + 1 }} 번</q-item-label>
+                    <q-item-label caption lines="1"
+                      >{{ votelist.beginDate }}
+                      {{ votelist.endDate }}</q-item-label
+                    >
+                  </q-item-section>
 
-                <!-- 내가한 투표 표시 -->
-                <q-item-section side>
-                  <q-badge rounded color="green" />
-                </q-item-section>
-              </q-item>
-            </q-intersection>
+                  <q-item-section side>
+                    <q-badge rounded color="green" />
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
           </dk-tab-panel>
 
           <dk-tab-panel name="pre">
-            <q-intersection
+            <div
               v-for="index in 10"
               :key="index"
               transition="flip-right"
               class="vote-item"
             >
-              <q-item v-ripple clickable>
-                <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white"> Q </q-avatar>
-                </q-item-section>
+              <q-card flat bordered class="q-mb-sm">
+                <q-item v-ripple clickable>
+                  <q-item-section avatar>
+                    <q-avatar color="primary" text-color="white"> Q </q-avatar>
+                  </q-item-section>
 
-                <q-item-section>
-                  <q-item-label>투표{{ index }} 번</q-item-label>
-                  <q-item-label caption lines="1"
-                    >투표기간 From-to</q-item-label
-                  >
-                </q-item-section>
+                  <q-item-section>
+                    <q-item-label>투표{{ index }} 번</q-item-label>
+                    <q-item-label caption lines="1"
+                      >투표기간 From-to</q-item-label
+                    >
+                  </q-item-section>
 
-                <q-item-section side>
-                  <q-badge rounded color="green" />
-                </q-item-section>
-              </q-item>
-            </q-intersection>
+                  <q-item-section side>
+                    <q-badge rounded color="green" />
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
           </dk-tab-panel>
 
           <dk-tab-panel name="end">
-            <q-intersection
+            <div
               v-for="index in 10"
               :key="index"
               transition="flip-right"
               class="vote-item"
             >
-              <q-item v-ripple clickable>
-                <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white"> Q </q-avatar>
-                </q-item-section>
+              <q-card flat bordered class="q-mb-sm">
+                <q-item v-ripple clickable>
+                  <q-item-section avatar>
+                    <q-avatar color="primary" text-color="white"> Q </q-avatar>
+                  </q-item-section>
 
-                <q-item-section>
-                  <q-item-label>투표{{ index }} 번</q-item-label>
-                  <q-item-label caption lines="1"
-                    >투표기간 From-to</q-item-label
-                  >
-                </q-item-section>
+                  <q-item-section>
+                    <q-item-label>투표{{ index }} 번</q-item-label>
+                    <q-item-label caption lines="1"
+                      >투표기간 From-to</q-item-label
+                    >
+                  </q-item-section>
 
-                <q-item-section side>
-                  <q-badge rounded color="green" />
-                </q-item-section>
-              </q-item>
-            </q-intersection>
+                  <q-item-section side>
+                    <q-badge rounded color="green" />
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
           </dk-tab-panel>
         </dk-tab-panels>
       </q-card>
@@ -127,7 +132,7 @@
 <!-- 함수정의 -->
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import { onBeforeMount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { type ApiPagingResponse } from '~/interface/server'
 
 const text = ref<string>()
@@ -160,13 +165,11 @@ interface Data {
 
 // 샘플 목록 조회 리스트
 const resData = ref<Data[]>([])
-const initYn = ref<boolean>(false)
 const maxDataYn = ref<boolean>(false)
 
 const fn_click = () => {
   // 변수 초기화
   resData.value = []
-  initYn.value = false
   maxDataYn.value = false
   currentPage.value = 0
 
@@ -213,13 +216,6 @@ const scrollEvent = () => {
     (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          // 감지대상이 교차영역에 진입 할 경우
-          // 인터섹션 이벤트가 발생하면 옵저버 객체의 콜백 호출
-          if (!initYn.value) {
-            // 최초 document 그려지기 전에 이벤트 발생하여 제어
-            initYn.value = true
-            return
-          }
           currentPage.value++
           observer.unobserve(entry.target) // 로딩 이후론 관찰할 필요 없음
           selectList()
@@ -233,8 +229,6 @@ const scrollEvent = () => {
   // 위 $votes의 첫 번째 요소의 인터섹션 여부를 검사. obs.observe($votes[0]) 이렇게 사용해도 됨
   $votes.forEach((el) => obs.observe(el))
 }
-
-onBeforeMount(() => {})
 </script>
 
 <!-- css -->
@@ -247,7 +241,6 @@ onBeforeMount(() => {})
 
 .vote-item {
   margin-bottom: 10px;
-  border-bottom: ridge;
 }
 
 .vote-list {
