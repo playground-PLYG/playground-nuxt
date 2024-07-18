@@ -136,12 +136,6 @@ const columns = ref<QTableProps['columns']>([
     name: 'eventSerial',
     label: '순번',
     field: (row: Data) => {
-      console.debug(row)
-      console.debug(
-        eventList.value.findIndex(
-          (event) => event.eventSerial == row.eventSerial
-        )
-      )
       const idx = eventList.value.findIndex(
         (event) => event.eventSerial == row.eventSerial
       )
