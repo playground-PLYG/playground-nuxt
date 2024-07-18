@@ -130,7 +130,7 @@ import { imageUtil } from '~/utils/image'
 
 const imgCheckIdLazy = ref<number>(1)
 const imgCheckId = ref<number>(1)
-const imgCheckUrl = ref<string>('')
+const imgCheckUrl = ref<string>(imageUtil.getImageUrl(1))
 
 watch(imgCheckId, (newVal) => {
   imgCheckUrl.value = imageUtil.getImageUrl(newVal)
