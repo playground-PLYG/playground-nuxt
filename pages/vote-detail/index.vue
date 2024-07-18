@@ -109,10 +109,18 @@
     <vote-rstrnt-list
       v-model="openYn"
       @select-rstrnt="rstrntSelect"
+      @show-rstrnt-detail="showRstrntDetail"
       @close-callback="dialogCloseCallback"
     />
-
     <!-- 식당 팝업 end -->
+
+    <!-- 식당 상세 팝업 start -->
+    <vote-rstrnt-detail
+      ref="rstrntDetailComponent"
+      v-model="openDetailYn"
+      @close-callback="detailDialogCloseCallback"
+    />
+    <!-- 식당 상세 팝업 end -->
   </div>
   <!-- 메인 영역 end -->
 </template>
@@ -208,6 +216,19 @@ const dialogCloseCallback = () => {
 const rstrntSelect = (data: object) => {
   openYn.value = false
   console.log(data)
+}
+
+const openDetailYn = ref<boolean>(false)
+
+const rstrntDetailComponent = ref()
+const showRstrntDetail = (data: number) => {
+  openYn.value = false
+  rstrntDetailComponent.value.fn_getRstrntDetail(data)
+  openDetailYn.value = true
+}
+const detailDialogCloseCallback = () => {
+  openDetailYn.value = false
+  openYn.value = true
 }
 </script>
 

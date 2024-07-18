@@ -505,7 +505,7 @@
                                 />
                               </div>
 
-                              <div class="col-1"/>
+                              <div class="col-1" />
 
                               <div class="col-5 text-right">
                                 <q-input
@@ -543,7 +543,7 @@
                                 }}
                               </div>
 
-                              <div class="col-6 text-right"/>
+                              <div class="col-6 text-right" />
                             </div>
                           </q-card-section>
 
@@ -658,7 +658,7 @@
                               />
                             </div>
 
-                            <div class="col-1"/>
+                            <div class="col-1" />
 
                             <div class="col-5 text-right">
                               <q-input
@@ -714,6 +714,7 @@ interface Restaurant {
   imageFileId: number | null
   imageUrl: string | undefined
   isSelected?: boolean
+  imageFileIds: number[]
 }
 
 /* 식당 상세 */
@@ -729,6 +730,7 @@ interface RestaurantDetail {
   imageFileId: number | null
   imageUrl: string | undefined
   menuList: Menu[] | []
+  fileList: number[] | []
 }
 
 /* 메뉴 */
@@ -806,7 +808,8 @@ const restaurantDetail = ref<RestaurantDetail>({
   kakaoMapId: '',
   imageFileId: null,
   imageUrl: undefined,
-  menuList: []
+  menuList: [],
+  fileList: []
 })
 
 const restaurantDetailImageUpload = ref()
@@ -823,7 +826,8 @@ const addRestaurant = ref<Omit<Restaurant, 'restaurantSerialNo' | 'imageUrl'>>({
   la: '',
   lo: '',
   kakaoMapId: '',
-  imageFileId: null
+  imageFileId: null,
+  imageFileIds: []
 })
 
 const inp_addMenuMenuName = ref()
@@ -918,6 +922,7 @@ const fn_getRestaurantList = async (): Promise<void> => {
       } else {
         result.data.forEach((restaurant) => {
           restaurant.isSelected = false
+          restaurant.imageFileId = restaurant.imageFileIds[0]
           restaurant.imageUrl = restaurant.imageFileId
             ? imageUtil.getImageUrl(restaurant.imageFileId)
             : '/icon/no-image.png'
@@ -999,19 +1004,24 @@ const fn_selectRestaurant = async (restaurantSerialNo: number) => {
             )[0].codeName
           : ''
 
-        restaurantDetail.value.imageUrl = restaurantDetail.value.imageFileId
-          ? imageUtil.getImageUrl(restaurantDetail.value.imageFileId)
+        restaurantDetail.value.fileList = result.data.fileList
+        restaurantDetail.value.imageUrl = restaurantDetail.value.fileList[0]
+          ? imageUtil.getImageUrl(restaurantDetail.value.fileList[0])
           : '/icon/no-image.png'
 
-        restaurantDetail.value.menuList.forEach((menu: Menu) => {
-          menu.isModifyMenu = false
-          menu.isHashtagAddMode = false
-          menu.addMenuHashtag = {
-            restaurantSerialNo: menu.restaurantSerialNo,
-            restaurantMenuSerialNo: menu.restaurantMenuSerialNo,
-            hashtagName: ''
-          }
-        })
+        if (restaurantDetail.value.menuList) {
+          restaurantDetail.value.menuList.forEach((menu: Menu) => {
+            menu.isModifyMenu = false
+            menu.isHashtagAddMode = false
+            menu.addMenuHashtag = {
+              restaurantSerialNo: menu.restaurantSerialNo,
+              restaurantMenuSerialNo: menu.restaurantMenuSerialNo,
+              hashtagName: ''
+            }
+          })
+        } else {
+          fn_getMenuList(restaurantDetail.value.restaurantSerialNo)
+        }
 
         restaurantDetailTab.value = 'basic'
 

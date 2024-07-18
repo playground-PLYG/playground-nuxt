@@ -53,7 +53,7 @@
                       round
                       color="blue"
                       icon="info"
-                      @click="fn_rstrntDetail"
+                      @click="fn_rstrntDetail(rstrnt)"
                     />
                     {{ rstrnt.rstrntName }}
                   </q-card-actions>
@@ -80,7 +80,12 @@ import { commUtil } from '~/utils/comm'
 
 const text = ref<string>()
 
-const emit = defineEmits(['close-callback', 'select-rstrnt'])
+const emit = defineEmits([
+  'close-callback',
+  'select-rstrnt',
+  'show-rstrnt-detail',
+  'close-detail-callback'
+])
 
 const dialogCloseCallback = () => {
   emit('close-callback')
@@ -104,8 +109,8 @@ interface rstrntData {
 }
 
 const rstrnt = ref<rstrntData[]>([
-  { rstrntSsno: 1, rstrntName: '가쯔야' },
-  { rstrntSsno: 2, rstrntName: '스시' },
+  { rstrntSsno: 1, rstrntName: '태성골뱅이신사 본점' },
+  { rstrntSsno: 40, rstrntName: '롯데호텔서울 라세느' },
   { rstrntSsno: 3, rstrntName: '인천집' },
   { rstrntSsno: 4, rstrntName: '향설주랑' },
   { rstrntSsno: 5, rstrntName: '장군보쌈' },
@@ -127,10 +132,6 @@ const onLoad = (index: number, done: (stop?: boolean) => void) => {
   }, 2000)
 }
 
-const fn_rstrntDetail = () => {
-  alert('상세보기')
-}
-
 const selectRstrnt = ref<rstrntData>()
 
 const fn_selectRstrnt = (rstrnt: rstrntData) => {
@@ -139,6 +140,10 @@ const fn_selectRstrnt = (rstrnt: rstrntData) => {
     message: '해당 식당을 선택하시겠습니까?',
     callbackFn: fn_confirmCallback
   })
+}
+
+const fn_rstrntDetail = (rstrnt: rstrntData) => {
+  emit('show-rstrnt-detail', rstrnt.rstrntSsno)
 }
 
 const fn_confirmCallback = (isConfirm: boolean) => {
