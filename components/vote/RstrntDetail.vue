@@ -141,6 +141,7 @@
 
 <!-- 함수정의 -->
 <script setup lang="ts">
+
 import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '@/interface/server'
@@ -171,6 +172,11 @@ interface RestaurantDetail {
 
 /* 메뉴 */
 interface Menu {
+  menu: {
+    /* __placeholder__ */
+    restaurantSerialNo: /* __placeholder__ */
+    number
+  }
   restaurantSerialNo: number
   restaurantMenuSerialNo: number
   menuName: string
@@ -351,3 +357,4 @@ defineExpose({
   border: 1px solid lightgray;
 }
 </style>
+
