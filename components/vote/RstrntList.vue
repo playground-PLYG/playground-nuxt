@@ -1,76 +1,92 @@
 <template>
   <!-- 식당 팝업 start -->
-  <dk-dialog
-    header-label="식당 선택"
-    :footer-visible="false"
-    @close-callback="dialogCloseCallback"
-  >
-    <template #body>
-      <div class="dialog-body">
-        <div class="row">
-          <dk-select
-            v-model="select3"
-            :options="selectOption3"
-            class="col-4 q-pr-sm"
-            label="종류"
-          />
-          <dk-input
-            v-model="text"
-            label="식당"
-            class="col-8"
-            clearable
-            :max-length="20"
-          >
-            <template #append>
-              <q-icon name="search" @click="fn_searchRstrnt" />
-            </template>
-          </dk-input>
-        </div>
-        <q-separator spaced="12px" />
-
-        <div id="scroll-target">
-          <div id="scroll-target-id" style="overflow: auto">
-            <q-infinite-scroll scroll-target="#scroll-target-id" @load="onLoad">
-              <div
-                v-for="(rstrnt, index) in rstrnt"
-                :key="index"
-                class="rstrnt-list"
-              >
-                <q-card flat bordered class="q-mb-sm">
-                  <q-card-section horizontal class="rstrnt-card">
-                    <q-img
-                      class="col"
-                      src="https://cdn.quasar.dev/img/parallax1.jpg"
-                      @click="fn_selectRstrnt(rstrnt)"
-                    />
-                  </q-card-section>
-
-                  <q-separator />
-
-                  <q-card-actions class="justify-flex-start">
-                    <dk-btn
-                      flat
-                      round
-                      color="blue"
-                      icon="info"
-                      @click="fn_rstrntDetail"
-                    />
-                    {{ rstrnt.rstrntName }}
-                  </q-card-actions>
-                </q-card>
-              </div>
-              <template #loading>
-                <div class="row justify-center q-my-md">
-                  <q-spinner-dots color="primary" size="40px" />
-                </div>
+  <div>
+    <dk-dialog
+      header-label="식당 선택"
+      v-bind="$attrs"
+      :footer-visible="false"
+      @close-callback="dialogCloseCallback"
+    >
+      <template #body>
+        <div class="dialog-body">
+          <div class="row">
+            <dk-select
+              v-model="select3"
+              :options="selectOption3"
+              class="col-4 q-pr-sm"
+              label="종류"
+            />
+            <dk-input
+              v-model="text"
+              label="식당"
+              class="col-8"
+              clearable
+              :max-length="20"
+            >
+              <template #append>
+                <q-icon name="search" @click="fn_searchRstrnt" />
               </template>
-            </q-infinite-scroll>
+            </dk-input>
+          </div>
+          <q-separator spaced="12px" />
+
+          <div id="scroll-target">
+            <div id="scroll-target-id" style="overflow: auto">
+              <q-infinite-scroll
+                scroll-target="#scroll-target-id"
+                @load="onLoad"
+              >
+                <div
+                  v-for="(rstrnt, index) in rstrnt"
+                  :key="index"
+                  class="rstrnt-list"
+                >
+                  <q-card flat bordered class="q-mb-sm">
+                    <q-card-section horizontal class="rstrnt-card">
+                      <q-img
+                        class="col"
+                        src="https://cdn.quasar.dev/img/parallax1.jpg"
+                        @click="fn_selectRstrnt(rstrnt)"
+                      />
+                    </q-card-section>
+
+                    <q-separator />
+
+                    <q-card-actions class="justify-flex-start">
+                      <dk-btn
+                        flat
+                        round
+                        color="blue"
+                        icon="info"
+                        @click="fn_rstrntDetail"
+                      />
+                      {{ rstrnt.rstrntName }}
+                    </q-card-actions>
+                  </q-card>
+                </div>
+                <template #loading>
+                  <div class="row justify-center q-my-md">
+                    <q-spinner-dots color="primary" size="40px" />
+                  </div>
+                </template>
+              </q-infinite-scroll>
+            </div>
           </div>
         </div>
-      </div>
-    </template>
-  </dk-dialog>
-  <!-- 식당 팝업 end -->
+      </template>
+    </dk-dialog>
+
+    <!-- 식당 팝업 end -->
+
+    <!-- 식당 상세 팝업 start -->
+
+    <vote-rstrnt-detail
+      v-model="rstrntDetailOpen"
+      @close-callback="rstrntDetailCloseCallback"
+    />
+
+    <!-- 식당 상세 팝업 end -->
+  </div>
 </template>
 
 <!-- 함수정의 -->
@@ -95,7 +111,7 @@ const selectOption3 = [
 ]
 
 const fn_searchRstrnt = () => {
-  alert('식당 검색')
+  rstrntDetailOpen.value = false
 }
 
 interface rstrntData {
@@ -128,7 +144,7 @@ const onLoad = (index: number, done: (stop?: boolean) => void) => {
 }
 
 const fn_rstrntDetail = () => {
-  alert('상세보기')
+  rstrntDetailOpen.value = true
 }
 
 const selectRstrnt = ref<rstrntData>()
@@ -147,6 +163,12 @@ const fn_confirmCallback = (isConfirm: boolean) => {
   } else {
     return
   }
+}
+
+const rstrntDetailOpen = ref<boolean>(false)
+
+const rstrntDetailCloseCallback = () => {
+  rstrntDetailOpen.value = false
 }
 </script>
 
