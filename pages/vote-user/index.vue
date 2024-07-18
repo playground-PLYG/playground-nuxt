@@ -123,6 +123,7 @@ const checkIem = ref([])
 const selectIem = ref()
 
 const fn_openRstrnt = () => {
+  console.log('ASDF')
   openYn.value = true
 }
 
