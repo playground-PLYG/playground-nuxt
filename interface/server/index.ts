@@ -41,6 +41,64 @@ export interface ApiPagingResponse<Type> {
 }
 
 /**
+ * 페이징 정보 구조
+ *
+ * @typedef Page
+ *
+ * @property {object} pageable pageable 객체
+ * @property {object} pageable.sort 정렬 객체
+ * @property {boolean} pageable.sort.empty 정렬 빈값 여부
+ * @property {boolean} pageable.sort.unsorted 정렬 미적용 여부
+ * @property {boolean} pageable.sort.sorted 정렬 적용 여부
+ * @property {number} pageable.offset ?
+ * @property {number} pageable.pageNumber 페이지 번호 (zero base)
+ * @property {number} pageable.pageSize 한 페이지당 row 수
+ * @property {boolean} pageable.unpaged 페이징 미적용여부
+ * @property {boolean} pageable.paged 페이징 적용여부
+ *
+ * @property {object} sort 정렬
+ * @property {boolean} sort.empty 빈값여부
+ * @property {boolean} sort.unsorted 미적용 여부
+ * @property {boolean} sort.sorted 적용 여부
+ *
+ * @property {number} totalElements 전체 row 수
+ * @property {boolean} last 마지막 페이지 여부
+ * @property {number} totalPages 총 페이지 수
+ * @property {number} size 한 페이지당 row 수
+ * @property {number} number 현재 페이지 번호
+ * @property {number} numberOfElements 현재 페이지 row 수
+ * @property {boolean} first 첫 페이지 여부
+ * @property {boolean} empty 현재 결과 비어있는지 여부
+ */
+export interface Page {
+  readonly pageable: {
+    sort: {
+      empty: boolean
+      unsorted: boolean
+      sorted: boolean
+    }
+    offset: number
+    pageNumber: number
+    pageSize: number
+    unpaged: boolean
+    paged: boolean
+  }
+  readonly totalElements: number
+  readonly last: boolean
+  readonly totalPages: number
+  readonly size: number
+  readonly number: number
+  readonly sort: {
+    empty: boolean
+    unsorted: boolean
+    sorted: boolean
+  }
+  readonly numberOfElements: number
+  readonly first: boolean
+  readonly empty: boolean
+}
+
+/**
  * 페이징 처리 결과 구조
  *
  * @typedef ApiResponse<Type>
@@ -72,33 +130,8 @@ export interface ApiPagingResponse<Type> {
  * @property {boolean} first 첫 페이지 여부
  * @property {boolean} empty 현재 결과 비어있는지 여부
  */
-export interface PageListInfo<Type> {
+export interface PageListInfo<Type> extends Page {
   content: Array<Type>
-  readonly pageable: {
-    sort: {
-      empty: boolean
-      unsorted: boolean
-      sorted: boolean
-    }
-    offset: number
-    pageNumber: number
-    pageSize: number
-    unpaged: boolean
-    paged: boolean
-  }
-  readonly totalElements: number
-  readonly last: boolean
-  readonly totalPages: number
-  readonly size: number
-  readonly number: number
-  readonly sort: {
-    empty: boolean
-    unsorted: boolean
-    sorted: boolean
-  }
-  readonly numberOfElements: number
-  readonly first: boolean
-  readonly empty: boolean
 }
 
 /**
