@@ -91,9 +91,11 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, date } from 'quasar'
+
 import type { ApiResponse, Code, Page, PageListInfo } from '@/interface/server'
 
 import { codeUtil } from '@/utils/code'
+import { useEventStore } from '@/stores/useEventStore'
 import paginationLayout from '@/components/PaginationComponent.vue'
 
 interface Data {
@@ -113,7 +115,6 @@ const param = ref<Data>({
 const eventList = ref<Data[]>([])
 const evnetCode = ref<Code[]>([])
 const evnetCodeSearch = ref<Code[]>([])
-const prompt = ref(false)
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -123,6 +124,7 @@ const totalItems = ref<number | undefined>()
 const page = ref<Page | undefined>()
 
 const router = useRouter()
+const eventStore = useEventStore()
 
 const statusOptions = ref([
   { code: '', codeName: '전체' },
@@ -155,8 +157,8 @@ const columns = ref<QTableProps['columns']>([
     name: 'eventSectionCodeId',
     label: '이벤트구분',
     field: 'eventSectionCodeId',
-    align: 'center'
-    //format: (val) => (val === 'JOIN' ? '참여' : '응모')
+    align: 'center',
+    format: (val) => (val === 'JOIN' ? '참여' : '응모')
   },
   {
     name: 'progrsSttus',
@@ -168,13 +170,15 @@ const columns = ref<QTableProps['columns']>([
     name: 'eventBeginDate',
     label: '시작일시',
     field: 'eventBeginDate',
-    align: 'center'
+    align: 'center',
+    format: (val) => (val ? date.formatDate(val, 'YYYY-MM-DD HH:mm') : val)
   },
   {
     name: 'eventEndDate',
     label: '종료일시',
     field: 'eventEndDate',
-    align: 'center'
+    align: 'center',
+    format: (val) => (val ? date.formatDate(val, 'YYYY-MM-DD HH:mm') : val)
   },
   { name: 'registUsrId', label: '등록자', field: 'registUsrId', align: 'left' },
   {
@@ -245,11 +249,14 @@ const getEventList = async () => {
 const rowClick = (evt: Event, row: any) => {
   console.log(evt)
   console.log(row)
-  router.push({ path: '/post/postDetail' })
+  eventStore.eventSn = row.eventSerial
+  eventStore.updateYn = 'Y'
+  router.push({ path: '/event-detail' })
+  // router.push({ path: '/post/postDetail' })
 }
 
 const insert = () => {
-  prompt.value = true
+  router.push({ path: '/event-detail' })
 }
 
 const resetForm = () => {
