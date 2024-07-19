@@ -91,21 +91,21 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, date } from 'quasar'
-import {
-  type ApiResponse,
-  type Code,
-  type PageListInfo
-} from '@/interface/server'
+
+import type { ApiResponse, Code, Page, PageListInfo } from '@/interface/server'
+
 import { codeUtil } from '@/utils/code'
 import { useEventStore } from '@/stores/useEventStore'
 import paginationLayout from '@/components/PaginationComponent.vue'
 
 interface Data {
+  eventSerial: number
   eventName: string
   progrsSttus: string
   eventSectionCodeId: string
 }
 const param = ref<Data>({
+  eventSerial: -1,
   eventName: '',
   progrsSttus: '',
   eventSectionCodeId: ''
@@ -121,6 +121,7 @@ const currentPage = ref<number>(1)
 const totalPages = ref<number>(0)
 const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
 const totalItems = ref<number | undefined>()
+const page = ref<Page | undefined>()
 
 const router = useRouter()
 const eventStore = useEventStore()
@@ -133,7 +134,24 @@ const statusOptions = ref([
 ])
 
 const columns = ref<QTableProps['columns']>([
-  { name: 'eventSerial', label: '순번', field: 'eventSerial', align: 'center' },
+  {
+    name: 'eventSerial',
+    label: '순번',
+    field: (row: Data) => {
+      const idx = eventList.value.findIndex(
+        (event) => event.eventSerial == row.eventSerial
+      )
+
+      if (page.value) {
+        return (
+          page.value.totalElements - page.value.number * page.value.size - idx
+        )
+      }
+
+      return 0
+    },
+    align: 'center'
+  },
   { name: 'eventName', label: '이벤트명', field: 'eventName', align: 'center' },
   {
     name: 'eventSectionCodeId',
@@ -210,7 +228,8 @@ const getEventList = async () => {
     }
   )
     .then((result) => {
-      eventList.value = result.data.content
+      const { content, ...pageInfo } = result.data
+      eventList.value = content
 
       totalItems.value = result.data.totalElements ?? 0
 
@@ -219,6 +238,8 @@ const getEventList = async () => {
           ? Math.ceil(totalItems.value / itemsPerPage.value)
           : 1
       )
+
+      page.value = pageInfo
     })
     .catch((error) => {
       console.error(error)

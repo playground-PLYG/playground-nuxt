@@ -90,11 +90,51 @@
         />
       </div>
     </div>
+
+    <q-separator inset class="q-my-lg" />
+
+    <div class="wrap-box">
+      <div class="title q-pa-md">
+        <div class="text-h6">이미지 확인</div>
+      </div>
+
+      <div class="q-pa-md">
+        <dk-input
+          v-model="imgCheckIdLazy"
+          label="이미지파일일련번호"
+          @change="
+            (val: number) => {
+              imgCheckId = val
+            }
+          "
+        />
+      </div>
+
+      <q-separator inset />
+
+      <q-img
+        :src="imgCheckUrl"
+        class="fit"
+        :ratio="1"
+        fit="contain"
+        :img-style="{ borderRadius: '2px' }"
+        error-src="/icon/no-image.png"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { imageUtil } from '~/utils/image'
+
+const imgCheckIdLazy = ref<number>(1)
+const imgCheckId = ref<number>(1)
+const imgCheckUrl = ref<string>(imageUtil.getImageUrl(1))
+
+watch(imgCheckId, (newVal) => {
+  imgCheckUrl.value = imageUtil.getImageUrl(newVal)
+})
 
 const editorOptions = ref({
   theme: 'vs-dark',
