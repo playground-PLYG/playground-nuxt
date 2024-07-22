@@ -22,6 +22,7 @@
     "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
     "@types/daum-postcode": "^2.0.3",
     "@types/node": "^18.16.19",
+    "@types/sockjs-client": "^1.5.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.57.0",
@@ -56,6 +57,8 @@
     "hangul-util": "^0.1.4",
     "pinia": "^2.1.7",
     "quasar": "^2.16.4",
-    "vue-chartjs": "^5.3.1"
+    "sockjs-client": "^1.6.1",
+    "vue-chartjs": "^5.3.1",
+    "webstomp-client": "^1.2.6"
   }
 }

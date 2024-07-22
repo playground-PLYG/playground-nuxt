@@ -65,5 +65,14 @@ export default defineNuxtConfig({
       codeEditor: 'CodeEditor',
       diffEditor: 'DiffEditor'
     }
+  },
+  vite: {
+    optimizeDeps: {
+      esbuildOptions: {
+        define: {
+          global: 'globalThis',
+        },
+      },
+    }
   }
 })
