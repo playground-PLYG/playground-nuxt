@@ -99,7 +99,6 @@ if (currentMenu) {
 }
 
 const fn_setSeoMenuExtends = async () => {
-  console.debug('>>> fn_setSeoMenuExtends')
   if (menuAsyncData.data.value?.data) {
     currentMenu = menuAsyncData.data.value.data.find(
       (item) => item.menuUrl == route.path
@@ -118,7 +117,6 @@ const fn_setSeoMenuExtends = async () => {
       }
     })
   )
-  console.debug('>>> metaAsyncData', metaAsyncData.data.value)
 
   if (metaAsyncData.data.value?.data) {
     // metadataSet
@@ -156,7 +154,7 @@ onMounted(() => {
   const serverURL = `${config.public.apiBaseUrl}/ws`
 
   const socket = new SockJS(serverURL)
-  const stompClient = Stomp.over(socket)
+  const stompClient = Stomp.over(socket, { debug: false })
 
   stompClient.connect(
     {},
@@ -165,15 +163,18 @@ onMounted(() => {
 
       stompClient.subscribe('/sub', (response) => {
         const body = JSON.parse(response.body)
+        const caption = new Intl.DateTimeFormat('ko', {
+          timeStyle: 'medium'
+        }).format(new Date(body.sendDate))
 
         // TODO Notification권한 체크해서 notification가능하면 push 아니면 notify
         notify({
           message: body.message,
+          caption,
           position: 'top',
           icon: 'announcement',
           group: false,
-          progress: true,
-          color: 'primary'
+          progress: true
         })
       })
     },
