@@ -173,6 +173,7 @@ onMounted(() => {
           caption,
           position: 'top',
           icon: 'announcement',
+          color: 'teal',
           group: false,
           progress: true,
           html: body.messageType == 'HTML'
