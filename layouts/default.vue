@@ -174,7 +174,8 @@ onMounted(() => {
           position: 'top',
           icon: 'announcement',
           group: false,
-          progress: true
+          progress: true,
+          html: body.messageType == 'HTML'
         })
       })
     },
