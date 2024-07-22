@@ -11,7 +11,7 @@ import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
 const config = useRuntimeConfig()
 const authStore = useAuthStore()
 
-const { notify } = useQuasar()
+const $q = useQuasar()
 
 // api로 조회할 데이터 구조
 interface MenuData {
@@ -163,18 +163,18 @@ onMounted(() => {
 
       stompClient.subscribe('/sub', (response) => {
         const body = JSON.parse(response.body)
+        console.log(body)
         const caption = new Intl.DateTimeFormat('ko', {
           timeStyle: 'medium'
         }).format(new Date(body.sendDate))
 
         // TODO Notification권한 체크해서 notification가능하면 push 아니면 notify
-        notify({
+        $q.notify({
           message: body.message,
           caption,
           position: 'top',
           icon: 'announcement',
           color: 'teal',
-          group: false,
           progress: true,
           html: body.messageType == 'HTML'
         })
