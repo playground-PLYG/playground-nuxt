@@ -461,7 +461,12 @@ const fn_voting = async () => {
   )
     .then((result: ApiResponse<VoteAnswerResponse[]>) => {
       console.log('fn_voting start :::::result : ', result.data)
-      router.push('/vote-list')
+
+      commUtil.alert({
+        message: '투표가 완료 되었습니다.',
+        callbackFn: fn_votingEndCallback
+      })
+
       loading.hide()
     })
     .catch((error) => {
@@ -470,6 +475,10 @@ const fn_voting = async () => {
       console.error(error)
     })
 }
+const fn_votingEndCallback = () => {
+  router.push('/vote-list')
+}
+
 const fn_showVoteResult = () => {
   router.push('/vote-result?ssno=' + voteDetail.value.voteSsno)
 }
