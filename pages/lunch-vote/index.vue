@@ -8,7 +8,7 @@
 
     <q-separator inset />
 
-    <div class="q-pa-md" v-if="createdYn">
+    <div v-if="createdYn" class="q-pa-md">
       <q-card class="my-card">
         <q-card-section class="bg-primary text-white">
           <div
@@ -37,13 +37,13 @@
           <q-item
             v-for="(iem, ind) in resultList.voteRstrntIemList"
             :key="iem.iemSsno"
-            tag="label"
             v-ripple
+            tag="label"
           >
             <q-item-section avatar>
               <q-radio
-                v-model="selectedRadioValue"
                 v-if="!compnoYn"
+                v-model="selectedRadioValue"
                 checked-icon="task_alt"
                 unchecked-icon="panorama_fish_eye"
                 :val="iem.iemSsno"
@@ -52,8 +52,8 @@
                 :disable="false"
               />
               <q-checkbox
-                v-model="selectedCheckValue"
                 v-if="compnoYn"
+                v-model="selectedCheckValue"
                 :val="iem.iemSsno"
                 :label="iem.iemName"
                 color="light-blue-7"
@@ -64,7 +64,7 @@
         </q-list>
       </q-card>
     </div>
-    <div align="center" v-if="createdYn">
+    <div v-if="createdYn" align="center">
       <q-btn
         class="glossy"
         rounded
@@ -73,7 +73,7 @@
         @click="fn_voteCheck"
       />
     </div>
-    <div align="center" v-if="!createdYn">
+    <div v-if="!createdYn" align="center">
       <q-btn
         class="glossy"
         rounded
@@ -89,7 +89,8 @@
 import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ApiResponse, IFetchOptions } from '~/interface/server'
+import type { ApiResponse} from '~/interface/server';
+import { IFetchOptions } from '~/interface/server'
 import { useAuthStore } from '~/stores/useAuthStore'
 import { dateUtil } from '~/utils/dateUtil'
 
@@ -129,7 +130,7 @@ interface answerResponseType {
   answerSsno: number
 }
 
-let resultList = ref<Data>({
+const resultList = ref<Data>({
   voteSsno: -1,
   voteKindCode: '',
   voteSubject: '',
@@ -148,8 +149,8 @@ let resultList = ref<Data>({
   ]
 })
 
-let selectedRadioValue = ref<Number>()
-let selectedCheckValue = ref<Number[]>([])
+const selectedRadioValue = ref<number>()
+const selectedCheckValue = ref<number[]>([])
 
 let createdYn = false //투표 생성 여부
 let compnoYn = false // 복수선택 여부 (Y: true, N: false)
@@ -254,7 +255,7 @@ const fn_makeData = () => {
     })
   } else {
     insertVoteResult = []
-    let filterList = resultList.value.voteRstrntIemList.filter((x) =>
+    const filterList = resultList.value.voteRstrntIemList.filter((x) =>
       selectedCheckValue.value.includes(x.iemSsno)
     )
     filterList.forEach((val, idx) => {
@@ -303,7 +304,7 @@ const fn_voteAnswer = async () => {
 
 const fn_isDuplicateVote = async () => {
   loading.show()
-  await $fetch<ApiResponse<Boolean>>(
+  await $fetch<ApiResponse<boolean>>(
     '/playground/public/voteAnswer/isDuplicateVote',
     {
       method: 'POST',

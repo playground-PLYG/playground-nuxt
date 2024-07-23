@@ -92,6 +92,23 @@ export const dateUtil = {
 
     return Math.ceil(Math.abs(_date1.diff(_date2, delimiter, true)))
   },
+
+  /**
+   * 절대값 없이 차이를 반환한다.
+   * date1 > date2 결과값 : (+)
+   * date2 > date1 결과값 : (-)
+    */
+  getDiffDateWithoutAbs: (
+    dateDiff1: Date,
+    dateDiff2: Date,
+    delimiter: UnitTypeShort
+  ): number => {
+    const _date1 = dayjs(dateDiff1)
+    const _date2 = dayjs(dateDiff2)
+
+    return Math.ceil(_date1.diff(_date2, delimiter, true))
+  },
+
   getStringToDateTime: (val: string): string => {
     const _date = dayjs(val)
 

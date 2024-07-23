@@ -6,8 +6,8 @@
     <div class="search">
       <q-form @submit="getAuthorList" @reset="onResetSelect">
         <q-input
-          outlined
           v-model="searchParam.authorId"
+          outlined
           label="권한ID"
           round
           dense
@@ -15,8 +15,8 @@
           class="input"
         />
         <q-input
-          outlined
           v-model="searchParam.authorNm"
+          outlined
           label="권한명"
           round
           dense
@@ -24,8 +24,8 @@
           class="input"
         />
         <q-select
-          outlined
           v-model="searchParam.deleteAt"
+          outlined
           :options="searchOptions"
           label="삭제여부"
           round
@@ -47,10 +47,10 @@
     </div>
     <div class="table">
       <q-table
+        v-model:selected="selected"
         :rows="resData"
         :columns="columns"
         row-key="authorId"
-        v-model:selected="selected"
         selection="single"
         :rows-per-page-options="[0]"
         @row-click="clickRow"
@@ -80,8 +80,8 @@
           <q-toolbar class="bg-primary">
             <q-toolbar-title style="color: white">권한</q-toolbar-title>
             <q-btn
-              flat
               v-close-popup
+              flat
               round
               dense
               icon=" close"
@@ -107,8 +107,8 @@
                 :readonly="readonly"
               />
               <q-select
-                outlined
                 v-model="param.deleteAt"
+                outlined
                 emit-value
                 map-options
                 :options="inputOptions"
@@ -136,7 +136,7 @@
                 :readonly="readonly"
               />
               <q-toolbar class="bg-white">
-                <q-toolbar-title></q-toolbar-title>
+                <q-toolbar-title/>
                 <q-btn
                   v-if="!(modifyClick == '')"
                   push
@@ -174,7 +174,7 @@
           <q-header>
             <q-toolbar class="bg-primary">
               <q-toolbar-title>등록</q-toolbar-title>
-              <q-btn flat v-close-popup round dense icon="close" />
+              <q-btn v-close-popup flat round dense icon="close" />
             </q-toolbar>
           </q-header>
           <q-page-container class="bg-white">
@@ -196,7 +196,7 @@
                     :rules="[nm_rules]"
                   />
                   <q-toolbar class="bg-white">
-                    <q-toolbar-title></q-toolbar-title>
+                    <q-toolbar-title/>
                     <q-btn push color="primary" label="등록" type="submit" />
                   </q-toolbar>
                 </q-form>
@@ -213,7 +213,7 @@
           <q-header>
             <q-toolbar class="bg-primary">
               <q-toolbar-title>권한메뉴매핑</q-toolbar-title>
-              <q-btn flat v-close-popup round dense icon="close" />
+              <q-btn v-close-popup flat round dense icon="close" />
             </q-toolbar>
           </q-header>
           <q-page-container class="bg-white">
@@ -227,17 +227,17 @@
                   :readonly="true"
                 />
                 <q-table
+                  v-model:selected="menuSelected"
                   :rows="resMenuData"
                   row-key="menuSn"
                   :columns="MenuColumns"
-                  v-model:selected="menuSelected"
                   selection="single"
                   :rows-per-page-options="[0]"
                   @selection="clickMenuRow"
                 />
               </q-card-section>
               <q-toolbar class="bg-white">
-                <q-toolbar-title></q-toolbar-title>
+                <q-toolbar-title/>
                 <div class="q-gutter-md row items-start">
                   <q-btn
                     push
@@ -266,9 +266,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { type ApiResponse } from '../../interface/server'
 import { useQuasar } from 'quasar'
-import { date, type QTableProps } from 'quasar'
+import { type QTableProps, date } from 'quasar'
+import { type ApiResponse } from '../../interface/server'
 
 const router = useRouter()
 const { loading } = useQuasar()

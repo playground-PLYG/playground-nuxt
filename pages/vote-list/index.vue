@@ -44,6 +44,7 @@
               :key="voteIndex"
               transition="flip-right"
               class="vote-item"
+              @click="fn_goVoteDetail(votelist.sampleSsno)"
             >
               <q-card flat bordered class="q-mb-sm">
                 <q-item v-ripple clickable>
@@ -133,6 +134,7 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { type ApiPagingResponse } from '~/interface/server'
 
 const text = ref<string>()
@@ -228,6 +230,11 @@ const scrollEvent = () => {
   )
   // 위 $votes의 첫 번째 요소의 인터섹션 여부를 검사. obs.observe($votes[0]) 이렇게 사용해도 됨
   $votes.forEach((el) => obs.observe(el))
+}
+
+const router = useRouter()
+const fn_goVoteDetail = (voteSsno: number) => {
+  router.push('/vote-user?ssno=' + voteSsno)
 }
 </script>
 

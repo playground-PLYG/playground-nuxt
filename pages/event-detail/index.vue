@@ -276,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { codeUtil } from '@/utils/code'
 import type { ApiResponse, Code } from '@/interface/server'
@@ -367,14 +367,6 @@ const isFormValid = computed(() => {
   return true
 })
 
-// 버튼 활성화 체크
-const drawBtn = () => {
-  return (
-    param.value.eventSectionCodeId === 'ENTR' &&
-    eventStore.progrsSttus === 'END'
-  )
-}
-
 //포인트지급단위 항목 추가
 const addFixedPoint = () => {
   pointPayment.value.push({
@@ -391,7 +383,6 @@ const removeFixedPoint = (index: number) => {
 
 onMounted(() => {
   isReadOnly.value = false
-  console.log('parm.val :: ', param.value)
   getCodeList()
   setEvent()
 })
@@ -413,11 +404,6 @@ const setEvent = async () => {
           fixingPointPayrCount: string
           fixingPointValue: string
         }[]
-        console.log('evData :: ', evData)
-        console.log(
-          'getImageUrl :: ',
-          imageUtil.getImageUrl(evData.eventThumbFileSn)
-        )
 
         paramDate.value.dateFrom = evData.eventBeginDate.replaceAll('T', ' ')
         paramDate.value.dateTo = evData.eventEndDate.replaceAll('T', ' ')
@@ -441,8 +427,6 @@ const setEvent = async () => {
           fixingPointPayrCount: option.fixingPointPayrCount ?? '',
           fixingPointValue: option.fixingPointValue ?? ''
         }))
-
-        console.log('paramDate:: ', param.value)
       })
       .catch((error) => {
         console.error(error)
@@ -486,7 +470,6 @@ const addEvent = async () => {
         })
     } else {
       param.value.eventSerial = eventStore.eventSn
-      console.log('param.value ::', param.value)
       await $fetch<ApiResponse<Point[]>>('/playground/api/event/modifyEvent', {
         method: 'POST',
         body: JSON.stringify(param.value)
@@ -506,7 +489,6 @@ const executeEventRaffle = async () => {
   const req = {
     eventSerial: param.value.eventSerial
   }
-  console.log('test :: ', JSON.stringify(req))
 
   await $fetch<ApiResponse<Point[]>>(
     '/playground/api/event/executeEventRaffle',
@@ -527,7 +509,6 @@ const modifyEndEvent = async () => {
   const req = {
     eventSerial: param.value.eventSerial
   }
-  console.log('test :: ', JSON.stringify(req))
 
   await $fetch<ApiResponse<Point[]>>('/playground/api/event/modifyEndEvent', {
     method: 'POST',

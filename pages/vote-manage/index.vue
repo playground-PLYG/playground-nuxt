@@ -6,9 +6,9 @@
     <div class="search">
       <q-form ref="searchForm" @submit="selectVoteList" @reset="onReset">
         <q-input
+          v-model="searchParam.voteSubject"
           outlined
           clearable
-          v-model="searchParam.voteSubject"
           label="투표제목"
           round
           dense
@@ -16,9 +16,9 @@
           class="input"
         />
         <q-select
+          v-model="searchParam.voteKindCode"
           outlined
           clearable
-          v-model="searchParam.voteKindCode"
           :options="kindCodeNm"
           label="투표종류"
           round
@@ -32,20 +32,20 @@
           class="checkbox"
         />
         <q-input
+          v-model="searchParam.voteBeginDate"
           outlined
           readonly
-          v-model="searchParam.voteBeginDate"
           label="투표시작일자"
           round
           dense
           flat
           class="calendar"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon
               name="close"
-              @click="searchParam.voteBeginDate = ''"
               class="cursor-pointer"
+              @click="searchParam.voteBeginDate = ''"
             />
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy
@@ -64,20 +64,20 @@
         </q-input>
         ~
         <q-input
+          v-model="searchParam.voteEndDate"
           outlined
           readonly
-          v-model="searchParam.voteEndDate"
           label="투표종료일자"
           round
           dense
           flat
           class="calendar"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon
               name="close"
-              @click="searchParam.voteEndDate = ''"
               class="cursor-pointer"
+              @click="searchParam.voteEndDate = ''"
             />
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy
@@ -106,10 +106,10 @@
     </div>
     <div class="table">
       <q-table
+        v-model:selected="selected"
         :rows="voteList"
         :columns="columns"
         row-key="voteSsno"
-        v-model:selected="selected"
         selection="single"
         :rows-per-page-options="[0]"
         @row-click="onClickVote"
@@ -141,7 +141,7 @@
     :question-data="selectedQestn"
     :code-data="kindCode"
     :code-name="kindCodeNm"
-    @chgShowVoteDetail="chgShowVoteDetail"
+    @chg-show-vote-detail="chgShowVoteDetail"
   />
 
   <voteRegistForm
@@ -149,7 +149,7 @@
     v-model="showVoteRegistForm"
     :code-data="kindCode"
     :code-name="kindCodeNm"
-    @chgShowVoteRegist="chgShowVoteRegist"
+    @chg-show-vote-regist="chgShowVoteRegist"
   />
 
   <voteStatistics ref="statisticsForm" v-model="showVoteStatistics" />
@@ -157,12 +157,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { type QTableProps, useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 import { type ApiResponse } from '../../interface/server'
-import { useQuasar, type QTableProps } from 'quasar'
 import voteDetail from './vote-detail/voteDetail.vue'
 import voteRegistForm from './vote-detail/voteRegistForm.vue'
 import voteStatistics from './statistics/voteStatistics.vue'
-import { useRouter } from 'vue-router'
 // import { dateUtil } from '~/utils/dateUtil'
 const { loading } = useQuasar()
 const $q = useQuasar()
@@ -173,9 +173,9 @@ interface kindCodeType {
   upperCode: string
 }
 
-let kindCode = ref<kindCodeType[]>([])
-let kindCodeNm = ref<String[]>([])
-let searchCodeParam = ref<kindCodeType>({
+const kindCode = ref<kindCodeType[]>([])
+const kindCodeNm = ref<string[]>([])
+const searchCodeParam = ref<kindCodeType>({
   code: '',
   codeName: '',
   upperCode: 'VOTE_KND_CODE'
@@ -190,7 +190,7 @@ const setKindCode = async () => {
     }
   )
     .then((result) => {
-      let resData = result.data
+      const resData = result.data
       resData.forEach((item) => {
         const kindItem: kindCodeType = {
           code: item.code,
@@ -248,7 +248,7 @@ interface Form {
   voteDeleteAlternative: string
 }
 
-let param = ref<Form>({
+const param = ref<Form>({
   voteKindCode: '',
   voteSubject: '',
   anonymityVoteAlternative: '',
@@ -257,7 +257,7 @@ let param = ref<Form>({
   voteDeleteAlternative: ''
 })
 
-let voteList = ref<ResponseData[]>([])
+const voteList = ref<ResponseData[]>([])
 
 const selectAllVote = async () => {
   await $fetch<ApiResponse<pageableData>>(
@@ -268,7 +268,7 @@ const selectAllVote = async () => {
     }
   )
     .then((res) => {
-      let resData = res.data.content
+      const resData = res.data.content
       resData.forEach((item: ResponseData, index: number) => {
         let kindNm: string = ''
         kindCode.value.forEach((code) => {
@@ -315,7 +315,7 @@ interface searchParamType {
   voteBeginDate: string
   voteEndDate: string
 }
-let searchParam = ref<searchParamType>({
+const searchParam = ref<searchParamType>({
   voteSubject: '',
   voteKindCode: '',
   anonymityVoteAlternativeBoo: false,
@@ -324,7 +324,7 @@ let searchParam = ref<searchParamType>({
   voteEndDate: ''
 })
 
-let selected = ref<any>()
+const selected = ref<any>()
 
 const columns = ref<QTableProps['columns']>([
   { name: 'voteIndex', label: '번호', field: 'voteIndex', align: 'center' },
@@ -388,7 +388,7 @@ const selectVoteList = async () => {
     }
   })
 
-  let srchParam = ref<Form>({
+  const srchParam = ref<Form>({
     voteKindCode: kindId,
     voteSubject: searchParam.value.voteSubject,
     anonymityVoteAlternative: searchParam.value.anonymityVoteAlternativeBoo
@@ -408,7 +408,7 @@ const selectVoteList = async () => {
     .then((res) => {
       loading.show()
       voteList.value = []
-      let resData = res.data.content
+      const resData = res.data.content
       resData.forEach((item: ResponseData, index: number) => {
         let kindNm: string = ''
         kindCode.value.forEach((code) => {
@@ -484,8 +484,8 @@ interface VoteItemDetailDataType {
   voteSsno?: number
 }
 
-let showVoteDetail = ref<boolean>(false)
-let selectedVote = ref<VoteDetailDataType>({
+const showVoteDetail = ref<boolean>(false)
+const selectedVote = ref<VoteDetailDataType>({
   voteSsno: 0,
   voteKindCode: '',
   voteKindName: '',
@@ -503,7 +503,7 @@ let selectedVote = ref<VoteDetailDataType>({
   qestnResponseList: []
 })
 
-let selectedQestn = ref<QuestionDetailDataType[]>([])
+const selectedQestn = ref<QuestionDetailDataType[]>([])
 
 const onClickVote = (evt: Object, row: ResponseData, index: number) => {
   getVoteDetail(row.voteSsno, row.voteKindCode)
@@ -522,7 +522,7 @@ const getVoteDetail = async (ssno: number, kindCdNm: string) => {
     }
   )
     .then((res) => {
-      let resData = res.data
+      const resData = res.data
 
       selectedVote.value = {
         voteSsno: resData.voteSsno,
@@ -559,7 +559,7 @@ const chgShowVoteDetail = (call: boolean) => {
   router.go(0)
 }
 
-let showVoteRegistForm = ref<boolean>(false)
+const showVoteRegistForm = ref<boolean>(false)
 const chgShowVoteRegist = (call: boolean) => {
   showVoteRegistForm.value = call
   router.go(0)
@@ -577,7 +577,7 @@ const onClickResult = () => {
   }
 }
 
-let showVoteStatistics = ref<boolean>(false)
+const showVoteStatistics = ref<boolean>(false)
 const statisticsForm = ref()
 
 const getVoteResult = (row: ResponseData) => {
