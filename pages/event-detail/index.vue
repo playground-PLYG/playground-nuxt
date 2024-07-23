@@ -25,15 +25,33 @@
       <q-card-section>
         <div>
           썸네일 이미지
-          <div
-            v-if="
-              param.eventThumbFileSn === null || param.eventThumbFileSn === ''
-            "
-          >
-            <image-upload @file-uploaded="fn_fileUploaded" />
+          <div v-if="eventStore.updateYn === 'Y'">
+            <q-img
+              v-if="
+                param.eventThumbFileSn !== null && param.eventThumbFileSn !== ''
+              "
+              :src="imageUtil.getImageUrl(param.eventThumbFileSn)"
+              class="fit"
+              :rato="1"
+              :img-style="{ borderRadius: '2px' }"
+              no-native-menu
+            />
           </div>
-          <div v-else>
-            <image-upload :file-id="75" @file-uploaded="fn_fileUploaded" />
+          <div v-if="eventStore.updateYn === 'N'">
+            <image-upload
+              v-if="
+                param.eventThumbFileSn === null || param.eventThumbFileSn === ''
+              "
+              @file-uploaded="fn_fileUploaded"
+            />
+
+            <image-upload
+              v-if="
+                param.eventThumbFileSn !== null && param.eventThumbFileSn !== ''
+              "
+              :file-id="param.eventThumbFileSn"
+              @file-uploaded="fn_fileUploaded"
+            />
           </div>
         </div>
       </q-card-section>
@@ -214,20 +232,34 @@
         />
       </q-card-section>
       <div class="q-gutter-md row items-start left-align" v-if="isReadOnly">
-        <q-btn color="primary" label="수정" @click="updateEvent" />
         <q-btn
-          v-if="param.eventSectionCodeId === 'ENTR' && !param.drwtDate"
+          v-if="eventStore.progrsSttus === 'PRE'"
+          color="primary"
+          label="수정"
+          @click="updateEvent"
+        />
+        <q-btn
+          v-if="
+            param.eventSectionCodeId === 'ENTR' &&
+            eventStore.progrsSttus === 'END' &&
+            param.drwtDate === null
+          "
           color="primary"
           label="추첨"
           @click="executeEventRaffle"
         />
         <q-btn
-          v-if="param.eventSectionCodeId === 'ENTR'"
+          v-if="param.eventSectionCodeId === 'ENTR' && param.drwtDate !== null"
           color="primary"
           label="결과보기"
           @click="resultEvent"
         />
-        <q-btn color="primary" label="종료" @click="modifyEndEvent" />
+        <q-btn
+          v-if="eventStore.progrsSttus === 'ING'"
+          color="primary"
+          label="종료"
+          @click="modifyEndEvent"
+        />
         <q-btn color="primary" label="취소" @click="updateOutEvent" />
       </div>
       <div class="q-gutter-md row items-start right-align" v-if="!isReadOnly">
@@ -249,6 +281,7 @@ import { useRouter } from 'vue-router'
 import { codeUtil } from '@/utils/code'
 import type { ApiResponse, Code } from '@/interface/server'
 import { useEventStore } from '@/stores/useEventStore'
+import { imageUtil } from '~/utils/image'
 
 const router = useRouter()
 const eventStore = useEventStore()
@@ -334,6 +367,14 @@ const isFormValid = computed(() => {
   return true
 })
 
+// 버튼 활성화 체크
+const drawBtn = () => {
+  return (
+    param.value.eventSectionCodeId === 'ENTR' &&
+    eventStore.progrsSttus === 'END'
+  )
+}
+
 //포인트지급단위 항목 추가
 const addFixedPoint = () => {
   pointPayment.value.push({
@@ -372,9 +413,17 @@ const setEvent = async () => {
           fixingPointPayrCount: string
           fixingPointValue: string
         }[]
+        console.log('evData :: ', evData)
+        console.log(
+          'getImageUrl :: ',
+          imageUtil.getImageUrl(evData.eventThumbFileSn)
+        )
 
         paramDate.value.dateFrom = evData.eventBeginDate.replaceAll('T', ' ')
         paramDate.value.dateTo = evData.eventEndDate.replaceAll('T', ' ')
+
+        param.value.eventBeginDate = evData.eventBeginDate
+        param.value.eventEndDate = evData.eventEndDate
 
         param.value.eventSerial = evData.eventSerial
         param.value.eventName = evData.eventName
@@ -404,13 +453,10 @@ const setEvent = async () => {
 //시작일시 데이터
 const setEventBeginDate = (val: string) => {
   param.value.eventBeginDate = val.replaceAll('T', ' ')
-
-  console.log('paramDate:: ', paramDate.value)
 }
 //시작일시 데이터
 const setEventEndDate = (val: string) => {
   param.value.eventEndDate = val.replaceAll('T', ' ')
-  console.log('paramDate:: ', paramDate.value)
 }
 
 const getCodeList = async (): Promise<void> => {
@@ -423,6 +469,8 @@ const fn_fileUploaded = (fileId: number) => {
   param.value.eventThumbFileSn = fileId
 }
 const addEvent = async () => {
+  param.value.eventBeginDate = param.value.eventBeginDate.replaceAll('T', ' ')
+  param.value.eventEndDate = param.value.eventEndDate.replaceAll('T', ' ')
   param.value.pointPayment = pointPayment.value
   if (isFormValid.value) {
     if (eventStore.eventSn === '') {
