@@ -122,10 +122,12 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: "/",
-      offline: false
+      config: {
+        debug: false
+      }
     },
     devOptions: {
-      enabled: false,
+      enabled: true,
       type: "module"
     }
   }
