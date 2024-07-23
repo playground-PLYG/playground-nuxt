@@ -449,8 +449,44 @@ const setAnswerReqForm = () => {
   voteAnswer.value = voteAnswerList
 }
 
-const fn_voting = async () => {
+const fn_voting = () => {
   setAnswerReqForm()
+
+  // validation check
+  // 1. 선택한 답변의 질문 수와 voteDetail 에서의 질문 수를 비교
+  const selQestnCount: number = voteAnswer.value ? voteAnswer.value.length : 0
+  const voteQestnCount: number = voteDetail.value.voteQestnResponseList.length
+
+  if (selQestnCount != voteQestnCount) {
+    commUtil.alert({
+      message: '투표항목을 선택해주세요.'
+    })
+    return false
+  } else {
+    // 2. 질문 수는 동일하지만 질문안의 답변 list 가 비어 있는 경우 check
+    let isCompleteAnswer: boolean = true
+    voteAnswer.value?.forEach((ans) => {
+      if (ans.itemSsnoList.length == 0) {
+        commUtil.alert({
+          message: '투표항목을 선택해주세요.'
+        })
+        isCompleteAnswer = false
+      }
+    })
+
+    // 3. 최종적으로 check
+    if (isCompleteAnswer) {
+      fn_addVoteAnswer()
+    } else {
+      commUtil.alert({
+        message: '투표항목을 선택해주세요.'
+      })
+      return false
+    }
+  }
+}
+
+const fn_addVoteAnswer = async () => {
   loading.show()
   await $fetch<ApiResponse<VoteAnswerResponse[]>>(
     '/playground/api/vote/addVoteAnswer',
@@ -461,12 +497,10 @@ const fn_voting = async () => {
   )
     .then((result: ApiResponse<VoteAnswerResponse[]>) => {
       console.log('fn_voting start :::::result : ', result.data)
-
       commUtil.alert({
         message: '투표가 완료 되었습니다.',
         callbackFn: fn_votingEndCallback
       })
-
       loading.hide()
     })
     .catch((error) => {
@@ -475,6 +509,7 @@ const fn_voting = async () => {
       console.error(error)
     })
 }
+
 const fn_votingEndCallback = () => {
   router.push('/vote-list')
 }

@@ -16,10 +16,10 @@
           <q-card class="q-mb-sm" flat bordered>
             <q-card-section>
               <q-badge
+                v-if="qestn.anonymityVoteAlternative == 'Y'"
                 color="negative"
                 align="middle"
                 class="q-mr-sm"
-                v-if="qestn.anonymityVoteAlternative == 'Y'"
                 >익명투표</q-badge
               >
               <q-badge
@@ -36,10 +36,10 @@
                 <div
                   class="row q-mb-sm"
                   :class="{ highlight: iem.bestItem == true }"
-                  style="align-items: center; border: ridge; min-height: 30px"
+                  style="align-items: center; border: outset; min-height: 30px"
                 >
                   <!-- 투표 1등 일 경우 표시 -->
-                  <div style="min-width: 10%">
+                  <div style="max-width: 10%">
                     <q-icon
                       v-if="iem.bestItem"
                       size="25px"
@@ -55,9 +55,20 @@
                 <div
                   v-if="qestn.questionDetailYn"
                   class="row"
-                  style="min-height: 30px"
+                  style="
+                    min-height: 30px;
+                    justify-content: flex-start;
+                    margin-bottom: 10px;
+                  "
                 >
-                  {{ iem.userIds }}
+                  <div
+                    v-for="(userId, index) in iem.selUserIdList"
+                    :key="index"
+                    class="q-ml-xs q-mr-xs"
+                  >
+                    <q-icon name="person" class="text-grey" />
+                    {{ userId }}
+                  </div>
                 </div>
               </div>
               <div class="row justify-center">
@@ -124,7 +135,6 @@ interface VoteResultDetailDetail {
   itemCount: number
   itemIdentificationId: string
   selUserIdList: string[]
-  userIds: string
   bestItem?: boolean
 }
 
@@ -146,8 +156,7 @@ const voteResult = ref<VoteResult>({
           itemName: '',
           itemCount: 0,
           itemIdentificationId: '',
-          selUserIdList: [],
-          userIds: ''
+          selUserIdList: []
         }
       ]
     }
@@ -196,26 +205,22 @@ const fn_getVoteResult = async (ssno: number) => {
         voteResult.value.voteStatus = 'NONE' // 알수 없음
       }
 
-      // 2. 자세히 보기 처리  구분자 : [·]
+      // 2. 자세히 보기 처리
+      let anonymityVoteCount: number = 0
       voteResult.value.voteResultList.forEach((qestn) => {
         // 익명일때만 자세히 보기 버튼 삭제
-        qestn.questionDetailShowBtn =
-          qestn.anonymityVoteAlternative == 'Y' ? false : true
+        if (qestn.anonymityVoteAlternative == 'Y') {
+          qestn.questionDetailShowBtn = false
+          anonymityVoteCount++
+        } else {
+          qestn.questionDetailShowBtn = true
+        }
 
         qestn.questionDetailYn = false
         qestn.questionDetailLabel = '자세히보기'
 
         const bestCountArray: number[] = []
         qestn.resultDetailList.forEach((iem) => {
-          iem.selUserIdList.forEach((userId, index) => {
-            if (index == 0) {
-              iem.userIds = userId + ' · '
-            } else if (index == iem.selUserIdList.length - 1) {
-              iem.userIds += userId
-            } else {
-              iem.userIds += userId + ' · '
-            }
-          })
           iem.bestItem = false
           bestCountArray.push(iem.itemCount)
         })
@@ -227,6 +232,15 @@ const fn_getVoteResult = async (ssno: number) => {
             iem.bestItem = true
           }
         })
+      })
+
+      // 4. 전체 자세히보기 관리
+      // 질문 중 하나라도 익명이 있을 경우 && 진행 중일 경우
+      // 질문 전부 자세히보기 버튼 안보이게  ->  v-show = false
+      voteResult.value.voteResultList.forEach((qestn) => {
+        if (anonymityVoteCount > 0 && voteResult.value.voteStatus == 'VTI') {
+          qestn.questionDetailShowBtn = false
+        }
       })
 
       loading.hide()
