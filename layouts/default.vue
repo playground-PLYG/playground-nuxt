@@ -163,7 +163,6 @@ onMounted(() => {
 
       stompClient.subscribe('/sub', (response) => {
         const body = JSON.parse(response.body)
-        console.log(body)
         const caption = new Intl.DateTimeFormat('ko', {
           timeStyle: 'medium'
         }).format(new Date(body.sendDate))

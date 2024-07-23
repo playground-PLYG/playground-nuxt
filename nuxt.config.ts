@@ -121,11 +121,15 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: "/"
+      navigateFallback: "/",
+      offline: false
     },
     devOptions: {
-      enabled: true,
+      enabled: false,
       type: "module"
+    },
+    client: {
+      installPrompt: true
     }
   }
 })
