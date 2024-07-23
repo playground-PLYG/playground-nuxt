@@ -1,55 +1,36 @@
 <template>
   <div :class="['page-wrap', isMobile ? 'mobile' : '']">
     <div class="content q-pa-md q-gutter-md">
-      <div class="title">
-        <div class="text-h4"><q-icon name="emoji_events" /> 이벤트</div>
-      </div>
-
       <div class="search">
-        <q-form @submit="fn_getEventList" @reset="fn_resetSearchArea">
-          <q-card flat class="search-card">
-            <q-card-section class="row q-pa-none">
-              <div class="row full-width q-px-lg q-pb-lg q-pt-md">
-                <div
-                  class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
-                >
-                  <q-input
-                    v-model="eventSrchReq.eventName"
-                    outlined
-                    label="이벤트명"
-                    round
-                    dense
-                    flat
-                    class="input"
-                  />
-                </div>
-                <div
-                  class="text-grey-8 col-md-4 col-lg-4 col-xs-12 col-sm-12 q-pr-md q-pt-sm"
-                >
-                  <div class="row full-width justify-end">
-                    <div class="q-pl-xs">
-                      <q-btn
-                        push
-                        class="button"
-                        color="green-6"
-                        label="초기화"
-                        type="reset"
-                      />
-                    </div>
-                    <div class="q-pl-xs">
-                      <q-btn
-                        push
-                        class="button"
-                        color="green-6"
-                        label="조회"
-                        type="submit"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
+        <q-form @submit.prevent="handleSearch">
+          <div class="search-controls">
+            <q-input
+              v-model="eventSrchReq.eventName"
+              outlined
+              label="이벤트명"
+              round
+              dense
+              flat
+              class="input"
+            >
+              <template #append>
+                <q-icon
+                  v-if="eventSrchReq.eventName !== ''"
+                  name="close"
+                  class="cursor-pointer"
+                  @click="eventSrchReq.eventName = ''"
+                />
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <dk-btn
+              push
+              color="white"
+              text-color="primary"
+              label="조회"
+              type="submit"
+            />
+          </div>
         </q-form>
       </div>
 
@@ -71,24 +52,27 @@
               v-else
               :class="[isMobile ? 'col' : 'row', 'justify-center q-gutter-sm']"
             >
-              <q-intersection
+              <div
                 v-for="(event, eventIndex) in eventResList"
                 :key="eventIndex"
                 class="q-ma-sm card-event cursor-pointer"
+                @click="fn_goEventDetail(event.eventSerial)"
               >
                 <q-card flat bordered>
-                  <q-card-section class="q-pa-none q-pb-xs">
+                  <q-card-section
+                    v-if="event.imageUrl !== ''"
+                    class="q-pa-none"
+                  >
                     <div class="card-img">
                       <q-img
                         :src="event.imageUrl"
-                        class="fit"
+                        class="contain"
                         :rato="1"
                         :img-style="{ borderRadius: '2px' }"
                         no-native-menu
                       />
                     </div>
                   </q-card-section>
-                  <q-separator inset />
                   <q-card-section class="row justify-between items-center">
                     <div class="event-info">
                       <div class="text-subtitle1">{{ event.eventName }}</div>
@@ -104,7 +88,7 @@
                     </q-badge>
                   </q-card-section>
                 </q-card>
-              </q-intersection>
+              </div>
             </div>
           </div>
         </dk-tab-panel>
@@ -119,24 +103,27 @@
               v-else
               :class="[isMobile ? 'col' : 'row', 'justify-center q-gutter-sm']"
             >
-              <q-intersection
+              <div
                 v-for="(event, eventIndex) in eventResList"
                 :key="eventIndex"
                 class="q-ma-sm card-event cursor-pointer"
+                @click="fn_goEventDetail(event.eventSerial)"
               >
                 <q-card flat bordered>
-                  <q-card-section class="q-pa-none q-pb-xs">
+                  <q-card-section
+                    v-if="event.imageUrl !== ''"
+                    class="q-pa-none"
+                  >
                     <div class="card-img">
                       <q-img
                         :src="event.imageUrl"
-                        class="fit"
+                        class="contain"
                         :rato="1"
                         :img-style="{ borderRadius: '2px' }"
                         no-native-menu
                       />
                     </div>
                   </q-card-section>
-                  <q-separator inset />
                   <q-card-section class="row justify-between items-center">
                     <div class="event-info">
                       <div class="text-subtitle1">{{ event.eventName }}</div>
@@ -147,7 +134,7 @@
                     </q-badge>
                   </q-card-section>
                 </q-card>
-              </q-intersection>
+              </div>
             </div>
           </div>
         </dk-tab-panel>
@@ -157,8 +144,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { QInput, useQuasar } from 'quasar'
+import { nextTick, onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 import { type ApiResponse, type PageListInfo } from '../../interface/server'
 import { imageUtil } from '~/utils/image'
 import { dateUtil } from '~/utils/dateUtil'
@@ -169,7 +157,7 @@ const tab = ref('ING')
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
-const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
+const itemsPerPage = ref<number>(10) // 테이블 UI에 보여지는 데이터 개수
 
 /** 이벤트 정보 */
 interface Event {
@@ -194,14 +182,32 @@ const eventSrchReq = ref<Pick<Event, 'eventName' | 'progrsSttus'>>({
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
 const eventResList = ref<Event[]>([])
 const maxDataYn = ref<boolean>(false)
+let observer: IntersectionObserver | null = null
 
 onMounted(() => {
   fn_getEventList()
 })
 
-const fn_getEventList = async () => {
-  loading.show()
+const handleSearch = () => {
+  currentPage.value = 1
+  eventResList.value = []
+  maxDataYn.value = false
+  fn_getEventList()
+}
 
+const handleTabChange = (tab: string) => {
+  eventSrchReq.value.progrsSttus = tab
+  handleSearch()
+}
+
+const fn_getEventList = async () => {
+  if (maxDataYn.value) {
+    return
+  }
+
+  if (observer) {
+    observer.disconnect()
+  }
   await $fetch<ApiResponse<PageListInfo<Event>>>(
     '/playground/public/eventUser/getEventPageList?page=' +
       (currentPage.value - 1) +
@@ -213,11 +219,10 @@ const fn_getEventList = async () => {
     }
   )
     .then((result) => {
+      loading.show()
       if (result.data.content.length <= 0) {
-        eventResList.value = []
         maxDataYn.value = true
       } else {
-        console.log(result.data.content)
         const today = new Date()
         const processedEvents: Event[] = result.data.content.map((event) => {
           const eventBeginDate = new Date(event.eventBeginDate)
@@ -226,9 +231,6 @@ const fn_getEventList = async () => {
 
           return {
             ...event,
-            eventThumbFileUrl: event.eventThumbFileSn
-              ? imageUtil.getImageUrl(event.eventThumbFileSn)
-              : '/icon/no-image.png',
             eventDate: `${dateUtil.getformatString(
               event.eventBeginDate,
               'YYYY년 MM월 DD일'
@@ -238,14 +240,17 @@ const fn_getEventList = async () => {
             )}`,
             imageUrl: event.eventThumbFileSn
               ? imageUtil.getImageUrl(event.eventThumbFileSn)
-              : '/icon/no-image.png',
+              : '',
             dDay: event.progrsSttus === '예정' ? dDay : 0
           }
         })
-        eventResList.value = processedEvents
-        if (!maxDataYn.value) {
-          scrollEvent()
-        }
+        eventResList.value = [...eventResList.value, ...processedEvents]
+
+        nextTick(() => {
+          if (!maxDataYn.value) {
+            scrollEvent()
+          }
+        })
       }
     })
     .catch((error: ApiResponse<null>) => {
@@ -257,38 +262,29 @@ const fn_getEventList = async () => {
 }
 
 const scrollEvent = () => {
-  // 클래스명이 vote-item인 마지막 요소 가져오기
-  const $votes = document.querySelectorAll('.vote-item:last-child')
-  const obs = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          currentPage.value++
-          observer.unobserve(entry.target) // 로딩 이후론 관찰할 필요 없음
-          fn_getEventList()
-        }
-      })
-    },
-    {
-      threshold: 0.5
-    }
-  )
-  // 위 $votes의 첫 번째 요소의 인터섹션 여부를 검사. obs.observe($votes[0]) 이렇게 사용해도 됨
-  $votes.forEach((el) => obs.observe(el))
-}
-
-const handleTabChange = (newTab: string) => {
-  eventSrchReq.value.progrsSttus = newTab
-  fn_getEventList()
-}
-
-const fn_resetSearchArea = () => {
-  eventSrchReq.value = {
-    eventName: '',
-    progrsSttus: 'ING'
+  const $event = document.querySelector('.card-event:last-child')
+  if ($event) {
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            currentPage.value++
+            observer?.unobserve(entry.target)
+            fn_getEventList()
+          }
+        })
+      },
+      {
+        threshold: 0.5
+      }
+    )
+    observer.observe($event)
   }
-  tab.value = 'ING'
-  fn_getEventList()
+}
+
+const router = useRouter()
+const fn_goEventDetail = (eventSn: number) => {
+  router.push('/event-user/event-user-detail?eventSn=' + eventSn)
 }
 </script>
 
@@ -296,6 +292,16 @@ const fn_resetSearchArea = () => {
 .page-wrap {
   .content {
     .search {
+      .search-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .input {
+        flex: 1;
+      }
+
       .search-card {
         border: 1px solid lightgrey;
         border-radius: 5px;
@@ -326,15 +332,20 @@ const fn_resetSearchArea = () => {
           color: #bababa;
         }
       }
+
       .card-event {
-        height: 400px;
         width: 100%;
         max-width: 300px;
 
         .card-img {
           width: 100%;
-          height: 280px;
         }
+      }
+
+      .load-more {
+        display: flex;
+        justify-content: center;
+        margin-top: 1em;
       }
     }
   }
@@ -357,14 +368,10 @@ const fn_resetSearchArea = () => {
         color: #bababa;
       }
     }
+
     .card-event {
-      height: 450px;
       max-width: 100%;
       margin-bottom: 2em;
-    }
-
-    .card-img {
-      height: 380px;
     }
   }
 }
