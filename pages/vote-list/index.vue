@@ -3,18 +3,29 @@
   <div>
     <!-- 조회조건 영역 start -->
     <div class="mobile-search-area">
-      <dk-input v-model="text" outlined label="투표제목" maxlength="12">
+      <dk-input
+        v-model="voteSrchReq.voteSubject"
+        outlined
+        label="투표제목"
+        maxlength="12"
+      >
         <template #append>
           <q-icon
-            v-if="text !== ''"
+            v-if="voteSrchReq.voteSubject !== ''"
             name="close"
             class="cursor-pointer"
-            @click="text = ''"
+            @click="voteSrchReq.voteSubject = ''"
           />
-          <q-icon name="search" />
+          <q-icon name="search" @click="fn_click" />
         </template>
         <template #after>
-          <dk-btn push color="white" text-color="primary" label="등록" />
+          <dk-btn
+            push
+            color="white"
+            text-color="primary"
+            label="등록"
+            @click="fn_goAddVote"
+          />
         </template>
       </dk-input>
     </div>
@@ -30,94 +41,129 @@
           active-color="blue-9"
           indicator-color="blue"
           align="justify"
-          @click="fn_click"
+          @update:model-value="fn_click"
         >
-          <dk-tab name="ing" label="투표중" />
-          <dk-tab name="pre" label="준비중" />
-          <dk-tab name="end" label="투표완료" />
+          <dk-tab name="VTI" label="투표중" />
+          <dk-tab name="PRP" label="준비중" />
+          <dk-tab name="VTC" label="투표완료" />
         </dk-tabs>
 
         <dk-tab-panels v-model="tab" animated class="text-blue vote-list">
-          <dk-tab-panel name="ing">
+          <dk-tab-panel name="VTI">
             <div
               v-for="(votelist, voteIndex) in resData"
               :key="voteIndex"
               transition="flip-right"
               class="vote-item"
-              @click="fn_goVoteDetail(votelist.sampleSsno)"
             >
-              <q-card flat bordered class="q-mb-sm">
+              <q-card
+                flat
+                bordered
+                class="q-mb-sm"
+                @click="fn_goVoteDetail(votelist.voteSsno)"
+              >
                 <q-item v-ripple clickable>
                   <q-item-section avatar>
                     <q-avatar color="primary" text-color="white"> Q </q-avatar>
                   </q-item-section>
 
                   <q-item-section>
-                    <q-item-label>투표{{ voteIndex + 1 }} 번</q-item-label>
+                    <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >{{ votelist.beginDate }}
-                      {{ votelist.endDate }}</q-item-label
+                      >{{ votelist.voteBeginDate }}
+                      {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
 
                   <q-item-section side>
-                    <q-badge rounded color="green" />
+                    <template v-if="votelist.votePartcptnAt === 'Y'">
+                      <q-icon name="check" size="20px" class="text-green" />
+                      <span class="text-green">참여</span>
+                    </template>
+                    <template v-else>
+                      <!-- <q-icon name="close" size="20px" /> -->
+                      <span>미참여</span>
+                    </template>
                   </q-item-section>
                 </q-item>
               </q-card>
             </div>
           </dk-tab-panel>
 
-          <dk-tab-panel name="pre">
+          <dk-tab-panel name="PRP">
             <div
-              v-for="index in 10"
-              :key="index"
+              v-for="(votelist, voteIndex) in resData"
+              :key="voteIndex"
               transition="flip-right"
               class="vote-item"
             >
-              <q-card flat bordered class="q-mb-sm">
+              <q-card
+                flat
+                bordered
+                class="q-mb-sm"
+                @click="fn_goVoteDetail(votelist.voteSsno)"
+              >
                 <q-item v-ripple clickable>
                   <q-item-section avatar>
                     <q-avatar color="primary" text-color="white"> Q </q-avatar>
                   </q-item-section>
 
                   <q-item-section>
-                    <q-item-label>투표{{ index }} 번</q-item-label>
+                    <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >투표기간 From-to</q-item-label
+                      >{{ votelist.voteBeginDate }}
+                      {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
 
                   <q-item-section side>
-                    <q-badge rounded color="green" />
+                    <template v-if="votelist.votePartcptnAt === 'Y'">
+                      <q-icon name="check" size="20px" class="text-green" />
+                      <span class="text-green">참여</span>
+                    </template>
+                    <template v-else>
+                      <span>미참여</span>
+                    </template>
                   </q-item-section>
                 </q-item>
               </q-card>
             </div>
           </dk-tab-panel>
 
-          <dk-tab-panel name="end">
+          <dk-tab-panel name="VTC">
             <div
-              v-for="index in 10"
-              :key="index"
+              v-for="(votelist, voteIndex) in resData"
+              :key="voteIndex"
               transition="flip-right"
               class="vote-item"
             >
-              <q-card flat bordered class="q-mb-sm">
+              <q-card
+                flat
+                bordered
+                class="q-mb-sm"
+                @click="fn_goVoteDetail(votelist.voteSsno)"
+              >
                 <q-item v-ripple clickable>
                   <q-item-section avatar>
                     <q-avatar color="primary" text-color="white"> Q </q-avatar>
                   </q-item-section>
 
                   <q-item-section>
-                    <q-item-label>투표{{ index }} 번</q-item-label>
+                    <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >투표기간 From-to</q-item-label
+                      >{{ votelist.voteBeginDate }}
+                      {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
 
                   <q-item-section side>
-                    <q-badge rounded color="green" />
+                    <template v-if="votelist.votePartcptnAt === 'Y'">
+                      <q-icon name="check" size="20px" class="text-green" />
+                      <span class="text-green">참여</span>
+                    </template>
+                    <template v-else>
+                      <span>미참여</span>
+                    </template>
                   </q-item-section>
                 </q-item>
               </q-card>
@@ -135,15 +181,35 @@
 import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { type ApiPagingResponse } from '~/interface/server'
+import type { ApiResponse, PageListInfo } from '../../interface/server'
+import { useAuthStore } from '../../stores/useAuthStore'
 
-const text = ref<string>()
-const tab = ref('ing')
+const authStore = useAuthStore()
+
+interface mberData {
+  mberId: string
+}
+
+const param = ref<mberData>({
+  mberId: authStore.mberId
+})
+
+const router = useRouter()
+
+const fn_goAddVote = () => {
+  router.push('/vote-detail')
+}
+
+const fn_goVoteDetail = (voteSsno: number) => {
+  router.push('/vote-user?ssno=' + voteSsno)
+}
+
+const tab = ref('VTI')
 const { loading } = useQuasar()
 
 // 화면 mount 된 시점 조회
 onMounted(() => {
-  selectList()
+  fn_click()
 })
 
 // 페이징을 위한 파라미터
@@ -152,18 +218,24 @@ const itemsPerPage = ref<number>(20) // 데이터 개수
 
 // 샘플목록 조회 Data 영역
 interface Data {
-  sampleSsno: number
-  sampleContent1: string
-  sampleContent2: string
-  sampleContent3: string
-  useDate: string
-  beginDate: string
-  endDate: string
-  localDate: string
-  localTime: string
-  from: string
-  to: string
+  voteSsno: number
+  voteSubject: string
+  voteBeginDate: string
+  voteEndDate: string
+  votePartcptnAt: string
 }
+
+interface paramData {
+  userId?: string
+  voteSubject?: string
+  voteStatus?: string
+}
+
+const voteSrchReq = ref<paramData>({
+  userId: param.value.mberId,
+  voteSubject: '',
+  voteStatus: ''
+})
 
 // 샘플 목록 조회 리스트
 const resData = ref<Data[]>([])
@@ -175,20 +247,24 @@ const fn_click = () => {
   maxDataYn.value = false
   currentPage.value = 0
 
+  //탭 value 셋팅
+  voteSrchReq.value.voteStatus = tab.value
+
   //조회
-  selectList()
+  fn_getVoteList()
 }
 
-// 샘플 목록 조회 api
-const selectList = async () => {
+//코드 조회
+const fn_getVoteList = async () => {
   loading.show()
-  await $fetch<ApiPagingResponse<Data>>(
-    '/playground/public/sample/getSmpleList?page=' +
+  await $fetch<ApiResponse<PageListInfo<Data>>>(
+    '/playground/public/vote/getVoteList?page=' +
       currentPage.value +
       '&size=' +
       itemsPerPage.value,
     {
-      method: 'GET'
+      method: 'POST',
+      body: JSON.stringify(voteSrchReq.value)
     }
   )
     .then((result) => {
@@ -200,18 +276,20 @@ const selectList = async () => {
     })
     .then(() => {
       if (!maxDataYn.value) {
-        scrollEvent()
+        fn_scrollEvent()
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error(error)
+      alert('투표리스트가 조회되지 않았습니다.')
       loading.hide()
     })
 }
 
 /*
  * 이거 infinite-scroll로 바꿔서 구현해도 됨
- */
-const scrollEvent = () => {
+ */ ;['--']
+const fn_scrollEvent = () => {
   // 클래스명이 vote-item인 마지막 요소 가져오기
   const $votes = document.querySelectorAll('.vote-item:last-child')
   const obs = new IntersectionObserver(
@@ -220,7 +298,7 @@ const scrollEvent = () => {
         if (entry.isIntersecting) {
           currentPage.value++
           observer.unobserve(entry.target) // 로딩 이후론 관찰할 필요 없음
-          selectList()
+          fn_getVoteList()
         }
       })
     },
@@ -230,11 +308,6 @@ const scrollEvent = () => {
   )
   // 위 $votes의 첫 번째 요소의 인터섹션 여부를 검사. obs.observe($votes[0]) 이렇게 사용해도 됨
   $votes.forEach((el) => obs.observe(el))
-}
-
-const router = useRouter()
-const fn_goVoteDetail = (voteSsno: number) => {
-  router.push('/vote-user?ssno=' + voteSsno)
 }
 </script>
 
@@ -256,5 +329,9 @@ const fn_goVoteDetail = (voteSsno: number) => {
 
 .vote-tab {
   height: 50px;
+}
+
+.text-green {
+  color: green;
 }
 </style>
