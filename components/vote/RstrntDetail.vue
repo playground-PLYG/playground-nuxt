@@ -9,13 +9,13 @@
       <div class="dialog-body">
         <!-- 편집 start -->
         <q-splitter v-model="splitterModel" style="height: 100%">
-          <template v-slot:before>
+          <template #before>
             <q-tabs v-model="defaultTab" vertical class="text-black">
               <q-tab name="information" label="정보" icon="info" />
               <q-tab name="menu" label="메뉴" icon="menu_book" />
             </q-tabs>
           </template>
-          <template v-slot:after>
+          <template #after>
             <q-tab-panels
               v-model="defaultTab"
               animated
@@ -52,12 +52,7 @@
                 <div class="detail-map q-mb-md">
                   <map-location
                     :location="currentLocationCoordinate"
-                    :place="{
-                      placeName: restaurantDetail.restaurantName,
-                      kakaoMapId: restaurantDetail.kakaoMapId,
-                      la: restaurantDetail.la,
-                      lo: restaurantDetail.lo
-                    }"
+                    :place="restaurantDetailMap"
                   />
                 </div>
 
@@ -169,6 +164,14 @@ interface RestaurantDetail {
   fileList: imgFileInfo[] | []
 }
 
+/* 식장 지도 */
+interface RestaurantDetailMap {
+  placeName: string
+  kakaoMapId: string
+  la: string
+  lo: string
+}
+
 /* 메뉴 */
 interface Menu {
   restaurantSerialNo: number
@@ -203,6 +206,14 @@ const restaurantDetail = ref<RestaurantDetail>({
   ],
   fileList: []
 })
+
+const restaurantDetailMap = ref<RestaurantDetailMap>({
+  placeName: '',
+  kakaoMapId: '',
+  la: '',
+  lo: ''
+})
+
 const restaurantKindCodeOptions = ref<Code[]>([])
 const restaurantKindCodeSearchOptions = ref<Code[]>([])
 const currentLocationCode = ref<Code[]>([])
@@ -261,6 +272,16 @@ const fn_getRstrntDetail = async (ssno: number) => {
             (code) => code.code == restaurantDetail.value.restaurantKindCode
           )[0].codeName
         : ''
+
+      const { restaurantName, kakaoMapId, la, lo } = result.data
+
+      restaurantDetailMap.value = {
+        placeName: restaurantName,
+        kakaoMapId,
+        la,
+        lo
+      }
+
       fn_setImgUrl()
     })
     .catch((error) => {

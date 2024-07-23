@@ -1,24 +1,29 @@
 <template>
-  <div ref="mapContainer" class="map_wrap">
-    <div id="mapWrapper">
-      <div id="map" ref="mapArea" />
-      <div
-        id="roadviewControl"
-        ref="roadviewControl"
-        :class="rvActive ? 'active' : ''"
-        @click="setRoadviewRoad"
-      />
-    </div>
+  <client-only>
+    <div ref="mapContainer" :class="['map_wrap', isMobile ? 'mobile' : '']">
+      <div id="mapWrapper">
+        <div id="map" ref="mapArea" />
+        <div
+          id="roadviewControl"
+          ref="roadviewControl"
+          :class="rvActive ? 'active' : ''"
+          @click="setRoadviewRoad"
+        />
+      </div>
 
-    <div id="rvWrapper">
-      <div v-if="rvActive" id="roadview" ref="roadview" />
+      <div id="rvWrapper">
+        <div v-if="rvActive" id="roadview" ref="roadview" />
+      </div>
     </div>
-  </div>
+  </client-only>
 </template>
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
-import { onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { onMounted, ref, watch } from 'vue'
+
 const config = useRuntimeConfig()
+
 let marker: kakao.maps.Marker
 let placeMarker: kakao.maps.Marker
 let mapWalker: kakao.maps.Marker
@@ -30,6 +35,9 @@ let infowindow: kakao.maps.InfoWindow
 const rvActive = ref<boolean>(false)
 let overlayOn: boolean = false // 지도 위에 로드뷰 오버레이가 추가된 상태를 가지고 있을 변수
 let rvClient
+
+const { platform } = useQuasar()
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const mapArea = ref()
 const roadviewControl = ref()
@@ -48,12 +56,26 @@ const props = defineProps<{
   }
 }>()
 
+watch(
+  props,
+  () => {
+    console.group('***')
+    console.debug(props.location)
+    console.debug(props.location.x)
+    console.debug(props.location.y)
+    console.debug(props.place)
+    console.debug(props.place.placeName)
+    console.debug(props.place.kakaoMapId)
+    console.debug(props.place.la)
+    console.debug(props.place.lo)
+    console.groupEnd()
+    diaplayPlace()
+  },
+  { deep: true }
+)
+
 onMounted(() => {
-  if (window.kakao?.maps) {
-    loadMap()
-  } else {
-    loadScript()
-  }
+  loadScript()
 })
 
 const loadScript = () => {
@@ -175,6 +197,27 @@ const displayInfowindow = (placeMarker: kakao.maps.Marker) => {
     content.parentElement.parentElement.style.border = 'none'
     content.parentElement.parentElement.style.background = 'transparent'
   }
+}
+
+const diaplayPlace = () => {
+  const imageSrc =
+    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'
+  // 마커 이미지의 이미지 크기 입니다
+  const imageSize = new kakao.maps.Size(24, 35)
+
+  // 마커 이미지를 생성합니다
+  const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize)
+  placeMarker = new kakao.maps.Marker({
+    position: placeMarkerPosition,
+    image: markerImage
+  })
+
+  placeMarker.setMap(map)
+
+  bounds.extend(placeMarkerPosition)
+  map.setBounds(bounds)
+
+  displayInfowindow(placeMarker)
 }
 
 const setRoadviewRoad = () => {
@@ -306,6 +349,11 @@ const toggleRoadview = (position: kakao.maps.LatLng) => {
     #map {
       width: 100%;
       min-height: 380px;
+
+      :deep(div button[draggable='false']) {
+        margin: 0;
+        padding: 0;
+      }
     }
   }
 
