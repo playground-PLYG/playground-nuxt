@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 export const useEventStore = defineStore('event', {
   state: () => ({
     eventSn: '',
-    updateYn: 'N'
+    updateYn: 'N',
+    progrsSttus: ''
   }),
   actions: {
     // actions 설정

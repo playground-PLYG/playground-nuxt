@@ -31,7 +31,7 @@
         <q-select
           v-model="param.progrsSttus"
           outlined
-          :options="statusOptions"
+          :options="statCodeSearch"
           option-label="codeName"
           option-value="code"
           label="진행상태"
@@ -113,8 +113,8 @@ const param = ref<Data>({
 
 // 반응형 상태 변수 초기화
 const eventList = ref<Data[]>([])
-const evnetCode = ref<Code[]>([])
 const evnetCodeSearch = ref<Code[]>([])
+const statCodeSearch = ref<Code[]>([])
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -125,13 +125,6 @@ const page = ref<Page | undefined>()
 
 const router = useRouter()
 const eventStore = useEventStore()
-
-const statusOptions = ref([
-  { code: '', codeName: '전체' },
-  { code: '예정', codeName: '예정' },
-  { code: '진행중', codeName: '진행중' },
-  { code: '종료', codeName: '종료' }
-])
 
 const columns = ref<QTableProps['columns']>([
   {
@@ -164,7 +157,9 @@ const columns = ref<QTableProps['columns']>([
     name: 'progrsSttus',
     label: '진행상태',
     field: 'progrsSttus',
-    align: 'center'
+    align: 'center',
+    format: (val) =>
+      val === 'END' ? '종료' : val === 'ING' ? '진행중' : '예정'
   },
   {
     name: 'eventBeginDate',
@@ -203,7 +198,8 @@ onMounted(() => {
   getEventList()
 })
 const getCodeList = async (): Promise<void> => {
-  evnetCode.value = await codeUtil.getCodeGroupList('EVENT_DIVISION_CODE')
+  const eventCode = await codeUtil.getCodeGroupList('EVENT_DIVISION_CODE')
+  const statCode = await codeUtil.getCodeGroupList('EVENT_PROGRESS_STATUS')
 
   evnetCodeSearch.value = [
     {
@@ -212,11 +208,21 @@ const getCodeList = async (): Promise<void> => {
       upperCode: '',
       order: 0
     },
-    ...evnetCode.value
+    ...eventCode
+  ]
+  statCodeSearch.value = [
+    {
+      code: '',
+      codeName: '전체',
+      upperCode: '',
+      order: 0
+    },
+    ...statCode
   ]
 }
 
 const getEventList = async () => {
+  console.log('param.value ::', param.value)
   await $fetch<ApiResponse<PageListInfo<Data>>>(
     '/playground/public/event/getEventList?page=' +
       (currentPage.value - 1) +
@@ -247,9 +253,8 @@ const getEventList = async () => {
 }
 
 const rowClick = (evt: Event, row: any) => {
-  console.log(evt)
-  console.log(row)
   eventStore.eventSn = row.eventSerial
+  eventStore.progrsSttus = row.progrsSttus
   eventStore.updateYn = 'Y'
   router.push({ path: '/event-detail' })
   // router.push({ path: '/post/postDetail' })
