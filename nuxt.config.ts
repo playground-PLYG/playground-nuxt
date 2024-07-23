@@ -25,7 +25,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@vueuse/nuxt',
     'nuxt-monaco-editor',
-    "@formkit/auto-animate/nuxt"
+    "@formkit/auto-animate/nuxt",
+    "@vite-pwa/nuxt"
   ],
   quasar: {
     plugins: [
@@ -73,6 +74,58 @@ export default defineNuxtConfig({
           global: 'globalThis',
         },
       },
+    }
+  },
+  pwa: {
+    manifest: {
+      name: 'Playground',
+      short_name: 'Playground',
+      description: 'Playground 홈페이지',
+      theme_color: "#ffffff",
+      icons: [
+        {
+          src: "icon/playground_x48.png",
+          sizes: "48x48",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x72.png",
+          sizes: "72x72",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x96.png",
+          sizes: "96x96",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x128.png",
+          sizes: "128x128",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x192.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x384.png",
+          sizes: "384x384",
+          type: "image/png"
+        },
+        {
+          src: "icon/playground_x512.png",
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: "/"
+    },
+    devOptions: {
+      enabled: true,
+      type: "module"
     }
   }
 })
