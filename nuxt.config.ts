@@ -121,7 +121,15 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: "/"
+      navigateFallback: "/",
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+    },
+    injectManifest: {
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    },
+    client: {
+      installPrompt: true,
+      periodicSyncForUpdates: 3600,
     },
     devOptions: {
       enabled: true,
