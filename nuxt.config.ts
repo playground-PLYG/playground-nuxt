@@ -12,6 +12,7 @@ export default defineNuxtConfig({
   dev: true,
   runtimeConfig: {
     public: {
+      envProfile: process.env.ENV_PROFILE,
       apiBaseUrl: process.env.API_URL,
       kakaoApiKey: process.env.KAKAO_API_KEY
     }
@@ -78,45 +79,64 @@ export default defineNuxtConfig({
   },
   pwa: {
     manifest: {
-      name: 'Playground',
-      short_name: 'Playground',
-      description: 'Playground 홈페이지',
+      id: "/?source=pwa",
+      start_url: "/?source=pwa",
+      scope: "/",
+      name: "Playground" + (process.env.ENV_PROFILE == "PROD" ? "" : " - " + process.env.ENV_PROFILE?.toLocaleLowerCase()),
+      short_name: "Playground" + (process.env.ENV_PROFILE == "PROD" ? "" : " - " + process.env.ENV_PROFILE?.toLocaleLowerCase()),
+      description: "Playground 홈페이지" + (process.env.ENV_PROFILE == "PROD" ? "" : " - " + process.env.ENV_PROFILE?.toLocaleLowerCase()),
       theme_color: "#ffffff",
+      background_color: "#1976D2",
+      lang: "ko",
       icons: [
         {
-          src: "icon/playground_x48.png",
+          src: "icon/playground_48.png",
           sizes: "48x48",
           type: "image/png"
         },
         {
-          src: "icon/playground_x72.png",
+          src: "icon/playground_72.png",
           sizes: "72x72",
           type: "image/png"
         },
         {
-          src: "icon/playground_x96.png",
+          src: "icon/playground_96.png",
           sizes: "96x96",
           type: "image/png"
         },
         {
-          src: "icon/playground_x128.png",
+          src: "icon/playground_128.png",
           sizes: "128x128",
           type: "image/png"
         },
         {
-          src: "icon/playground_x192.png",
+          src: "icon/playground_192.png",
           sizes: "192x192",
           type: "image/png"
         },
         {
-          src: "icon/playground_x384.png",
+          src: "icon/playground_384.png",
           sizes: "384x384",
           type: "image/png"
         },
         {
-          src: "icon/playground_x512.png",
+          src: "icon/playground_512.png",
           sizes: "512x512",
           type: "image/png"
+        }
+      ],
+      screenshots: [
+        {
+          "src": "icon/playground_540x720.png",
+          "type": "image/png",
+          "sizes": "540x720",
+          "form_factor": "narrow"
+        },
+        {
+          "src": "icon/playground_720x540.png",
+          "type": "image/jpg",
+          "sizes": "720x540",
+          "form_factor": "wide"
         }
       ]
     },
@@ -127,6 +147,7 @@ export default defineNuxtConfig({
       installPrompt: true
     },
     devOptions: {
+      enabled: !(process.env.ENV_PROFILE == "PROD"),
       type: "module"
     }
   }

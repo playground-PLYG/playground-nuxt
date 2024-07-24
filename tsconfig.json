@@ -13,7 +13,16 @@
     "noEmit": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
-    "types": ["@nuxt/types", "@types/node", "kakao.maps.d.ts", "@types/daum-postcode", "node"],
+    "types": [
+      "nuxt",
+      "@nuxt/types",
+      "@types/node",
+      "quasar",
+      "kakao.maps.d.ts",
+      "@types/daum-postcode",
+      "@vite-pwa/nuxt",
+      "node"
+    ],
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"],

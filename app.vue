@@ -2,27 +2,20 @@
   <div class="text-lg">
     <VitePwaManifest />
     <NuxtLayout>
-      $pwa : {{ useNuxtApp().$pwa }} <br />
-      isInstalled : {{ useNuxtApp().$pwa?.isInstalled }} <br />
-      isPWAInstalled : {{ useNuxtApp().$pwa?.isPWAInstalled }} <br />
-      needRefresh : {{ useNuxtApp().$pwa?.needRefresh }} <br />
-      swActived : {{ useNuxtApp().$pwa?.swActived }} <br />
-      offlineReady : {{ useNuxtApp().$pwa?.offlineReady }} <br />
-      registrationError : {{ useNuxtApp().$pwa?.registrationError }} <br />
-      showInstallPrompt : {{ useNuxtApp().$pwa?.showInstallPrompt }} <br />
       <NuxtPage />
     </NuxtLayout>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ofetch } from 'ofetch'
-import { useCookie, useNuxtApp } from 'nuxt/app'
-import { onMounted } from 'vue'
+import { useCookie, useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { nextTick, onMounted } from 'vue'
+import type { PwaInjection } from './interface/server'
 
 const config = useRuntimeConfig()
-const { $pwa } = useNuxtApp()
-const $q = useQuasar()
+const nuxtApp = useNuxtApp()
+const $pwa = nuxtApp.$pwa as PwaInjection
 
 const getToken = useCookie('token')
 let HeadersInit
@@ -34,7 +27,7 @@ if (getToken.value) {
 }
 
 globalThis.$fetch = ofetch.create({
-  baseURL: config.public.apiBaseUrl,
+  baseURL: config.public.apiBaseUrl as string,
   headers: HeadersInit
 })
 
@@ -44,43 +37,6 @@ onMounted(async () => {
   if ($pwa) {
     if ($pwa.needRefresh) {
       await $pwa.updateServiceWorker()
-    }
-    console.group()
-    console.log($pwa)
-    console.log($pwa.isInstalled)
-    console.log($pwa.isPWAInstalled)
-    console.log($pwa.needRefresh)
-    console.log($pwa.swActived)
-    console.log($pwa.offlineReady)
-    console.log($pwa.registrationError)
-    console.log($pwa.getSWRegistration)
-    console.log($pwa.showInstallPrompt)
-    console.groupEnd()
-
-    if (!$pwa.isPWAInstalled) {
-      await nextTick()
-
-      $q.notify({
-        message: '앱을 설치하시겠습니까?',
-        position: 'top',
-        icon: 'announcement',
-        color: 'teal',
-        progress: true,
-        actions: [
-          {
-            label: '설치',
-            color: 'white',
-            handler: async () => {
-              await $pwa.install()
-
-              if ($pwa.needRefresh) {
-                console.log('*** needRefresh', $pwa.needRefresh)
-                await $pwa.updateServiceWorker()
-              }
-            }
-          }
-        ]
-      })
     }
   }
 })
