@@ -35,7 +35,10 @@ export default createConfigForNuxt({
     rules: {
       curly: ['error', 'all'], // Including if blocks with a single statement
       'dot-notation': 'error',
-      'no-console': ['warn', { allow: ['warn', 'error', 'debug'] }],
+      'no-console': [
+        'warn',
+        { allow: ['warn', 'error', 'debug', 'group', 'groupEnd'] }
+      ],
       'no-lonely-if': 'error', // No single if in an "else" block
       'no-useless-rename': 'error',
       'object-shorthand': 'error',
