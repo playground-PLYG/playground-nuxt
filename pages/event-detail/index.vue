@@ -557,8 +557,8 @@ const fn_fileUploaded = (fileId: number) => {
   param.value.eventThumbFileSn = fileId
 }
 const addEvent = async () => {
-  param.value.eventBeginDate = param.value.eventBeginDate.replaceAll('T', ' ')
-  param.value.eventEndDate = param.value.eventEndDate.replaceAll('T', ' ')
+  param.value.eventBeginDate = param.value.eventBeginDate.replaceAll(' ', 'T')
+  param.value.eventEndDate = param.value.eventEndDate.replaceAll(' ', 'T')
   param.value.pointPayment = pointPayment.value
   if (isFormValid.value) {
     if (eventStore.eventSn === '') {
@@ -579,6 +579,7 @@ const addEvent = async () => {
         body: JSON.stringify(param.value)
       })
         .then(() => {
+          eventStore.eventSn = ''
           eventStore.updateYn = 'N'
           router.push({ path: '/event' })
         })
