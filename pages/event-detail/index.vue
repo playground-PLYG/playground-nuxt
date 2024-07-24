@@ -273,39 +273,51 @@
       </div>
     </q-card>
     <div class="popup">
-      <q-dialog v-model="showResultPop" full-width @hide="resetResult">
-        <q-layout>
-          <q-header>
-            <q-toolbar class="bg-primary">
-              <q-toolbar-title>이벤트 결과보기</q-toolbar-title>
-              <q-btn flat v-close-popup round dense icon="close" />
-            </q-toolbar>
-          </q-header>
-          <q-page-container class="bg-white items-start">
-            총 포인트 {{ param.totalPointValue }} / 지급 포인트
-            {{ param.provisionPoint }}
-            <div class="table-container">
-              <div class="table-wrapper">
-                <q-table
-                  flat
-                  :rows="winData"
-                  :columns="winColumns"
-                  row-key="boardNm"
-                  :rows-per-page-options="[0]"
-                  hide-pagination
-                />
-                <q-table
-                  flat
-                  :rows="loseData"
-                  :columns="loseColumns"
-                  row-key="boardNm"
-                  :rows-per-page-options="[0]"
-                  hide-pagination
+      <q-dialog v-model="showResultPop" @hide="resetResult">
+        <q-card style="min-width: 700px; height: 700px">
+          <q-layout>
+            <q-header>
+              <q-toolbar class="bg-primary">
+                <q-toolbar-title>이벤트 결과보기</q-toolbar-title>
+                <q-btn flat v-close-popup round dense icon="close" />
+              </q-toolbar>
+            </q-header>
+            <q-page-container class="bg-white items-start">
+              총 포인트 {{ param.totalPointValue }} / 지급 포인트
+              {{ param.provisionPoint }}
+              <div class="table-container">
+                <div class="table-wrapper">
+                  <q-table
+                    flat
+                    :rows="winData"
+                    :columns="winColumns"
+                    row-key="boardNm"
+                    :rows-per-page-options="[0]"
+                    hide-pagination
+                  />
+                  <q-table
+                    flat
+                    :rows="loseData"
+                    :columns="loseColumns"
+                    row-key="boardNm"
+                    :rows-per-page-options="[0]"
+                    hide-pagination
+                  />
+                </div>
+              </div>
+              <div class="q-gutter-md row items-start right-align">
+                <q-btn
+                  push
+                  color="blue"
+                  text-color="black"
+                  label="엑셀 다운로드"
+                  :href="`https://august-cascade-385602.uw.r.appspot.com/playground/public/event/getEventExcelList?eventSn=${eventStore.eventSn}`"
+                  target="_blank"
                 />
               </div>
-            </div>
-          </q-page-container>
-        </q-layout>
+            </q-page-container>
+          </q-layout>
+        </q-card>
       </q-dialog>
     </div>
   </div>
@@ -314,7 +326,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { type QTableProps, date } from 'quasar'
+
+import { type QTableProps, date, useQuasar } from 'quasar'
 import { codeUtil } from '@/utils/code'
 import type { ApiResponse, Code } from '@/interface/server'
 import { useEventStore } from '@/stores/useEventStore'
@@ -322,6 +335,7 @@ import { imageUtil } from '~/utils/image'
 
 const router = useRouter()
 const eventStore = useEventStore()
+const { loading } = useQuasar()
 
 const evnetCode = ref<Code[]>([])
 const drwtCode = ref<Code[]>([])
@@ -438,6 +452,7 @@ onMounted(() => {
 })
 
 const setEventPopup = async () => {
+  loading.show()
   showResultPop.value = true
   const options = {
     eventSerial: eventStore.eventSn
@@ -485,6 +500,7 @@ const setEventPopup = async () => {
     .catch((error) => {
       console.error(error)
     })
+  loading.hide()
 }
 
 const resetResult = () => {
@@ -492,6 +508,7 @@ const resetResult = () => {
   loseData.value = []
 }
 const setEvent = async () => {
+  loading.show()
   if (eventStore.eventSn !== '') {
     isReadOnly.value = true
     const options = {
@@ -536,6 +553,7 @@ const setEvent = async () => {
         console.error(error)
       })
   }
+  loading.hide()
 }
 
 //시작일시 데이터
@@ -548,17 +566,20 @@ const setEventEndDate = (val: string) => {
 }
 
 const getCodeList = async (): Promise<void> => {
+  loading.show()
   evnetCode.value = await codeUtil.getCodeGroupList('EVENT_DIVISION_CODE')
   drwtCode.value = await codeUtil.getCodeGroupList('RAFFLE_METHOD_CODE')
   pymntCode.value = await codeUtil.getCodeGroupList('POINT_PAYMENT_METHOD_CODE')
+  loading.hide()
 }
 
 const fn_fileUploaded = (fileId: number) => {
   param.value.eventThumbFileSn = fileId
 }
 const addEvent = async () => {
-  param.value.eventBeginDate = param.value.eventBeginDate.replaceAll('T', ' ')
-  param.value.eventEndDate = param.value.eventEndDate.replaceAll('T', ' ')
+  loading.show()
+  param.value.eventBeginDate = param.value.eventBeginDate.replaceAll(' ', 'T')
+  param.value.eventEndDate = param.value.eventEndDate.replaceAll(' ', 'T')
   param.value.pointPayment = pointPayment.value
   if (isFormValid.value) {
     if (eventStore.eventSn === '') {
@@ -579,6 +600,7 @@ const addEvent = async () => {
         body: JSON.stringify(param.value)
       })
         .then(() => {
+          eventStore.eventSn = ''
           eventStore.updateYn = 'N'
           router.push({ path: '/event' })
         })
@@ -587,9 +609,11 @@ const addEvent = async () => {
         })
     }
   }
+  loading.hide()
 }
 
 const executeEventRaffle = async () => {
+  loading.show()
   const req = {
     eventSerial: param.value.eventSerial
   }
@@ -607,9 +631,11 @@ const executeEventRaffle = async () => {
     .catch((error) => {
       console.error(error)
     })
+  loading.hide()
 }
 
 const modifyEndEvent = async () => {
+  loading.show()
   const req = {
     eventSerial: param.value.eventSerial
   }
@@ -624,7 +650,9 @@ const modifyEndEvent = async () => {
     .catch((error) => {
       console.error(error)
     })
+  loading.hide()
 }
+
 const event_rules = (val: string) => {
   if (!val) {
     return '입력해주세요.'
