@@ -3,47 +3,72 @@
   <div>
     <div class="mobile-content-area">
       <div class="text-h6 q-mb-sm">투표제목</div>
-      <dk-input v-model="text" label="제목" clearable :max-length="20" />
-
-      <!-- 시작시간 종료시간 옵션 줘야함 -->
-      <div class="text-h6">시작시간</div>
-      <dk-date-time-picker
-        :datetime="param.val"
-        :date="param.date"
-        :time="param.time"
-        @send-date="setStartDateTimeValue"
-      />
-      <div class="text-h6 q-mt-md">종료시간</div>
-      <dk-date-time-picker
-        :datetime="param.val"
-        :date="param.date"
-        :time="param.time"
-        @send-date="setEndDateTimeValue"
+      <dk-input
+        v-model="voteData.voteSubject"
+        label="제목"
+        clearable
+        :max-length="20"
       />
 
-      <div v-for="(qestn, index) in qestn" :key="index">
+      <div class="text-h6">투표기간</div>
+      <dk-date-time-from-to-picker
+        :from="paramDate.dateFrom"
+        :to="paramDate.dateTo"
+        @send-from-date="setStartDateTimeValue"
+        @send-to-date="setEndDateTimeValue"
+      />
+
+      <div
+        v-for="(question, index) in voteData.voteQestnResponseList"
+        :key="index"
+      >
         <q-separator spaced="12px" />
         <q-card class="my-card" flat bordered>
           <q-card-section>
-            <dk-input v-model="text" label="질문" clearable :max-length="20" />
+            <dk-input
+              v-model="question.questionContents"
+              label="질문"
+              clearable
+              :max-length="20"
+            />
             <dk-select
-              v-model="select"
-              :options="selectOption"
+              v-model="question.voteKindCode"
+              :options="
+                voteKindCodeOptions.map((option) => ({
+                  label: option.codeName,
+                  value: option.code
+                }))
+              "
+              emit-value
+              map-options
               label="투표종류"
               class="q-mb-md"
             />
-            <div v-for="(iem, index) in iem" :key="index">
-              <dk-input v-model="text" label="항목" clearable :max-length="20">
+            <div
+              v-for="(item, idx) in question.voteQestnIemResponseList"
+              :key="idx"
+            >
+              <dk-input
+                v-model="item.itemName"
+                label="항목"
+                clearable
+                :max-length="20"
+              >
                 <template #append>
-                  <q-icon name="search" @click="fn_openRstrnt" />
+                  <q-icon
+                    v-if="question.voteKindCode === 'RST'"
+                    name="search"
+                    @click="fn_openRstrnt(item)"
+                  />
                 </template>
                 <template #after>
                   <dk-btn
+                    v-if="question.voteQestnIemResponseList.length > 1"
                     push
                     color="white"
                     text-color="primary"
                     label="-"
-                    @click="deleteIem(iem)"
+                    @click="deleteIem(question, item)"
                   />
                 </template>
               </dk-input>
@@ -54,21 +79,34 @@
               text-color="primary"
               label="항목추가"
               class="q-mb-sm"
-              @click="addIem"
+              @click="addIem(question)"
             />
 
             <div class="row">
-              <dk-check v-model="check" label="익명투표" class="col-6" />
-              <dk-check v-model="check" label="복수응답" class="col-6" />
+              <dk-check
+                v-model="question.anonymityVoteAlternative"
+                label="익명투표"
+                class="col-6"
+                true-value="Y"
+                false-value="N"
+              />
+              <dk-check
+                v-model="question.compoundNumberChoiceAlternative"
+                label="복수응답"
+                class="col-6"
+                true-value="Y"
+                false-value="N"
+              />
             </div>
             <div class="row justify-center">
               <dk-btn
+                v-if="voteData.voteQestnResponseList.length > 1"
                 push
                 color="white"
                 text-color="primary"
                 label="삭제"
                 class="q-mt-sm"
-                @click="deleteQestn"
+                @click="deleteQestn(index)"
               />
             </div>
           </q-card-section>
@@ -83,24 +121,53 @@
         @click="addQestn"
       />
       <div>
-        <dk-check v-model="check" label="미노출" />
+        <dk-check
+          v-model="voteData.voteExposureAlternative"
+          label="미노출"
+          true-value="Y"
+          false-value="N"
+        />
       </div>
       <div class="row">
-        <dk-check v-model="check" label="투표전송" class="col-4" />
+        <dk-check
+          v-model="voteData.voteTransmissionAlternative"
+          label="투표전송"
+          class="col-4"
+          true-value="Y"
+          false-value="N"
+        />
         <dk-select
-          v-model="select2"
-          :options="selectOption2"
+          v-model="voteData.voteTransmissionCode"
+          :options="
+            voteTransmissionCodeOptions.map((option) => ({
+              label: option.codeName,
+              value: option.code
+            }))
+          "
+          emit-value
+          map-options
           label="전송방식"
           class="col-8"
         />
       </div>
       <div class="row justify-end">
         <dk-btn
+          v-show="btn"
           push
           color="white"
           text-color="primary"
           label="등록"
           class="q-mt-sm"
+          @click="fn_addVote"
+        />
+        <dk-btn
+          v-show="!btn"
+          push
+          color="white"
+          text-color="primary"
+          label="수정"
+          class="q-mt-sm"
+          @click="fn_updateVote"
         />
       </div>
     </div>
@@ -127,109 +194,403 @@
 
 <!-- 함수정의 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+import type { ApiResponse, Code } from '../../interface/server'
+import { useAuthStore } from '../../stores/useAuthStore'
+import { codeUtil } from '../../utils/code'
 
-const text = ref<string>()
+const { loading } = useQuasar()
 
-const param = ref<any>({
-  val: ''
+const router = useRouter()
+const authStore = useAuthStore()
+
+const initVoteSsno = router.currentRoute.value.query.ssno
+const user = ref<{ mberId: string }>({ mberId: authStore.mberId })
+const voteTransmissionCodeOptions = ref<Code[]>([])
+const voteKindCodeOptions = ref<Code[]>([])
+
+//코드 리스트 가져오기
+const getCodeList = async () => {
+  voteTransmissionCodeOptions.value = await codeUtil.getCodeGroupList(
+    'VOTE_TRNSMIS_CODE'
+  )
+  voteKindCodeOptions.value = await codeUtil.getCodeGroupList('VOTE_KND_CODE')
+}
+
+//시간
+interface DateData {
+  date: string
+  time: string
+  dateTime: string
+  dateFrom: string
+  dateTo: string
+}
+
+const paramDate = ref<DateData>({
+  date: '',
+  time: '',
+  dateTime: '',
+  dateFrom: '',
+  dateTo: ''
 })
 
-// 셀렉트 옵션
-const select = ref()
-const selectOption = [
-  { label: '텍스트', value: '코드값1' },
-  { label: '식당', value: '코드값2' },
-  { label: '일자', value: '코드값3' }
-]
-
-const select2 = ref()
-const selectOption2 = [
-  { label: '즉시', value: '코드값1' },
-  { label: '투표 1시간 전', value: '코드값2' },
-  { label: '투표 시작 시', value: '코드값3' }
-]
-
-//체크박스 옵션
-//체크박스
-const check = ref(false)
-
-//질문갯수
-interface qestnData {
-  data: string
+interface VoteItem {
+  itemSsno: number
+  itemName: string
+  itemIdentificationId: string | null
 }
 
-const qestn = ref<qestnData[]>([{ data: '1' }])
-
-const addQestn = () => {
-  qestn.value.push({ data: '99' })
+interface VoteQuestion {
+  questionSsno: number
+  voteSsno: number
+  voteKindCode: string
+  compoundNumberChoiceAlternative: string
+  anonymityVoteAlternative: string
+  questionContents: string
+  voteQestnIemResponseList: VoteItem[]
 }
 
-const deleteQestn = () => {
-  alert('질문삭제')
+interface VoteData {
+  voteSsno?: number
+  voteSubject: string
+  voteBeginDate: string
+  voteEndDate: string
+  voteExposureAlternative: string
+  voteTransmissionAlternative: string
+  voteTransmissionCode: string
+  voteQestnResponseList: VoteQuestion[]
 }
 
-//항목갯수
-interface iemData {
-  data: string
+interface VoteItemRequest {
+  itemName: string
+  itemIdentificationId: string | null
+  itemSsno?: number
 }
 
-const iem = ref<iemData[]>([{ data: '1' }, { data: '2' }])
-
-//항목추가
-const addIem = () => {
-  iem.value.push({ data: '99' })
+interface VoteQuestionRequest {
+  questionContents: string
+  voteKndCd: string
+  compoundNumberChoiceAlternative: string
+  anonymityVoteAlternative: string
+  voteIemRequestList: VoteItemRequest[]
+  questionSsno?: number
 }
 
-//항목삭제
-const deleteIem = (val: iemData) => {
-  if (iem.value.length > 1) {
-    iem.value.forEach((item, index) => {
-      if (item.data === val.data) {
-        iem.value.splice(index, 1)
+interface VoteDataRequest {
+  userId: string
+  voteSubject: string
+  voteBeginDate: string
+  voteEndDate: string
+  voteExposureAlternative: string
+  voteTransmissionCode: string
+  voteQestnRequestList: VoteQuestionRequest[]
+  voteSsno?: number
+  voteTransmissionAlternative?: string
+}
+
+const voteData = ref<VoteData>({
+  voteSubject: '',
+  voteBeginDate: '',
+  voteEndDate: '',
+  voteExposureAlternative: 'N',
+  voteTransmissionCode: '',
+  voteQestnResponseList: [],
+  voteSsno: 0,
+  voteTransmissionAlternative: 'N'
+})
+
+const addVoteData = ref<VoteDataRequest>({
+  userId: '',
+  voteSsno: 0,
+  voteSubject: '',
+  voteBeginDate: '',
+  voteEndDate: '',
+  voteExposureAlternative: '',
+  voteTransmissionCode: '',
+  voteQestnRequestList: [],
+  voteTransmissionAlternative: ''
+})
+
+const btn = ref<boolean>(true)
+
+//유효성 체크
+const valid = () => {
+  if (!voteData.value.voteSubject) {
+    alert('투표 제목을 입력해 주세요.')
+    return false
+  }
+  if (!voteData.value.voteBeginDate) {
+    alert('투표 시작 시간을 입력해 주세요.')
+    return false
+  }
+  if (!voteData.value.voteEndDate) {
+    alert('투표 종료 시간을 입력해 주세요.')
+    return false
+  }
+  if (voteData.value.voteQestnResponseList.length === 0) {
+    alert('최소 하나의 질문을 추가해 주세요.')
+    return false
+  }
+
+  for (const question of voteData.value.voteQestnResponseList) {
+    if (!question.questionContents) {
+      alert('질문 내용을 입력해 주세요.')
+      return false
+    }
+    if (!question.voteKindCode) {
+      alert('투표 종류를 선택해 주세요.')
+      return false
+    }
+    if (question.voteQestnIemResponseList.length === 0) {
+      alert('항목을 추가해 주세요.')
+      return false
+    }
+    if (question.voteQestnIemResponseList.length < 2) {
+      alert('각 질문에는 최소 2개의 항목을 추가해 주세요.')
+      return false
+    }
+    for (const item of question.voteQestnIemResponseList) {
+      if (!item.itemName) {
+        alert('항목 이름을 입력해 주세요.')
+        return false
       }
-    })
+    }
+  }
+  if (!voteData.value.voteTransmissionCode) {
+    alert('전송방식을 선택해 주세요.')
+    return false
+  }
+  return true
+}
+
+// 질문 삭제
+const deleteQestn = (index: number) => {
+  voteData.value.voteQestnResponseList.splice(index, 1)
+}
+
+// 질문 추가
+const addQestn = () => {
+  if (!voteData.value.voteQestnResponseList) {
+    voteData.value.voteQestnResponseList = []
+  }
+
+  voteData.value.voteQestnResponseList.push({
+    questionContents: '',
+    voteKindCode: 'TXT',
+    compoundNumberChoiceAlternative: 'N',
+    anonymityVoteAlternative: 'N',
+    voteQestnIemResponseList: [
+      {
+        itemName: '',
+        itemIdentificationId: '',
+        itemSsno: 0
+      }
+    ],
+    questionSsno: 0,
+    voteSsno: 0
+  })
+}
+
+// 항목 추가
+const addIem = (question: VoteQuestion) => {
+  question.voteQestnIemResponseList.push({
+    itemName: '',
+    itemIdentificationId: '',
+    itemSsno: 0
+  })
+}
+
+// 항목 삭제
+const deleteIem = (question: VoteQuestion, item: VoteItem) => {
+  if (question.voteQestnIemResponseList.length > 1) {
+    const index = question.voteQestnIemResponseList.findIndex((i) => i === item)
+    question.voteQestnIemResponseList.splice(index, 1)
   }
 }
 
-//시작일시 데이터
+// 투표 등록
+const fn_addVote = async () => {
+  if (!valid()) {
+    return
+  }
+
+  addVoteData.value.userId = user.value.mberId
+  addVoteData.value.voteSubject = voteData.value.voteSubject
+  addVoteData.value.voteBeginDate = voteData.value.voteBeginDate
+  addVoteData.value.voteEndDate = voteData.value.voteEndDate
+  addVoteData.value.voteExposureAlternative =
+    voteData.value.voteExposureAlternative
+  addVoteData.value.voteTransmissionCode = voteData.value.voteTransmissionCode
+  addVoteData.value.voteTransmissionAlternative =
+    voteData.value.voteTransmissionAlternative
+
+  addVoteData.value.voteQestnRequestList =
+    voteData.value.voteQestnResponseList.map((question) => {
+      return {
+        questionContents: question.questionContents,
+        voteKndCd: question.voteKindCode,
+        compoundNumberChoiceAlternative:
+          question.compoundNumberChoiceAlternative,
+        anonymityVoteAlternative: question.anonymityVoteAlternative,
+        voteIemRequestList: question.voteQestnIemResponseList.map((item) => {
+          return {
+            itemName: item.itemName,
+            itemIdentificationId: item.itemIdentificationId
+          }
+        })
+      }
+    })
+
+  loading.show()
+
+  try {
+    await $fetch<ApiResponse<VoteData>>('/playground/api/vote/addVote', {
+      method: 'POST',
+      body: JSON.stringify(addVoteData.value)
+    })
+    alert('등록되었습니다.')
+    router.push('/vote-list')
+  } catch (error) {
+    console.error(error)
+    alert('등록되지 않았습니다.')
+  }
+  loading.hide()
+}
+
+// 투표 수정
+const fn_updateVote = async () => {
+  if (!valid()) {
+    return
+  }
+
+  addVoteData.value.userId = user.value.mberId
+  addVoteData.value.voteSsno = voteData.value.voteSsno
+  addVoteData.value.voteSubject = voteData.value.voteSubject
+  addVoteData.value.voteBeginDate = voteData.value.voteBeginDate
+  addVoteData.value.voteEndDate = voteData.value.voteEndDate
+  addVoteData.value.voteExposureAlternative =
+    voteData.value.voteExposureAlternative
+  addVoteData.value.voteTransmissionCode = voteData.value.voteTransmissionCode
+  addVoteData.value.voteTransmissionAlternative =
+    voteData.value.voteTransmissionAlternative
+
+  addVoteData.value.voteQestnRequestList =
+    voteData.value.voteQestnResponseList.map((question) => {
+      return {
+        questionContents: question.questionContents,
+        voteKndCd: question.voteKindCode,
+        compoundNumberChoiceAlternative:
+          question.compoundNumberChoiceAlternative,
+        anonymityVoteAlternative: question.anonymityVoteAlternative,
+        voteIemRequestList: question.voteQestnIemResponseList.map((item) => {
+          return {
+            itemName: item.itemName,
+            itemIdentificationId: item.itemIdentificationId
+          }
+        })
+      }
+    })
+
+  loading.show()
+
+  try {
+    await $fetch<ApiResponse<VoteData>>('/playground/api/vote/modifyVote', {
+      method: 'PUT',
+      body: JSON.stringify(addVoteData.value)
+    })
+    alert('수정되었습니다.')
+    fn_goVoteUser()
+  } catch (error) {
+    console.error(error)
+    alert('수정되지 않았습니다.')
+  }
+  loading.hide()
+}
+
+// 투표 상세 조회
+const fn_getVoteDetail = async (ssno: number) => {
+  try {
+    const result = await $fetch<ApiResponse<VoteData>>(
+      '/playground/api/vote/getVoteDetail',
+      {
+        method: 'POST',
+        body: JSON.stringify({ voteSsno: ssno })
+      }
+    )
+    voteData.value = result.data
+    paramDate.value.dateFrom = voteData.value.voteBeginDate
+    paramDate.value.dateTo = voteData.value.voteEndDate
+  } catch (error) {
+    console.error(error)
+    alert('조회되지 않았습니다.')
+  }
+}
+
+// 시작시간 설정
 const setStartDateTimeValue = (val: string) => {
-  console.debug('setDateValue :::: ', val)
+  voteData.value.voteBeginDate = val.replace(/T/g, ' ')
 }
 
-//종료일시 데이터
+// 종료시간 설정
 const setEndDateTimeValue = (val: string) => {
-  console.debug('setDateValue :::: ', val)
+  voteData.value.voteEndDate = val.replace(/T/g, ' ')
 }
 
-const fn_openRstrnt = () => {
-  openYn.value = true
-}
-
-//식당 팝업
+// 식당 팝업
 const openYn = ref<boolean>(false)
+const rstrntItem = ref<VoteItem | null>(null)
+const openDetailYn = ref<boolean>(false)
+const rstrntDetailComponent = ref()
 
 const dialogCloseCallback = () => {
   openYn.value = false
 }
 
-const rstrntSelect = (data: object) => {
-  openYn.value = false
-  console.log(data)
+const fn_openRstrnt = (item: VoteItem) => {
+  rstrntItem.value = item
+  openYn.value = true
 }
 
-const openDetailYn = ref<boolean>(false)
+const rstrntSelect = (data: {
+  restaurantSerialNo: string
+  restaurantName: string
+}) => {
+  openYn.value = false
+  if (rstrntItem.value) {
+    rstrntItem.value.itemIdentificationId = data.restaurantSerialNo
+    rstrntItem.value.itemName = data.restaurantName
+  }
+}
 
-const rstrntDetailComponent = ref()
 const showRstrntDetail = (data: number) => {
   openYn.value = false
   rstrntDetailComponent.value.fn_getRstrntDetail(data)
   openDetailYn.value = true
 }
+
 const detailDialogCloseCallback = () => {
   openDetailYn.value = false
   openYn.value = true
 }
+
+const fn_goVoteUser = () => {
+  router.push('/vote-user?ssno=' + initVoteSsno)
+}
+
+onMounted(() => {
+  if (initVoteSsno) {
+    fn_getVoteDetail(Number(initVoteSsno))
+    btn.value = false
+  } else {
+    btn.value = true
+  }
+  getCodeList()
+  if (!voteData.value.voteQestnResponseList.length) {
+    addQestn()
+  }
+})
 </script>
 
 <!-- css -->
