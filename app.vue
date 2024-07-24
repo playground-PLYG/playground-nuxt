@@ -2,13 +2,14 @@
   <div class="text-lg">
     <VitePwaManifest />
     <NuxtLayout>
-      isInstalled : {{ useNuxtApp().$pwa.isInstalled }} <br />
-      isPWAInstalled : {{ useNuxtApp().$pwa.isPWAInstalled }} <br />
-      needRefresh : {{ useNuxtApp().$pwa.needRefresh }} <br />
-      swActived : {{ useNuxtApp().$pwa.swActived }} <br />
-      offlineReady : {{ useNuxtApp().$pwa.offlineReady }} <br />
-      registrationError : {{ useNuxtApp().$pwa.registrationError }} <br />
-      showInstallPrompt : {{ useNuxtApp().$pwa.showInstallPrompt }} <br />
+      $pwa : {{ useNuxtApp().$pwa }} <br />
+      isInstalled : {{ useNuxtApp().$pwa?.isInstalled }} <br />
+      isPWAInstalled : {{ useNuxtApp().$pwa?.isPWAInstalled }} <br />
+      needRefresh : {{ useNuxtApp().$pwa?.needRefresh }} <br />
+      swActived : {{ useNuxtApp().$pwa?.swActived }} <br />
+      offlineReady : {{ useNuxtApp().$pwa?.offlineReady }} <br />
+      registrationError : {{ useNuxtApp().$pwa?.registrationError }} <br />
+      showInstallPrompt : {{ useNuxtApp().$pwa?.showInstallPrompt }} <br />
       <NuxtPage />
     </NuxtLayout>
   </div>
@@ -38,40 +39,42 @@ globalThis.$fetch = ofetch.create({
 })
 
 onMounted(async () => {
-  if ($pwa.needRefresh) {
-    await $pwa.updateServiceWorker()
-  }
-  console.group()
-  console.log($pwa)
-  console.log($pwa.isInstalled)
-  console.log($pwa.isPWAInstalled)
-  console.log($pwa.needRefresh)
-  console.log($pwa.swActived)
-  console.log($pwa.offlineReady)
-  console.log($pwa.registrationError)
-  console.log($pwa.getSWRegistration)
-  console.log($pwa.showInstallPrompt)
+  if ($pwa) {
+    if ($pwa.needRefresh) {
+      await $pwa.updateServiceWorker()
+    }
+    console.group()
+    console.log($pwa)
+    console.log($pwa.isInstalled)
+    console.log($pwa.isPWAInstalled)
+    console.log($pwa.needRefresh)
+    console.log($pwa.swActived)
+    console.log($pwa.offlineReady)
+    console.log($pwa.registrationError)
+    console.log($pwa.getSWRegistration)
+    console.log($pwa.showInstallPrompt)
+    console.groupEnd()
 
-  console.groupEnd()
-  if (!$pwa.isPWAInstalled) {
-    await nextTick()
+    if (!$pwa.isPWAInstalled) {
+      await nextTick()
 
-    $q.notify({
-      message: '앱을 설치하시겠습니까?',
-      position: 'top',
-      icon: 'announcement',
-      color: 'teal',
-      progress: true,
-      actions: [
-        {
-          label: '설치',
-          color: 'white',
-          handler: () => {
-            $pwa.install()
+      $q.notify({
+        message: '앱을 설치하시겠습니까?',
+        position: 'top',
+        icon: 'announcement',
+        color: 'teal',
+        progress: true,
+        actions: [
+          {
+            label: '설치',
+            color: 'white',
+            handler: () => {
+              $pwa.install()
+            }
           }
-        }
-      ]
-    })
+        ]
+      })
+    }
   }
 })
 </script>
