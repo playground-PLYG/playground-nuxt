@@ -2,6 +2,12 @@
   <div class="text-lg">
     <VitePwaManifest />
     <NuxtLayout>
+      isInstalled : {{ useNuxtApp().$pwa.isInstalled }} <br />
+      isPWAInstalled : {{ useNuxtApp().$pwa.isPWAInstalled }} <br />
+      needRefresh : {{ useNuxtApp().$pwa.needRefresh }} <br />
+      swActived : {{ useNuxtApp().$pwa.swActived }} <br />
+      offlineReady : {{ useNuxtApp().$pwa.offlineReady }} <br />
+      registrationError : {{ useNuxtApp().$pwa.registrationError }} <br />
       <NuxtPage />
     </NuxtLayout>
   </div>
@@ -34,7 +40,17 @@ onMounted(async () => {
   if ($pwa.needRefresh) {
     await $pwa.updateServiceWorker()
   }
+  console.group()
+  console.log($pwa)
+  console.log($pwa.isInstalled)
+  console.log($pwa.isPWAInstalled)
+  console.log($pwa.needRefresh)
+  console.log($pwa.swActived)
+  console.log($pwa.offlineReady)
+  console.log($pwa.registrationError)
+  console.log($pwa.getSWRegistration)
 
+  console.groupEnd()
   if (!$pwa.isPWAInstalled) {
     await nextTick()
 
