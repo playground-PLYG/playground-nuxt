@@ -467,9 +467,6 @@ const fn_voting = () => {
     let isCompleteAnswer: boolean = true
     voteAnswer.value?.forEach((ans) => {
       if (ans.itemSsnoList.length == 0) {
-        commUtil.alert({
-          message: '투표항목을 선택해주세요.'
-        })
         isCompleteAnswer = false
       }
     })

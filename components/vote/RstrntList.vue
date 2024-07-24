@@ -172,9 +172,7 @@ onMounted(() => {
 })
 
 const totalRstrntLength = ref<number>(0)
-
-// 추후 20으로 바꾸기
-const initOffsetCount = ref<number>(10)
+const initOffsetCount = ref<number>(20)
 
 const fn_getRstrntList = async () => {
   await $fetch<ApiResponse<RestaurantData[]>>(
@@ -258,20 +256,23 @@ const fn_resetSearchParam = () => {
   }
 }
 
-let criteriaCount: number = 20
+let criteriaCount: number = 40
 const onLoad = (index: number, done: (stop?: boolean) => void) => {
   setTimeout(() => {
     const items: RestaurantData[] = []
     if (initOffsetCount.value < totalRstrntLength.value) {
+      if (totalRstrntLength.value < criteriaCount) {
+        criteriaCount = totalRstrntLength.value
+      }
       for (let i = initOffsetCount.value; i < criteriaCount; i++) {
         items.push(totalRestaurantData.value[i])
       }
       items.forEach((iem) => restaurantData.value.push(iem))
-      initOffsetCount.value += 10
+      initOffsetCount.value += 20
       criteriaCount =
-        criteriaCount + 10 > totalRstrntLength.value
+        criteriaCount + 20 > totalRstrntLength.value
           ? totalRstrntLength.value
-          : criteriaCount + 10
+          : criteriaCount + 20
     } else {
       done(true)
     }
