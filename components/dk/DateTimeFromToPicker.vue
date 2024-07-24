@@ -100,6 +100,20 @@ onMounted(() => {
   }
 })
 
+watch(
+  () => props.from,
+  () => {
+    _dateFrom.value = props.from
+  }
+)
+
+watch(
+  () => props.to,
+  () => {
+    _dateTo.value = props.to
+  }
+)
+
 const optionsFromDate = function (val: string) {
   const _dateToDvs = _dateTo.value?.split('T')
 

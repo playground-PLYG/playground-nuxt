@@ -50,6 +50,20 @@ const props = defineProps<Data>()
 const _dateFrom = ref(props.from)
 const _dateTo = ref(props.to)
 
+watch(
+  () => props.from,
+  () => {
+    _dateFrom.value = props.from
+  }
+)
+
+watch(
+  () => props.to,
+  () => {
+    _dateTo.value = props.to
+  }
+)
+
 const optionsFromDate = function (val: string) {
   if (_dateTo.value == undefined || _dateTo.value == '') {
     return true

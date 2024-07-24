@@ -25,6 +25,13 @@ const props = defineProps<Data>()
 const _date = ref(props.date)
 const emit = defineEmits(['send-date'])
 
+watch(
+  () => props.date,
+  () => {
+    _date.value = props.date
+  }
+)
+
 watch(_date, () => {
   emit('send-date', _date.value, 'dateValue')
 })

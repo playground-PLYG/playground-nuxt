@@ -62,6 +62,26 @@ const _time = ref(props.time)
 const _valueText = ref()
 const emit = defineEmits(['send-date'])
 
+watch(
+  () => props.datetime,
+  () => {
+    _datetime.value = props.datetime
+  }
+)
+
+watch(
+  () => props.date,
+  () => {
+    _date.value = props.date
+  }
+)
+watch(
+  () => props.time,
+  () => {
+    _time.value = props.time
+  }
+)
+
 onMounted(() => {
   if (_datetime.value) {
     //1.datetime이 있는 경우
