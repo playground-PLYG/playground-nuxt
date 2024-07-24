@@ -252,7 +252,7 @@
           v-if="param.eventSectionCodeId === 'ENTR' && param.drwtDate !== null"
           color="primary"
           label="결과보기"
-          @click="resultEvent"
+          @click="setEventPopup"
         />
         <q-btn
           v-if="eventStore.progrsSttus === 'ING'"
@@ -272,12 +272,49 @@
         <q-btn color="primary" label="취소" @click="outEvent" />
       </div>
     </q-card>
+    <div class="popup">
+      <q-dialog v-model="showResultPop" full-width @hide="resetResult">
+        <q-layout>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>이벤트 결과보기</q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white items-start">
+            총 포인트 {{ param.totalPointValue }} / 지급 포인트
+            {{ param.provisionPoint }}
+            <div class="table-container">
+              <div class="table-wrapper">
+                <q-table
+                  flat
+                  :rows="winData"
+                  :columns="winColumns"
+                  row-key="boardNm"
+                  :rows-per-page-options="[0]"
+                  hide-pagination
+                />
+                <q-table
+                  flat
+                  :rows="loseData"
+                  :columns="loseColumns"
+                  row-key="boardNm"
+                  :rows-per-page-options="[0]"
+                  hide-pagination
+                />
+              </div>
+            </div>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { type QTableProps, date } from 'quasar'
 import { codeUtil } from '@/utils/code'
 import type { ApiResponse, Code } from '@/interface/server'
 import { useEventStore } from '@/stores/useEventStore'
@@ -302,6 +339,15 @@ interface Data {
   dateTo: string
 }
 
+const winColumns = ref<QTableProps['columns']>([
+  { name: 'winner', label: '당첨자 ', field: 'winner', align: 'center' }
+])
+const loseColumns = ref<QTableProps['columns']>([
+  { name: 'loser', label: '미당첨자 ', field: 'loser', align: 'center' }
+])
+const winData = ref<any[]>([])
+const loseData = ref<any[]>([])
+
 const paramDate = ref<Data>({
   date: '',
   time: '',
@@ -323,6 +369,7 @@ const param = ref<any>({
   cntntsContents: '', // 컨텐츠
   expsrAt: '', // 노출여부
   drwtDate: '', // 추첨일시
+  provisionPoint: '',
   pointPayment: []
 })
 
@@ -337,6 +384,9 @@ const pointPayment = ref<any[]>([
 ])
 
 const isReadOnly = ref(false)
+
+// 결과화면
+const showResultPop = ref(false)
 
 // notnull 체크
 const isFormValid = computed(() => {
@@ -387,6 +437,60 @@ onMounted(() => {
   setEvent()
 })
 
+const setEventPopup = async () => {
+  showResultPop.value = true
+  const options = {
+    eventSerial: eventStore.eventSn
+  }
+  await $fetch<ApiResponse<any>>('/playground/api/event/getEventResultList', {
+    method: 'POST',
+    body: JSON.stringify(options)
+  })
+    .then((result) => {
+      const winnerData = result.data.winnerEvent
+      const loserData = result.data.loserEvent
+      param.value.totalPointValue = result.data.totalPointValue
+      param.value.provisionPoint = result.data.provisionPointValue
+      for (const idx in winnerData) {
+        winData.value.push({
+          winner:
+            winnerData[idx].memberNm +
+            ' / ' +
+            winnerData[idx].memberId +
+            ' / ' +
+            winnerData[idx].przwinPointVal +
+            ' / ' +
+            winnerData[idx].memberTelno +
+            ' / ' +
+            date.formatDate(
+              winnerData[idx].eventPartcptnDate,
+              'YY-MM-DD HH:mm:ss'
+            )
+        })
+      }
+      for (const idx in loserData) {
+        loseData.value.push({
+          loser:
+            loserData[idx].memberNm +
+            ' / ' +
+            loserData[idx].memberId +
+            ' / ' +
+            date.formatDate(
+              loserData[idx].eventPartcptnDate,
+              'YY-MM-DD HH:mm:ss'
+            )
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+}
+
+const resetResult = () => {
+  winData.value = []
+  loseData.value = []
+}
 const setEvent = async () => {
   if (eventStore.eventSn !== '') {
     isReadOnly.value = true
@@ -543,11 +647,6 @@ const updateEvent = () => {
   eventStore.updateYn = 'N'
 }
 
-const resultEvent = () => {
-  eventStore.eventSn = ''
-  router.push({ path: '/event' })
-}
-
 watch(
   () => param.value.eventSectionCodeId,
   (newVal) => {
@@ -611,6 +710,13 @@ const filteredDrwtCode = computed(() => {
     padding-right: 0.5rem;
   }
 }
+.table-container {
+  .table-wrapper {
+    display: flex;
+    gap: 20px;
+  }
+}
+
 .right-align {
   display: flex;
   justify-content: flex-end;
@@ -623,8 +729,5 @@ const filteredDrwtCode = computed(() => {
   padding-right: 0.5rem;
   padding-left: 0.5rem;
   padding-bottom: 0.5rem;
-}
-.input-container {
-  width: 100%;
 }
 </style>
