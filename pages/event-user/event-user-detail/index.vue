@@ -21,7 +21,7 @@
 
       <div class="button-section">
         <q-btn
-          v-if="event && isEventOngoing"
+          v-if="event && isEventOngoing && event.eventSectionCodeId === 'JOIN'"
           color="primary"
           class="q-mb-sm"
           label="참여하기"
@@ -52,27 +52,50 @@
       </div>
     </div>
 
-    <q-dialog v-model="isOpenPop" persistent>
-      <q-card>
-        <q-card-section>
-          <div class="q-mb-md">
-            <h3>당첨자 리스트</h3>
-            <q-list>
+    <q-dialog v-model="isOpenPop" :maximized="false" :full-width="false">
+      <q-card
+        :style="
+          isMobile ? { width: '90vw', margin: '20vh auto' } : { width: '40vw' }
+        "
+      >
+        <q-card-section class="header-section">
+          <q-toolbar class="text-white q-pa-md">
+            <q-toolbar-title>당첨자 확인</q-toolbar-title>
+            <q-btn
+              v-close-popup
+              flat
+              round
+              dense
+              icon="close"
+              class="q-ml-sm"
+              @click="isOpenPop = false"
+            />
+          </q-toolbar>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none q-pb-none">
+          <div class="q-mb-md winner-list">
+            <div v-if="prize?.eventPrizeAt === 'Y'" class="congrats-message">
+              {{ prize.memberName }}님 축하드립니다! <br />{{
+                prize.przwinPointValue
+              }}포인트 당첨되었습니다!
+            </div>
+            <q-list bordered separator>
               <q-item
                 v-for="(winner, index) in prize?.prizeWinner"
                 :key="index"
+                class="winner-item"
               >
                 <q-item-section>
-                  <div>{{ winner.memberName }}</div>
-                  <div>상: {{ winner.pointPaymentUnitValue }}</div>
+                  <div>
+                    {{ winner.memberName }} ({{ winner.memberId }}) /
+                    {{ winner.pointPaymentUnitValue }}point
+                  </div>
                 </q-item-section>
               </q-item>
             </q-list>
           </div>
         </q-card-section>
-        <q-card-actions>
-          <q-btn flat label="닫기" @click="isOpenPop = false" />
-        </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
@@ -90,8 +113,9 @@ const { loading, platform } = useQuasar()
 const authStore = useAuthStore()
 const router = useRouter()
 const eventSn = router.currentRoute.value.query.eventSn
-const $q = useQuasar()
 
+const event = ref<Event>()
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 const detailReq = ref<EventReq>({ eventSerial: Number(eventSn) })
 const joinRes = ref<JoinRes>()
 const isOpenPop = ref<boolean>(false)
@@ -115,11 +139,12 @@ interface Event {
   participationAt: string
   pointPayment: Payment[]
   eventThumbFileUrl?: string
+  eventEndDateString?: string
 }
 
 interface JoinRes {
   eventPrizeAt: string
-  eventName: number
+  przwinPointValue: number
 }
 
 interface EventReq {
@@ -129,6 +154,7 @@ interface EventReq {
 interface Prize {
   eventPrizeAt: string
   przwinPointValue: number
+  memberName: string
   prizeWinner: Winner[]
 }
 
@@ -137,9 +163,6 @@ interface Winner {
   memberId: string
   pointPaymentUnitValue: number
 }
-
-const event = ref<Event | undefined>()
-const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const isEventOngoing = computed(() => {
   if (!event.value) {
@@ -169,6 +192,10 @@ const getEventDetail = async () => {
           result.eventEndDate,
           'YYYY년 MM월 DD일'
         )}`,
+        eventEndDateString: `${dateUtil.getformatString(
+          result.eventEndDate,
+          'YYYY년 MM월 DD일'
+        )}`,
         pointPayment: result.pointPayment
       }
     })
@@ -180,32 +207,47 @@ const getEventDetail = async () => {
 
 const loginCheck = () => {
   if (authStore?.isLogin) {
-    true
+    return true
   } else {
-    $q.dialog({
-      title: '알림',
-      message: '로그인 후 참여가 가능합니다.'
-    })
+    alert('로그인 후 참여가 가능합니다.')
     router.push(
-      '/login?redirectUrl=event-user/event-user-detail?eventSn=' + eventSn
+      `/login?redirectUrl=event-user/event-user-detail?eventSn=${eventSn}`
     )
+    return false
   }
 }
 
 const participate = async () => {
-  if (event.value?.participationAt == 'Y') {
+  if (event.value?.participationAt === 'Y') {
     alert('이미 참여한 이벤트입니다.')
     return
   }
-  loginCheck()
+
+  if (!loginCheck()) {
+    return
+  }
 
   loading.show()
-  await $fetch<ApiResponse<JoinRes>>('/api/eventUser/addEventParticipation', {
-    method: 'POST',
-    body: JSON.stringify(detailReq.value)
-  })
+  await $fetch<ApiResponse<JoinRes>>(
+    '/playground/api/eventUser/addEventParticipation',
+    {
+      method: 'POST',
+      body: JSON.stringify(detailReq.value)
+    }
+  )
     .then((res) => {
       joinRes.value = res.data
+      if (joinRes.value.eventPrizeAt == 'Y') {
+        alert(
+          `${joinRes.value.przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
+        )
+      } else {
+        alert('다음기회에..')
+      }
+
+      if (event.value) {
+        event.value.participationAt = 'Y'
+      }
     })
     .catch((err) => {
       console.error(err)
@@ -213,28 +255,63 @@ const participate = async () => {
   loading.hide()
 }
 
-const apply = () => {}
+const apply = async () => {
+  if (event.value?.participationAt === 'Y') {
+    alert('이미 참여한 이벤트입니다.')
+    return
+  }
+
+  if (!loginCheck()) {
+    return
+  }
+
+  loading.show()
+  await $fetch<ApiResponse<void>>('/playground/api/eventUser/addEventRaffle', {
+    method: 'POST',
+    body: JSON.stringify(detailReq.value)
+  })
+    .then((res) => {
+      if (res.resultCode == '0000') {
+        alert('응모가 완료되었습니다!')
+
+        if (event.value) {
+          event.value.participationAt = 'Y'
+        }
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+  loading.hide()
+}
 
 const openWinner = () => {
   getWinners()
-  isOpenPop.value = true
 }
 
 const getWinners = async () => {
   loading.show()
-  try {
-    const response = await $fetch<ApiResponse<Prize>>(
-      '/public/eventUser/getEntryEventWinner',
-      {
-        method: 'POST',
-        body: JSON.stringify(detailReq.value)
+
+  await $fetch<ApiResponse<Prize>>(
+    '/playground/public/eventUser/getEntryEventWinner',
+    {
+      method: 'POST',
+      body: JSON.stringify(detailReq.value.eventSerial)
+    }
+  )
+    .then((response) => {
+      prize.value = response.data
+      if (!prize.value.prizeWinner || prize.value.prizeWinner.length === 0) {
+        alert('아직 추첨이 완료되지 않았어요.')
+      } else {
+        isOpenPop.value = true
       }
-    )
-    prize.value = response.data
-  } catch (err) {
-    console.error('Error fetching winners:', err)
-  }
-  loading.hide()
+      loading.hide()
+    })
+    .catch((error) => {
+      console.error(error)
+      loading.hide()
+    })
 }
 
 onMounted(() => {
@@ -274,7 +351,8 @@ onMounted(() => {
       }
 
       .event-description {
-        margin: 20px 0;
+        max-width: 500px;
+        margin: 20px auto;
         font-size: 16px;
         color: #333;
         background-color: #f9f9f9;
@@ -296,5 +374,31 @@ onMounted(() => {
       }
     }
   }
+}
+
+.winner-list {
+  padding: 15px;
+  border-radius: 0 0 8px 8px;
+}
+
+.winner-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.congrats-message {
+  color: #4caf50;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.header-section {
+  padding: 0px;
+  background-color: #007bff;
+  color: white;
 }
 </style>
