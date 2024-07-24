@@ -90,13 +90,15 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { type QTableProps, date } from 'quasar'
+import { type QTableProps, date, useQuasar } from 'quasar'
 
 import type { ApiResponse, Code, Page, PageListInfo } from '@/interface/server'
 
 import { codeUtil } from '@/utils/code'
 import { useEventStore } from '@/stores/useEventStore'
 import paginationLayout from '@/components/PaginationComponent.vue'
+
+const { loading } = useQuasar()
 
 interface Data {
   eventSerial: number
@@ -194,10 +196,12 @@ const columns = ref<QTableProps['columns']>([
 ])
 
 onMounted(() => {
+  eventStore.eventSn = ''
   getCodeList()
   getEventList()
 })
 const getCodeList = async (): Promise<void> => {
+  loading.show()
   const eventCode = await codeUtil.getCodeGroupList('EVENT_DIVISION_CODE')
   const statCode = await codeUtil.getCodeGroupList('EVENT_PROGRESS_STATUS')
 
@@ -219,10 +223,11 @@ const getCodeList = async (): Promise<void> => {
     },
     ...statCode
   ]
+  loading.hide()
 }
 
 const getEventList = async () => {
-  console.log('param.value ::', param.value)
+  loading.show()
   await $fetch<ApiResponse<PageListInfo<Data>>>(
     '/playground/public/event/getEventList?page=' +
       (currentPage.value - 1) +
@@ -250,6 +255,7 @@ const getEventList = async () => {
     .catch((error) => {
       console.error(error)
     })
+  loading.hide()
 }
 
 const rowClick = (evt: Event, row: any) => {
