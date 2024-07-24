@@ -8,6 +8,7 @@
       swActived : {{ useNuxtApp().$pwa.swActived }} <br />
       offlineReady : {{ useNuxtApp().$pwa.offlineReady }} <br />
       registrationError : {{ useNuxtApp().$pwa.registrationError }} <br />
+      showInstallPrompt : {{ useNuxtApp().$pwa.showInstallPrompt }} <br />
       <NuxtPage />
     </NuxtLayout>
   </div>
@@ -49,6 +50,7 @@ onMounted(async () => {
   console.log($pwa.offlineReady)
   console.log($pwa.registrationError)
   console.log($pwa.getSWRegistration)
+  console.log($pwa.showInstallPrompt)
 
   console.groupEnd()
   if (!$pwa.isPWAInstalled) {
