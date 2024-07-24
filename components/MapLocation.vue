@@ -59,16 +59,6 @@ const props = defineProps<{
 watch(
   props,
   () => {
-    console.group('***')
-    console.debug(props.location)
-    console.debug(props.location.x)
-    console.debug(props.location.y)
-    console.debug(props.place)
-    console.debug(props.place.placeName)
-    console.debug(props.place.kakaoMapId)
-    console.debug(props.place.la)
-    console.debug(props.place.lo)
-    console.groupEnd()
     diaplayPlace()
   },
   { deep: true }
