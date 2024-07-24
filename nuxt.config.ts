@@ -124,11 +124,9 @@ export default defineNuxtConfig({
       navigateFallback: "/"
     },
     client: {
-      installPrompt: true,
-      periodicSyncForUpdates: 3600
+      installPrompt: true
     },
     devOptions: {
-      enabled: true,
       type: "module"
     }
   }

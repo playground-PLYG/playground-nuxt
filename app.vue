@@ -39,6 +39,8 @@ globalThis.$fetch = ofetch.create({
 })
 
 onMounted(async () => {
+  await nextTick()
+
   if ($pwa) {
     if ($pwa.needRefresh) {
       await $pwa.updateServiceWorker()
@@ -68,8 +70,13 @@ onMounted(async () => {
           {
             label: '설치',
             color: 'white',
-            handler: () => {
-              $pwa.install()
+            handler: async () => {
+              await $pwa.install()
+
+              if ($pwa.needRefresh) {
+                console.log('*** needRefresh', $pwa.needRefresh)
+                await $pwa.updateServiceWorker()
+              }
             }
           }
         ]
