@@ -170,7 +170,8 @@ const isEventOngoing = computed(() => {
   }
   const now = new Date()
   const endDate = new Date(event.value.eventEndDate)
-  return now <= endDate
+  const beginDate = new Date(event.value.eventBeginDate)
+  return now <= endDate && now >= beginDate
 })
 
 const getEventDetail = async () => {
