@@ -1,10 +1,10 @@
 <template>
   <!-- 메인 영역 start -->
   <div>
-    <div class="mobile-content-area">
+    <div v-show="isAllReady" class="mobile-content-area">
       <div class="text-h6 q-mb-sm q-pa-sm">
         {{ voteDetail.voteSubject }}
-        <div class="row" style="font-size: medium">
+        <div class="row" style="font-size: small">
           <div class="q-ml-sm q-mr-sm">-</div>
           <div>{{ voteDetail.voteBeginDate }}</div>
           <div class="q-ml-sm q-mr-sm">~</div>
@@ -57,7 +57,7 @@
                     />
                   </q-item-section>
                   <q-icon
-                    v-if="qestn.voteKindCode == 'LUN'"
+                    v-if="qestn.voteKindCode == 'RST'"
                     size="20px"
                     name="search"
                     class="q-ml-auto"
@@ -96,6 +96,19 @@
           label="수정"
           class="q-mt-sm q-ml-auto"
           @click="fn_goVoteModify"
+        />
+      </div>
+      <div class="row justify-start q-mt-md">
+        <dk-btn
+          icon="list"
+          push
+          color="white"
+          text-color="primary"
+          label="투표목록"
+          unelevated
+          rounded
+          style="width: 100%"
+          @click="$router.push('/vote-list')"
         />
       </div>
     </div>
@@ -186,8 +199,8 @@ const voteDetail = ref<VoteDetail>({
   voteSubject: '',
   voteTransmissionAlternative: 'N',
   voteTransmissionCode: '',
-  voteBeginDate: '9999-12-31 00:00',
-  voteEndDate: '9999-12-31 00:00',
+  voteBeginDate: '',
+  voteEndDate: '',
   voteExposureAlternative: 'N',
   registUserId: '',
   voteQestnResponseList: [
@@ -215,6 +228,7 @@ const showModifyBtn = ref<boolean>(false)
 const showResultBtn = ref<boolean>(false)
 const showVotingBtn = ref<boolean>(false)
 const isVoteComplete = ref<boolean>(false)
+const isAllReady = ref<boolean>(false)
 const fn_getVoteDetail = async (ssno: number) => {
   loading.show()
   await $fetch<ApiResponse<VoteDetail>>('/playground/api/vote/getVoteDetail', {
@@ -278,11 +292,14 @@ const fn_getVoteDetail = async (ssno: number) => {
         // 투표기간이 투표완료일 경우 -> 결과만 노출
         showResultBtn.value = true
         showVotingBtn.value = false
-        isVoteComplete.value = true // 투표종료를 알림
+        isVoteComplete.value = true // 투표항목 disable
+      } else if (voteStatusFlag == 'PRP') {
+        isVoteComplete.value = true // 투표항목 disable
       }
 
       settingVoteAnswer()
 
+      isAllReady.value = true
       loading.hide()
     })
     .catch((error) => {
@@ -393,8 +410,10 @@ const settingVoteAnswer = async () => {
       }
     })
     .catch((error) => {
-      alert(error.errorMessage)
       console.error(error)
+      commUtil.alert({
+        message: error.errorMessage
+      })
     })
 }
 
@@ -502,8 +521,10 @@ const fn_addVoteAnswer = async () => {
     })
     .catch((error) => {
       loading.hide()
-      alert(error.errorMessage)
       console.error(error)
+      commUtil.alert({
+        message: error.errorMessage
+      })
     })
 }
 
