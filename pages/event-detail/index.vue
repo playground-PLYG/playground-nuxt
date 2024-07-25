@@ -14,17 +14,48 @@
           :rules="[event_rules]"
         />
       </q-card-section>
-      <q-card-section class="q-gutter-md row items-start">
-        <dk-date-time-from-to-picker
-          :from="paramDate.dateFrom"
-          :to="paramDate.dateTo"
-          @send-from-date="setEventBeginDate"
-          @send-to-date="setEventEndDate"
-        />
+      <q-card-section>
+        <div
+          v-if="eventStore.updateYn === 'Y'"
+          class="q-gutter-md row items-start"
+        >
+          <q-input
+            v-model="param.eventBeginDate"
+            :readonly="isReadOnly"
+            outlined
+            min="1"
+            type="text"
+            label="이벤트 시작일시"
+            class="input"
+          />
+          <q-input
+            v-model="param.eventEndDate"
+            :readonly="isReadOnly"
+            outlined
+            min="1"
+            type="text"
+            label="이벤트 종료일시"
+            class="input"
+          />
+        </div>
+        <div v-else>
+          <dk-date-time-from-to-picker
+            :from="paramDate.dateFrom"
+            :to="paramDate.dateTo"
+            @send-from-date="setEventBeginDate"
+            @send-to-date="setEventEndDate"
+          />
+        </div>
       </q-card-section>
       <q-card-section>
         <div>
-          썸네일 이미지
+          <div
+            v-if="
+              eventStore.updateYn === 'N' || param.eventThumbFileSn !== null
+            "
+          >
+            썸네일 이미지
+          </div>
           <div v-if="eventStore.updateYn === 'Y'">
             <q-img
               v-if="
@@ -37,7 +68,7 @@
               no-native-menu
             />
           </div>
-          <div v-if="eventStore.updateYn === 'N'">
+          <div v-else-if="eventStore.updateYn === 'N'">
             <image-upload
               v-if="
                 param.eventThumbFileSn === null || param.eventThumbFileSn === ''
@@ -62,6 +93,7 @@
               v-model="param.przwnerCount"
               :readonly="isReadOnly"
               outlined
+              min="1"
               type="number"
               label="당첨자 수"
               class="input"
@@ -126,6 +158,7 @@
           type="number"
           label="총 포인트"
           class="q-mb-sm"
+          min="1"
           :rules="[event_rules]"
         />
         <q-card-section class="test">
@@ -141,6 +174,7 @@
               type="number"
               label="포인트 지급단위"
               class="q-mb-sm"
+              min="0"
               :rules="[event_rules]"
             />
             <q-btn
@@ -176,6 +210,7 @@
             type="number"
             label="고정포인트 지급자 수"
             class="q-mb-sm"
+            min="1"
             :rules="[event_rules]"
           />
           <q-input
@@ -185,6 +220,7 @@
             type="number"
             label="고정포인트"
             class="q-mb-sm"
+            min="1"
             :rules="[event_rules]"
           />
           <q-btn
@@ -332,6 +368,7 @@ import { codeUtil } from '@/utils/code'
 import type { ApiResponse, Code } from '@/interface/server'
 import { useEventStore } from '@/stores/useEventStore'
 import { imageUtil } from '~/utils/image'
+import { commUtil } from '~/utils/comm'
 
 const router = useRouter()
 const eventStore = useEventStore()
@@ -577,80 +614,116 @@ const fn_fileUploaded = (fileId: number) => {
   param.value.eventThumbFileSn = fileId
 }
 const addEvent = async () => {
-  loading.show()
   param.value.eventBeginDate = param.value.eventBeginDate.replaceAll(' ', 'T')
   param.value.eventEndDate = param.value.eventEndDate.replaceAll(' ', 'T')
   param.value.pointPayment = pointPayment.value
-  if (isFormValid.value) {
-    if (eventStore.eventSn === '') {
-      await $fetch<ApiResponse<Point[]>>('/playground/api/event/addEvent', {
-        method: 'POST',
-        body: JSON.stringify(param.value)
-      })
-        .then(() => {
-          router.push({ path: '/event' })
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-    } else {
-      param.value.eventSerial = eventStore.eventSn
-      await $fetch<ApiResponse<Point[]>>('/playground/api/event/modifyEvent', {
-        method: 'POST',
-        body: JSON.stringify(param.value)
-      })
-        .then(() => {
-          eventStore.eventSn = ''
-          eventStore.updateYn = 'N'
-          router.push({ path: '/event' })
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-    }
+
+  let countSum = 0
+  for (const item of pointPayment.value) {
+    countSum += Number(item.fixingPointPayrCount)
   }
-  loading.hide()
+  if (param.value.przwnerCount !== countSum) {
+    commUtil.alert({
+      message: "'당첨자 수'와 '고정포인트 지급자 수'의 합이 같지 않습니다"
+    })
+    return
+  }
+
+  if (
+    await commUtil.confirmSync({
+      message: '저장하시겠습니까?'
+    })
+  ) {
+    loading.show()
+    param.value.eventBeginDate = param.value.eventBeginDate.replaceAll(' ', 'T')
+    param.value.eventEndDate = param.value.eventEndDate.replaceAll(' ', 'T')
+    param.value.pointPayment = pointPayment.value
+    if (isFormValid.value) {
+      if (eventStore.eventSn === '') {
+        await $fetch<ApiResponse<Point[]>>('/playground/api/event/addEvent', {
+          method: 'POST',
+          body: JSON.stringify(param.value)
+        })
+          .then(() => {
+            router.push({ path: '/event' })
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+      } else {
+        param.value.eventSerial = eventStore.eventSn
+        await $fetch<ApiResponse<Point[]>>(
+          '/playground/api/event/modifyEvent',
+          {
+            method: 'POST',
+            body: JSON.stringify(param.value)
+          }
+        )
+          .then(() => {
+            eventStore.eventSn = ''
+            eventStore.updateYn = 'N'
+            router.push({ path: '/event' })
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+      }
+    }
+    loading.hide()
+  }
 }
 
 const executeEventRaffle = async () => {
-  loading.show()
-  const req = {
-    eventSerial: param.value.eventSerial
-  }
-
-  await $fetch<ApiResponse<Point[]>>(
-    '/playground/api/event/executeEventRaffle',
-    {
-      method: 'POST',
-      body: JSON.stringify(req)
+  if (
+    await commUtil.confirmSync({
+      message: '추첨하시겠습니까?'
+    })
+  ) {
+    loading.show()
+    const req = {
+      eventSerial: param.value.eventSerial
     }
-  )
-    .then(() => {
-      setEvent()
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-  loading.hide()
+
+    await $fetch<ApiResponse<Point[]>>(
+      '/playground/api/event/executeEventRaffle',
+      {
+        method: 'POST',
+        body: JSON.stringify(req)
+      }
+    )
+      .then(() => {
+        setEvent()
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    loading.hide()
+  }
 }
 
 const modifyEndEvent = async () => {
-  loading.show()
-  const req = {
-    eventSerial: param.value.eventSerial
-  }
+  if (
+    await commUtil.confirmSync({
+      message: '종료하시겠습니까?'
+    })
+  ) {
+    loading.show()
+    const req = {
+      eventSerial: param.value.eventSerial
+    }
 
-  await $fetch<ApiResponse<Point[]>>('/playground/api/event/modifyEndEvent', {
-    method: 'POST',
-    body: JSON.stringify(req)
-  })
-    .then(() => {
-      router.push({ path: '/event' })
+    await $fetch<ApiResponse<Point[]>>('/playground/api/event/modifyEndEvent', {
+      method: 'POST',
+      body: JSON.stringify(req)
     })
-    .catch((error) => {
-      console.error(error)
-    })
-  loading.hide()
+      .then(() => {
+        router.push({ path: '/event' })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    loading.hide()
+  }
 }
 
 const event_rules = (val: string) => {
@@ -660,8 +733,17 @@ const event_rules = (val: string) => {
   return true
 }
 
-const outEvent = () => {
-  router.push({ path: '/event' })
+const outEvent = async () => {
+  if (eventStore.eventSn === '') {
+    router.push({ path: '/event' })
+  } else if (
+    await commUtil.confirmSync({
+      message: '취소하겠습니까?'
+    })
+  ) {
+    isReadOnly.value = true
+    eventStore.updateYn = 'Y'
+  }
 }
 
 const updateOutEvent = () => {

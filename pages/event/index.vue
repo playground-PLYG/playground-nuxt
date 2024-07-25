@@ -147,7 +147,7 @@ const columns = ref<QTableProps['columns']>([
     },
     align: 'center'
   },
-  { name: 'eventName', label: '이벤트명', field: 'eventName', align: 'center' },
+  { name: 'eventName', label: '이벤트명', field: 'eventName', align: 'left' },
   {
     name: 'eventSectionCodeId',
     label: '이벤트구분',
@@ -159,7 +159,7 @@ const columns = ref<QTableProps['columns']>([
     name: 'progrsSttus',
     label: '진행상태',
     field: 'progrsSttus',
-    align: 'center',
+    align: 'left',
     format: (val) =>
       val === 'END' ? '종료' : val === 'ING' ? '진행중' : '예정'
   },
@@ -228,6 +228,7 @@ const getCodeList = async (): Promise<void> => {
 
 const getEventList = async () => {
   loading.show()
+
   await $fetch<ApiResponse<PageListInfo<Data>>>(
     '/playground/public/event/getEventList?page=' +
       (currentPage.value - 1) +
@@ -272,7 +273,8 @@ const insert = () => {
 
 const resetForm = () => {
   param.value.eventName = ''
-
+  param.value.eventSectionCodeId = ''
+  param.value.progrsSttus = ''
   currentPage.value = 1
   getEventList()
 }
