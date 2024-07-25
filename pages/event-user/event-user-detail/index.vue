@@ -5,7 +5,8 @@
         <div class="event-header">
           <div class="event-info">
             <h1 class="event-title">{{ event.eventName }}</h1>
-            <p class="event-date">기간: {{ event.eventDate }}</p>
+            <p class="event-date">기간: {{ event.eventBeginDt }}</p>
+            <p class="event-date">~ {{ event.eventEndDt }}</p>
           </div>
           <img
             src="https://m.lpoint.com/upload/images/ha/event/202104/c4bdb28791a4458d9c0dd6d806aadaed.png"
@@ -48,6 +49,14 @@
           rounded
           push
           @click="openWinner"
+        />
+        <q-btn
+          class="q-mb-sm"
+          label="이벤트 목록"
+          rounded
+          push
+          style="color: black"
+          @click="goEventList"
         />
       </div>
     </div>
@@ -108,11 +117,14 @@ import { useQuasar } from 'quasar'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { type ApiResponse } from '../../../interface/server'
 import { dateUtil } from '~/utils/dateUtil'
+import { commUtil } from '~/utils/comm'
 
 const { loading, platform } = useQuasar()
 const authStore = useAuthStore()
 const router = useRouter()
 const eventSn = router.currentRoute.value.query.eventSn
+const listTab = router.currentRoute.value.query.tab
+const listEventName = router.currentRoute.value.query.eventName
 
 const event = ref<Event>()
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
@@ -139,7 +151,8 @@ interface Event {
   participationAt: string
   pointPayment: Payment[]
   eventThumbFileUrl?: string
-  eventEndDateString?: string
+  eventBeginDt: string
+  eventEndDt: string
 }
 
 interface JoinRes {
@@ -186,17 +199,11 @@ const getEventDetail = async () => {
       const result = res.data
       event.value = {
         ...result,
-        eventDate: `${dateUtil.getformatString(
+        eventBeginDt: `${dateUtil.getformatString(
           result.eventBeginDate,
-          'YYYY년 MM월 DD일'
-        )} ~ ${dateUtil.getformatString(
-          result.eventEndDate,
-          'YYYY년 MM월 DD일'
+          'YYYY년 MM월 DD일 HH시 mm분'
         )}`,
-        eventEndDateString: `${dateUtil.getformatString(
-          result.eventEndDate,
-          'YYYY년 MM월 DD일'
-        )}`,
+        eventEndDt: formatEventEndDt(result.eventEndDate),
         pointPayment: result.pointPayment
       }
     })
@@ -206,11 +213,27 @@ const getEventDetail = async () => {
   loading.hide()
 }
 
+const formatEventEndDt = (endDt: string) => {
+  const endDate = new Date(endDt)
+  if (endDate.getHours() === 0 && endDate.getMinutes() === 0) {
+    const preDay = new Date(endDate)
+    preDay.setDate(endDate.getDate() - 1)
+    return `${dateUtil.getformatString(
+      preDay.toString(),
+      'YYYY년 MM월 DD일 24시'
+    )}`
+  } else {
+    return `${dateUtil.getformatString(endDt, 'YYYY년 MM월 DD일 HH시 mm분')}`
+  }
+}
+
 const loginCheck = () => {
   if (authStore?.isLogin) {
     return true
   } else {
-    alert('로그인 후 참여가 가능합니다.')
+    commUtil.alert({
+      message: '로그인 후 참여가 가능합니다.'
+    })
     router.push(
       `/login?redirectUrl=event-user/event-user-detail?eventSn=${eventSn}`
     )
@@ -220,7 +243,9 @@ const loginCheck = () => {
 
 const participate = async () => {
   if (event.value?.participationAt === 'Y') {
-    alert('이미 참여한 이벤트입니다.')
+    commUtil.alert({
+      message: '이미 참여한 이벤트입니다.'
+    })
     return
   }
 
@@ -239,11 +264,13 @@ const participate = async () => {
     .then((res) => {
       joinRes.value = res.data
       if (joinRes.value.eventPrizeAt == 'Y') {
-        alert(
-          `${joinRes.value.przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
-        )
+        commUtil.alert({
+          message: `${joinRes.value.przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
+        })
       } else {
-        alert('다음기회에..')
+        commUtil.alert({
+          message: '다음기회에..'
+        })
       }
 
       if (event.value) {
@@ -258,7 +285,9 @@ const participate = async () => {
 
 const apply = async () => {
   if (event.value?.participationAt === 'Y') {
-    alert('이미 참여한 이벤트입니다.')
+    commUtil.alert({
+      message: '이미 참여한 이벤트입니다.'
+    })
     return
   }
 
@@ -273,8 +302,9 @@ const apply = async () => {
   })
     .then((res) => {
       if (res.resultCode == '0000') {
-        alert('응모가 완료되었습니다!')
-
+        commUtil.alert({
+          message: '응모가 완료되었습니다!'
+        })
         if (event.value) {
           event.value.participationAt = 'Y'
         }
@@ -303,7 +333,9 @@ const getWinners = async () => {
     .then((response) => {
       prize.value = response.data
       if (!prize.value.prizeWinner || prize.value.prizeWinner.length === 0) {
-        alert('아직 추첨이 완료되지 않았어요.')
+        commUtil.alert({
+          message: '아직 추첨이 완료되지 않았어요.'
+        })
       } else {
         isOpenPop.value = true
       }
@@ -313,6 +345,10 @@ const getWinners = async () => {
       console.error(error)
       loading.hide()
     })
+}
+
+const goEventList = () => {
+  router.push(`/event-user?eventName=${listEventName}&tab=${listTab}`)
 }
 
 onMounted(() => {
@@ -345,7 +381,7 @@ onMounted(() => {
             color: #333;
           }
           .event-date {
-            font-size: 18px;
+            font-size: 15px;
             color: #555;
           }
         }
