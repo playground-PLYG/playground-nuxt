@@ -2,7 +2,7 @@
   <div :class="['page-wrap', isMobile ? 'mobile' : '']">
     <div class="content q-pa-md q-gutter-md">
       <div class="search">
-        <q-form @submit.prevent="handleSearch">
+        <q-form>
           <div class="search-controls">
             <q-input
               v-model="eventSrchReq.eventName"
@@ -20,16 +20,11 @@
                   class="cursor-pointer"
                   @click="eventSrchReq.eventName = ''"
                 />
-                <q-icon name="search" />
+                <div @click="handleSearch">
+                  <q-icon name="search" />
+                </div>
               </template>
             </q-input>
-            <dk-btn
-              push
-              color="white"
-              text-color="primary"
-              label="조회"
-              type="submit"
-            />
           </div>
         </q-form>
       </div>
@@ -44,12 +39,7 @@
       <dk-tab-panels v-model="tab">
         <dk-tab-panel name="ING">
           <div class="content-body">
-            <div v-if="!eventResList.length" class="no-results">
-              <q-icon name="sentiment_very_dissatisfied" size="40px" />
-              <div class="message">현재 표시할 이벤트가 없습니다.</div>
-            </div>
             <div
-              v-else
               :class="[isMobile ? 'col' : 'row', 'justify-center q-gutter-sm']"
             >
               <div
@@ -76,7 +66,10 @@
                   <q-card-section class="row justify-between items-center">
                     <div class="event-info">
                       <div class="text-subtitle1">{{ event.eventName }}</div>
-                      <div class="text-subtitle6">{{ event.eventDate }}</div>
+                      <div class="event-dt">
+                        {{ event.eventBeginDt }}
+                      </div>
+                      <div class="event-dt">~{{ event.eventEndDt }}</div>
                     </div>
                     <q-badge color="primary" outline class="q-ml-sm">
                       <template v-if="event.progrsSttus === '예정'">
@@ -95,12 +88,7 @@
 
         <dk-tab-panel name="END">
           <div class="content-body">
-            <div v-if="!eventResList.length" class="no-results">
-              <q-icon name="sentiment_very_dissatisfied" size="40px" />
-              <div class="message">현재 표시할 이벤트가 없습니다.</div>
-            </div>
             <div
-              v-else
               :class="[isMobile ? 'col' : 'row', 'justify-center q-gutter-sm']"
             >
               <div
@@ -127,7 +115,10 @@
                   <q-card-section class="row justify-between items-center">
                     <div class="event-info">
                       <div class="text-subtitle1">{{ event.eventName }}</div>
-                      <div class="text-subtitle6">{{ event.eventDate }}</div>
+                      <div class="event-dt">
+                        {{ event.eventBeginDt }}
+                      </div>
+                      <div class="event-dt">~{{ event.eventEndDt }}</div>
                     </div>
                     <q-badge color="primary" outline class="q-ml-sm">
                       {{ event.participationAt }}
@@ -153,11 +144,14 @@ import { dateUtil } from '~/utils/dateUtil'
 
 const { loading, platform } = useQuasar()
 
-const tab = ref('ING')
-
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
 const itemsPerPage = ref<number>(10) // 테이블 UI에 보여지는 데이터 개수
+
+const router = useRouter()
+const listTab = router.currentRoute.value.query.tab
+const listEventName = router.currentRoute.value.query.eventName
+const tab = ref(typeof listTab === 'string' ? listTab : 'ING')
 
 /** 이벤트 정보 */
 interface Event {
@@ -165,18 +159,19 @@ interface Event {
   eventName: string
   eventBeginDate: string
   eventEndDate: string
-  eventDate: string
   eventThumbFileSn: number
   eventThumbFileUrl?: string
   participationAt: string
   imageUrl: string
   progrsSttus: string
   dDay?: number
+  eventBeginDt: string
+  eventEndDt: string
 }
 
 const eventSrchReq = ref<Pick<Event, 'eventName' | 'progrsSttus'>>({
-  eventName: '',
-  progrsSttus: 'ING'
+  eventName: typeof listEventName === 'string' ? listEventName : '',
+  progrsSttus: typeof listTab === 'string' ? listTab : 'ING'
 })
 
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
@@ -208,6 +203,7 @@ const fn_getEventList = async () => {
   if (observer) {
     observer.disconnect()
   }
+  loading.show()
   await $fetch<ApiResponse<PageListInfo<Event>>>(
     '/playground/public/eventUser/getEventPageList?page=' +
       (currentPage.value - 1) +
@@ -219,7 +215,6 @@ const fn_getEventList = async () => {
     }
   )
     .then((result) => {
-      loading.show()
       if (result.data.content.length <= 0) {
         maxDataYn.value = true
       } else {
@@ -231,13 +226,11 @@ const fn_getEventList = async () => {
 
           return {
             ...event,
-            eventDate: `${dateUtil.getformatString(
+            eventBeginDt: `${dateUtil.getformatString(
               event.eventBeginDate,
-              'YYYY년 MM월 DD일'
-            )} ~ ${dateUtil.getformatString(
-              event.eventEndDate,
-              'YYYY년 MM월 DD일'
+              'YYYY년 MM월 DD일 HH시 mm분'
             )}`,
+            eventEndDt: formatEventEndDt(event.eventEndDate),
             imageUrl: event.eventThumbFileSn
               ? imageUtil.getImageUrl(event.eventThumbFileSn)
               : '',
@@ -261,6 +254,20 @@ const fn_getEventList = async () => {
   loading.hide()
 }
 
+const formatEventEndDt = (endDt: string) => {
+  const endDate = new Date(endDt)
+  if (endDate.getHours() === 0 && endDate.getMinutes() === 0) {
+    const preDay = new Date(endDate)
+    preDay.setDate(endDate.getDate() - 1)
+    return `${dateUtil.getformatString(
+      preDay.toString(),
+      'YYYY년 MM월 DD일 24시'
+    )}`
+  } else {
+    return `${dateUtil.getformatString(endDt, 'YYYY년 MM월 DD일 HH시 mm분')}`
+  }
+}
+
 const scrollEvent = () => {
   const $event = document.querySelector('.card-event:last-child')
   if ($event) {
@@ -282,9 +289,10 @@ const scrollEvent = () => {
   }
 }
 
-const router = useRouter()
 const fn_goEventDetail = (eventSn: number) => {
-  router.push('/event-user/event-user-detail?eventSn=' + eventSn)
+  router.push(
+    `/event-user/event-user-detail?eventSn=${eventSn}&eventName=${eventSrchReq.value.eventName}&tab=${tab.value}`
+  )
 }
 </script>
 
@@ -316,23 +324,6 @@ const fn_goEventDetail = (eventSn: number) => {
     }
 
     .content-body {
-      .no-results {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 200px;
-        background-color: #f5f5f5;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 20px;
-        text-align: center;
-        .message {
-          margin-top: 10px;
-          font-size: 16px;
-          color: #bababa;
-        }
-      }
-
       .card-event {
         width: 100%;
         max-width: 300px;
@@ -341,32 +332,12 @@ const fn_goEventDetail = (eventSn: number) => {
           width: 100%;
         }
       }
-
-      .load-more {
-        display: flex;
-        justify-content: center;
-        margin-top: 1em;
-      }
     }
   }
 
   &.mobile .content .content-body {
-    .no-results {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      background-color: #f5f5f5;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      padding: 20px;
-      text-align: center;
-      .message {
-        margin-top: 10px;
-        font-size: 16px;
-        color: #bababa;
-      }
+    .event-dt {
+      font-size: 12px;
     }
 
     .card-event {
