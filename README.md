@@ -1,3 +1,1 @@
 # playground-nuxt
-
-#
