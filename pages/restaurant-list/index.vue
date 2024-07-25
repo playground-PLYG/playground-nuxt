@@ -348,6 +348,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, useQuasar } from 'quasar'
 import { type ApiResponse } from '../../interface/server'
+import { commUtil } from '~/utils/comm'
 import MapSearch from '~/components/MapSearch.vue'
 import MapLocation from '~/components/MapLocation.vue'
 
@@ -576,12 +577,18 @@ const onSubmit = async () => {
     body: JSON.stringify(param.value)
   })
     .then(() => {
-      alert('등록되었습니다.')
-      router.go(0)
+      commUtil.alert({
+        message: '등록되었습니다.',
+        callbackFn() {
+          router.go(0)
+        }
+      })
     })
     .catch((error) => {
       console.error(error)
-      alert('등록되지 않았습니다.')
+      commUtil.alert({
+        message: '등록되지 않았습니다..'
+      })
     })
   loading.hide()
 }
@@ -596,12 +603,18 @@ const removeRstrnt = async () => {
     }
   )
     .then(() => {
-      alert('삭제되었습니다.')
-      router.go(0)
+      commUtil.alert({
+        message: '삭제되었습니다.',
+        callbackFn() {
+          router.go(0)
+        }
+      })
     })
     .catch((error) => {
       console.error(error)
-      alert('삭제되지 않았습니다.')
+      commUtil.alert({
+        message: '삭제되지 않았습니다.'
+      })
     })
   loading.hide()
 }
@@ -662,13 +675,19 @@ const menuSubmit = async () => {
       }
     )
       .then(() => {
-        alert('수정되었습니다.')
-        getRstrntMenuList()
-        showMenuDialog.value = false
+        commUtil.alert({
+          message: '수정되었습니다.',
+          callbackFn() {
+            getRstrntMenuList()
+            showMenuDialog.value = false
+          }
+        })
       })
       .catch((error) => {
         console.error(error)
-        alert('수정되지 않았습니다.')
+        commUtil.alert({
+          message: '수정되지 않았습니다.'
+        })
       })
   } else {
     await $fetch<ApiResponse<MenuData[]>>(
@@ -679,13 +698,19 @@ const menuSubmit = async () => {
       }
     )
       .then(() => {
-        alert('등록되었습니다.')
-        getRstrntMenuList()
-        showMenuDialog.value = false
+        commUtil.alert({
+          message: '등록되었습니다.',
+          callbackFn() {
+            getRstrntMenuList()
+            showMenuDialog.value = false
+          }
+        })
       })
       .catch((error) => {
         console.error(error)
-        alert('등록되지 않았습니다.')
+        commUtil.alert({
+          message: '등록되지 않았습니다.'
+        })
       })
   }
   loading.hide()
@@ -712,13 +737,19 @@ const removeMenu = async () => {
     }
   )
     .then(() => {
-      alert('삭제되었습니다.')
-      getRstrntMenuList()
-      showMenuDialog.value = false
+      commUtil.alert({
+        message: '삭제되었습니다.',
+        callbackFn() {
+          getRstrntMenuList()
+          showMenuDialog.value = false
+        }
+      })
     })
     .catch((error) => {
       console.error(error)
-      alert('삭제되지 않았습니다.')
+      commUtil.alert({
+        message: '삭제되지 않았습니다.'
+      })
     })
   loading.hide()
 }

@@ -141,6 +141,7 @@ import { useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '@/interface/server'
 import { codeUtil } from '@/utils/code'
 import { imageUtil } from '~/utils/image'
+import { commUtil } from '~/utils/comm'
 
 const { loading } = useQuasar()
 
@@ -285,8 +286,10 @@ const fn_getRstrntDetail = async (ssno: number) => {
       fn_setImgUrl()
     })
     .catch((error) => {
-      alert(error.errorMessage)
       console.error(error)
+      commUtil.alert({
+        message: error.errorMessage
+      })
     })
 }
 
@@ -323,8 +326,10 @@ const fn_getMenuList = async () => {
       restaurantDetail.value.menuList = result.data
     })
     .catch((error) => {
-      alert(error.errorMessage)
       console.error(error)
+      commUtil.alert({
+        message: error.errorMessage
+      })
     })
 }
 

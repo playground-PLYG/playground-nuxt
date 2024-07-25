@@ -1,17 +1,17 @@
 <template>
   <!-- 메인 영역 start -->
-  <div>
+  <div v-show="isAllReady">
     <div class="mobile-content-area">
       <div class="text-h6 q-mb-sm q-pa-sm">
         {{ voteResult.voteSubject }}
-        <div class="row" style="font-size: medium">
+        <div class="row" style="font-size: small">
           <div class="q-ml-sm q-mr-sm">-</div>
           <div>{{ voteResult.voteBeginDate }}</div>
           <div class="q-ml-sm q-mr-sm">~</div>
           <div>{{ voteResult.voteEndDate }}</div>
         </div>
       </div>
-      <div>
+      <div v-if="voteResult.voteResultList.length > 0">
         <div v-for="(qestn, index) in voteResult.voteResultList" :key="index">
           <q-card class="q-mb-sm" flat bordered>
             <q-card-section>
@@ -84,6 +84,42 @@
             </q-card-section>
           </q-card>
         </div>
+
+        <div class="row justify-start q-mt-md">
+          <dk-btn
+            icon="list"
+            push
+            color="white"
+            text-color="primary"
+            label="투표목록"
+            unelevated
+            rounded
+            style="width: 100%"
+            @click="$router.push('/vote-list')"
+          />
+        </div>
+      </div>
+      <div v-else>
+        <q-card class="q-mt-xl" flat bordered>
+          <q-card-section class="bg-white text-black">
+            <div class="text-h6" style="text-align: center">
+              <q-icon name="search_off" size="25px" />
+              투표결과 조회 없음
+            </div>
+          </q-card-section>
+        </q-card>
+        <dk-btn
+          class="q-mt-lg"
+          icon="how_to_vote"
+          push
+          color="white"
+          text-color="black"
+          label="투표하러가기"
+          unelevated
+          rounded
+          style="width: 100%"
+          @click="$router.push('/vote-user?ssno=' + initVoteSsno)"
+        />
       </div>
     </div>
   </div>
@@ -142,8 +178,8 @@ const voteResult = ref<VoteResult>({
   voteSsno: 0,
 
   voteSubject: '',
-  voteBeginDate: '9999-12-31 00:00',
-  voteEndDate: '9999-12-31 00:00',
+  voteBeginDate: '',
+  voteEndDate: '',
   voteResultList: [
     {
       questionSsno: 0,
@@ -163,6 +199,7 @@ const voteResult = ref<VoteResult>({
   ]
 })
 
+const isAllReady = ref<boolean>(false)
 const fn_getVoteResult = async (ssno: number) => {
   loading.show()
 
@@ -243,6 +280,7 @@ const fn_getVoteResult = async (ssno: number) => {
         }
       })
 
+      isAllReady.value = true
       loading.hide()
     })
     .catch((error) => {
