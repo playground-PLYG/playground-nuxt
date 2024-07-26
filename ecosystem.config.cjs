@@ -7,8 +7,6 @@ module.exports = {
       instances: '2',
       autostart: true,
       script: './.output/server/index.mjs',
-      output: './logs/console.log',
-      error: './logs/consoleError.log',
       env: {
         HOST: '0.0.0.0',
         PORT: 3000,
