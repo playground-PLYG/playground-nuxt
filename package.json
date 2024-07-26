@@ -49,8 +49,6 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
     "@quasar/extras": "^1.16.11",
-    "@vercel/analytics": "^1.2.2",
-    "@vercel/speed-insights": "^1.0.10",
     "@vueuse/core": "^10.10.0",
     "@vueuse/nuxt": "^10.10.0",
     "chart.js": "^4.4.3",
