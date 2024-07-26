@@ -208,6 +208,7 @@ if (menuAsyncData.data.value?.data) {
   )
 } else {
   console.error('error: ', menuAsyncData)
+  console.error('error.value: ', menuAsyncData.error.value)
   throw new Error('메뉴를 불러오지 못했습니다.')
 }
 
