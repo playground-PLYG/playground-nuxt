@@ -6,7 +6,7 @@ module.exports = {
       exec_mode: 'cluster',
       instances: '2',
       autostart: true,
-      script: './.output/server/index.mjs',
+      script: 'node ./.output/server/index.mjs',
       output: './logs/console.log',
       error: './logs/consoleError.log',
       env: {
