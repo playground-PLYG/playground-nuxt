@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import {
   useAsyncData,
   useNuxtApp,
@@ -117,19 +117,20 @@ import {
   useRuntimeConfig,
   useSeoMeta
 } from 'nuxt/app'
-import { LoadingBar } from 'quasar'
+import { LoadingBar, useQuasar } from 'quasar'
+import Stomp from 'webstomp-client'
+import SockJS from 'sockjs-client'
 import type { ApiResponse, Metadata, PwaInjection } from '~/interface/server'
 import { useAuthStore } from '~/stores/useAuthStore'
 import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
 
-//const config = useRuntimeConfig()
 const nuxtApp = useNuxtApp()
 const config = useRuntimeConfig()
 const $pwa = nuxtApp.$pwa as PwaInjection
 const authStore = useAuthStore()
 const isPWAInstalled = ref<boolean>(false)
 
-//const $q = useQuasar()
+const $q = useQuasar()
 
 // api로 조회할 데이터 구조
 interface MenuData {
@@ -284,7 +285,7 @@ const fn_installPWA = async () => {
     }
   }
 }
-/*
+
 onMounted(() => {
   if ($pwa.isPWAInstalled) {
     isPWAInstalled.value = true
@@ -323,7 +324,6 @@ onMounted(() => {
     }
   )
 })
-  */
 </script>
 
 <style lang="scss" scoped>

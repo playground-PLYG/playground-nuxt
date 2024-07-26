@@ -14,7 +14,6 @@ export default defineNuxtConfig({
     public: {
       envProfile: process.env.ENV_PROFILE,
       apiBaseUrl: process.env.API_URL,
-      apiBaseUrlNuxt: process.env.API_URL_NUXT,
       kakaoApiKey: process.env.KAKAO_API_KEY
     }
   },
