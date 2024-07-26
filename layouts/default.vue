@@ -110,7 +110,13 @@
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
-import { useAsyncData, useNuxtApp, useRoute, useSeoMeta } from 'nuxt/app'
+import {
+  useAsyncData,
+  useNuxtApp,
+  useRoute,
+  useRuntimeConfig,
+  useSeoMeta
+} from 'nuxt/app'
 import { LoadingBar } from 'quasar'
 import type { ApiResponse, Metadata, PwaInjection } from '~/interface/server'
 import { useAuthStore } from '~/stores/useAuthStore'
@@ -118,6 +124,7 @@ import type { EssentialLinkProps } from '@/components/EssentialLink.vue'
 
 //const config = useRuntimeConfig()
 const nuxtApp = useNuxtApp()
+const config = useRuntimeConfig()
 const $pwa = nuxtApp.$pwa as PwaInjection
 const authStore = useAuthStore()
 const isPWAInstalled = ref<boolean>(false)
@@ -184,6 +191,7 @@ const setMenu = (arr: MenuData[]) => {
 
 const menuAsyncData = await useAsyncData(() =>
   $fetch<ApiResponse<MenuData[]>>('/playground/public/menu/select', {
+    baseURL: config.public.apiBaseUrlNuxt as string,
     method: 'POST',
     body: JSON.stringify(param.value)
   })
