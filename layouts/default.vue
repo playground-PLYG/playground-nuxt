@@ -191,7 +191,6 @@ const setMenu = (arr: MenuData[]) => {
 
 const menuAsyncData = await useAsyncData(() =>
   $fetch<ApiResponse<MenuData[]>>('/playground/public/menu/select', {
-    baseURL: config.public.apiBaseUrlNuxt as string,
     method: 'POST',
     body: JSON.stringify(param.value)
   })
