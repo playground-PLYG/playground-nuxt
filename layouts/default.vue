@@ -207,7 +207,7 @@ if (menuAsyncData.data.value?.data) {
     (item) => item.menuUrl == route.path
   )
 } else {
-  console.error('error: ', menuAsyncData.error)
+  console.error('error: ', menuAsyncData)
   throw new Error('메뉴를 불러오지 못했습니다.')
 }
 
