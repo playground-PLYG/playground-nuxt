@@ -534,7 +534,9 @@ const fn_votingEndCallback = () => {
 }
 
 const fn_showVoteResult = () => {
-  router.push('/vote-result?ssno=' + voteDetail.value.voteSsno)
+  router.push(
+    '/vote-result?ssno=' + voteDetail.value.voteSsno + '&tab=' + initTab
+  )
 }
 
 const fn_goVoteModify = () => {

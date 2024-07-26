@@ -141,7 +141,7 @@
                 flat
                 bordered
                 class="q-mb-sm"
-                @click="fn_goVoteDetail(votelist.voteSsno)"
+                @click="fn_goVoteResult(votelist.voteSsno)"
               >
                 <q-item v-ripple clickable>
                   <q-item-section avatar>
@@ -233,6 +233,10 @@ const fn_goAddVote = () => {
 
 const fn_goVoteDetail = (voteSsno: number) => {
   router.push('/vote-user?ssno=' + voteSsno + '&tab=' + tab.value)
+}
+
+const fn_goVoteResult = (voteSsno: number) => {
+  router.push('/vote-result?ssno=' + voteSsno + '&tab=' + tab.value)
 }
 
 // 화면 mount 된 시점 조회
