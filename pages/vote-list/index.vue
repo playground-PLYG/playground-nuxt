@@ -70,7 +70,7 @@
                   <q-item-section>
                     <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >{{ votelist.voteBeginDate }}
+                      >{{ votelist.voteBeginDate }} ~
                       {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
@@ -111,7 +111,7 @@
                   <q-item-section>
                     <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >{{ votelist.voteBeginDate }}
+                      >{{ votelist.voteBeginDate }} ~
                       {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
@@ -141,7 +141,7 @@
                 flat
                 bordered
                 class="q-mb-sm"
-                @click="fn_goVoteDetail(votelist.voteSsno)"
+                @click="fn_goVoteResult(votelist.voteSsno)"
               >
                 <q-item v-ripple clickable>
                   <q-item-section avatar>
@@ -151,7 +151,7 @@
                   <q-item-section>
                     <q-item-label>{{ votelist.voteSubject }}</q-item-label>
                     <q-item-label caption lines="1"
-                      >{{ votelist.voteBeginDate }}
+                      >{{ votelist.voteBeginDate }} ~
                       {{ votelist.voteEndDate }}</q-item-label
                     >
                   </q-item-section>
@@ -184,7 +184,19 @@ import { useRouter } from 'vue-router'
 import type { ApiResponse, PageListInfo } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
 
+const { loading } = useQuasar()
 const authStore = useAuthStore()
+const router = useRouter()
+const tab = ref('VTI')
+const initTab = router.currentRoute.value.query.initTab
+
+// 조회 리스트
+const resData = ref<Data[]>([])
+const maxDataYn = ref<boolean>(false)
+
+// 페이징을 위한 파라미터
+const currentPage = ref<number>(0) // 스크롤페이지
+const itemsPerPage = ref<number>(20) // 데이터 개수
 
 interface mberData {
   mberId: string
@@ -193,28 +205,6 @@ interface mberData {
 const param = ref<mberData>({
   mberId: authStore.mberId
 })
-
-const router = useRouter()
-
-const fn_goAddVote = () => {
-  router.push('/vote-detail')
-}
-
-const fn_goVoteDetail = (voteSsno: number) => {
-  router.push('/vote-user?ssno=' + voteSsno)
-}
-
-const tab = ref('VTI')
-const { loading } = useQuasar()
-
-// 화면 mount 된 시점 조회
-onMounted(() => {
-  fn_click()
-})
-
-// 페이징을 위한 파라미터
-const currentPage = ref<number>(0) // 스크롤페이지
-const itemsPerPage = ref<number>(20) // 데이터 개수
 
 // 샘플목록 조회 Data 영역
 interface Data {
@@ -237,9 +227,25 @@ const voteSrchReq = ref<paramData>({
   voteStatus: ''
 })
 
-// 샘플 목록 조회 리스트
-const resData = ref<Data[]>([])
-const maxDataYn = ref<boolean>(false)
+const fn_goAddVote = () => {
+  router.push('/vote-detail')
+}
+
+const fn_goVoteDetail = (voteSsno: number) => {
+  router.push('/vote-user?ssno=' + voteSsno + '&tab=' + tab.value)
+}
+
+const fn_goVoteResult = (voteSsno: number) => {
+  router.push('/vote-result?ssno=' + voteSsno + '&tab=' + tab.value)
+}
+
+// 화면 mount 된 시점 조회
+onMounted(() => {
+  if (initTab) {
+    tab.value = initTab.toString()
+  }
+  fn_click()
+})
 
 const fn_click = () => {
   // 변수 초기화

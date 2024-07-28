@@ -95,7 +95,7 @@
             unelevated
             rounded
             style="width: 100%"
-            @click="$router.push('/vote-list')"
+            @click="$router.push('/vote-list?tab=' + initTab)"
           />
         </div>
       </div>
@@ -118,7 +118,9 @@
           unelevated
           rounded
           style="width: 100%"
-          @click="$router.push('/vote-user?ssno=' + initVoteSsno)"
+          @click="
+            $router.push('/vote-user?ssno=' + initVoteSsno + '&tab=' + initTab)
+          "
         />
       </div>
     </div>
@@ -137,6 +139,7 @@ import { dateUtil } from '~/utils/dateUtil'
 const { loading } = useQuasar()
 const router = useRouter()
 const initVoteSsno = router.currentRoute.value.query.ssno
+const initTab = router.currentRoute.value.query.tab
 
 onMounted(() => {
   fn_getVoteResult(Number(initVoteSsno))

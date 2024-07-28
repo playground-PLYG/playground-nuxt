@@ -108,7 +108,7 @@
           unelevated
           rounded
           style="width: 100%"
-          @click="$router.push('/vote-list')"
+          @click="fn_votingEndCallback"
         />
       </div>
     </div>
@@ -140,6 +140,7 @@ const { loading } = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
 const initVoteSsno = router.currentRoute.value.query.ssno
+const initTab = router.currentRoute.value.query.tab
 
 onMounted(() => {
   console.group('##### 로그인 정보 확인 #####')
@@ -529,11 +530,13 @@ const fn_addVoteAnswer = async () => {
 }
 
 const fn_votingEndCallback = () => {
-  router.push('/vote-list')
+  router.push('/vote-list?initTab=' + initTab)
 }
 
 const fn_showVoteResult = () => {
-  router.push('/vote-result?ssno=' + voteDetail.value.voteSsno)
+  router.push(
+    '/vote-result?ssno=' + voteDetail.value.voteSsno + '&tab=' + initTab
+  )
 }
 
 const fn_goVoteModify = () => {
