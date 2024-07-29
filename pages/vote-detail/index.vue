@@ -682,10 +682,10 @@ const rstrntSelect = (data: {
 }) => {
   //레스토랑 sn 문자열 변환
   const restaurantSn = String(data.restaurantSerialNo)
-
   for (const question of voteData.value.voteQestnResponseList) {
     for (const item of question.voteQestnIemResponseList) {
-      if (item.itemIdentificationId === restaurantSn) {
+      const itemSn = String(item.itemIdentificationId)
+      if (itemSn === restaurantSn) {
         commUtil.alert({
           message: '이미 선택된 식당입니다. 다시 선택해 주세요.'
         })
