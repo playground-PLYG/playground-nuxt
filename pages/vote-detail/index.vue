@@ -67,17 +67,18 @@
                   :time="paramDate.time"
                   :readonly="question.voteKindCode === 'DTE'"
                   @send-date="(val: string) => setDateItem(item, val)"
-                />
-                <div>
-                  <dk-btn
-                    v-if="question.voteQestnIemResponseList.length > 2"
-                    push
-                    color="white"
-                    text-color="primary"
-                    label="-"
-                    @click="deleteIem(question, item)"
-                  />
-                </div>
+                >
+                  <template #after>
+                    <dk-btn
+                      v-if="question.voteQestnIemResponseList.length > 2"
+                      push
+                      color="white"
+                      text-color="primary"
+                      label="-"
+                      @click="deleteIem(question, item)"
+                    />
+                  </template>
+                </dk-date-time-picker>
               </div>
               <div v-else>
                 <dk-input
