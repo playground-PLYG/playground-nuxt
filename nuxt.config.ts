@@ -27,7 +27,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'nuxt-monaco-editor',
     "@formkit/auto-animate/nuxt",
-    "@vite-pwa/nuxt"
+    "@vite-pwa/nuxt",
+    "@artmizu/nuxt-prometheus"
   ],
   quasar: {
     plugins: [
