@@ -164,53 +164,36 @@ const passwordRules = (val: string) => {
   return true
 }
 </script>
-<style>
+<style lang="scss" scoped>
 .content {
   margin-top: 3rem;
   margin-left: 5rem;
   margin-right: 5rem;
-}
 
-.title {
-  margin-top: 3rem;
-}
+  .title {
+    margin-top: 3rem;
+  }
 
-.search {
-  margin-top: 2rem;
-}
+  .search {
+    margin-top: 2rem;
 
-.search .select {
-  display: inline-block;
-  vertical-align: middle;
-  width: 15%;
-  padding-right: 0.5rem;
-}
+    .select {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
 
-.search .input {
-  display: inline-block;
-  vertical-align: middle;
-  width: 15%;
-  padding-right: 0.5rem;
-}
+    .input {
+      display: inline-block;
+      vertical-align: middle;
+      width: 15%;
+      padding-right: 0.5rem;
+    }
 
-.search .button {
-  margin-right: 0.5rem;
-}
-
-.table {
-  margin-top: 1rem;
-}
-
-.proc {
-  margin-top: 1rem;
-}
-
-.proc .button {
-  margin-right: 0.5rem;
-}
-
-.proc .buttonR {
-  margin-left: 0.5rem;
-  float: right;
+    .button {
+      margin-right: 0.5rem;
+    }
+  }
 }
 </style>
