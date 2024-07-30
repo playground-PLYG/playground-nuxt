@@ -10,7 +10,10 @@ module.exports = {
       env: {
         HOST: '0.0.0.0',
         PORT: 3000,
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        PINPOINT_APPLICATION_NAME: 'playground',
+        PINPOINT_AGENT_ID: 'web',
+        PINPOINT_COLLECTOR_IP: 'localhost'
       }
     }
   ]

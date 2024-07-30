@@ -1,3 +1,4 @@
+import 'pinpoint-node-agent'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import materialIcons from 'quasar/icon-set/svg-material-icons'
 import materialIconsRound from 'quasar/icon-set/svg-material-icons-round'
