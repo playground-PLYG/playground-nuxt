@@ -14,7 +14,6 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@artmizu/nuxt-prometheus": "^2.4.0",
     "@formkit/auto-animate": "^0.8.2",
     "@nuxt/devtools": "latest",
     "@nuxt/eslint": "^0.3.13",

@@ -27,8 +27,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'nuxt-monaco-editor',
     "@formkit/auto-animate/nuxt",
-    "@vite-pwa/nuxt",
-    "@artmizu/nuxt-prometheus"
+    "@vite-pwa/nuxt"
   ],
   quasar: {
     plugins: [
@@ -148,7 +147,7 @@ export default defineNuxtConfig({
       installPrompt: true
     },
     devOptions: {
-      enabled: !(process.env.ENV_PROFILE == "PROD"),
+      enabled: process.env.ENV_PROFILE != "PROD",
       type: "module"
     }
   }
