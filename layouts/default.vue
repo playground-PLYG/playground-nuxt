@@ -248,6 +248,10 @@ const fn_setSeoMenuExtends = async () => {
       ogDescription: () => meta.ogDescription ?? '',
       ogImage: () => meta.ogImages[0] ?? ''
     })
+
+    if (!currentMenu) {
+      menuTitle.value = meta.title
+    }
   }
 }
 
