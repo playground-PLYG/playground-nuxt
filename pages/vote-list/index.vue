@@ -183,6 +183,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { ApiResponse, PageListInfo } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { commUtil } from '~/utils/comm'
 
 const { loading } = useQuasar()
 const authStore = useAuthStore()
@@ -228,7 +229,7 @@ const voteSrchReq = ref<paramData>({
 })
 
 const fn_goAddVote = () => {
-  router.push('/vote-detail')
+  router.push('/vote-detail?tab=' + tab.value)
 }
 
 const fn_goVoteDetail = (voteSsno: number) => {
@@ -287,7 +288,7 @@ const fn_getVoteList = async () => {
     })
     .catch((error) => {
       console.error(error)
-      alert('투표리스트가 조회되지 않았습니다.')
+      commUtil.alert({ message: '투표리스트가 조회되지 않았습니다.' })
       loading.hide()
     })
 }
