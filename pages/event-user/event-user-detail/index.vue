@@ -60,6 +60,12 @@
         />
       </div>
     </div>
+    <EventRoulette
+      v-model:showDialog="showDialog"
+      :point-payments="event?.pointPayment ?? []"
+      :winning-point="joinRes?.przwinPointValue ?? null"
+      @roulette-completed="handleRouletteCompleted"
+    />
 
     <q-dialog v-model="isOpenPop" :maximized="false" :full-width="false">
       <q-card
@@ -116,6 +122,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { type ApiResponse } from '../../../interface/server'
+import EventRoulette from '../../../components/EventRoulette.vue'
 import { dateUtil } from '~/utils/dateUtil'
 import { commUtil } from '~/utils/comm'
 
@@ -132,6 +139,11 @@ const detailReq = ref<EventReq>({ eventSerial: Number(eventSn) })
 const joinRes = ref<JoinRes>()
 const isOpenPop = ref<boolean>(false)
 const prize = ref<Prize | null>(null)
+const showDialog = ref(false)
+
+const showRoulette = () => {
+  showDialog.value = true
+}
 
 interface Payment {
   pointPaymentUnitValue: number | null
@@ -241,6 +253,12 @@ const loginCheck = () => {
   }
 }
 
+function handleRouletteCompleted(przwinPointValue: number) {
+  commUtil.alert({
+    message: `${przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
+  })
+}
+
 const participate = async () => {
   if (event.value?.participationAt === 'Y') {
     commUtil.alert({
@@ -264,12 +282,10 @@ const participate = async () => {
     .then((res) => {
       joinRes.value = res.data
       if (joinRes.value.eventPrizeAt == 'Y') {
-        commUtil.alert({
-          message: `${joinRes.value.przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
-        })
+        showRoulette()
       } else {
         commUtil.alert({
-          message: '다음기회에..'
+          message: '랜덤 포인트가 모두 소진되었습니다.'
         })
       }
 
