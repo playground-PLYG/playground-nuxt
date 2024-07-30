@@ -95,7 +95,7 @@
             unelevated
             rounded
             style="width: 100%"
-            @click="$router.push('/vote-list?tab=' + initTab)"
+            @click="$router.push('/vote-list?initTab=' + initTab)"
           />
         </div>
       </div>

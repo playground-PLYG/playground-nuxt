@@ -1,5 +1,5 @@
 <template>
-  <q-input v-model="_valueText" outline>
+  <q-input v-bind="attrs" v-model="_valueText" outline class="dk-input">
     <template #prepend>
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -31,13 +31,20 @@
         </q-popup-proxy>
       </q-icon>
     </template>
+    <template v-for="(slot, name) in slots" #[name]>
+      <slot :name="name" v-bind="slot" />
+    </template>
   </q-input>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, useAttrs, useSlots, watch } from 'vue'
 import { useQuasar } from 'quasar'
+import type { QInputProps, QInputSlots } from 'quasar'
 import { dateUtil } from '@/utils/dateUtil'
+
+const slots = useSlots() as unknown as QInputSlots
+const attrs = useAttrs() as unknown as QInputProps
 
 interface Data {
   datetime?: string

@@ -541,7 +541,9 @@ const fn_showVoteResult = () => {
 
 const fn_goVoteModify = () => {
   console.log('fn_goVoteModify start :::::')
-  router.push('/vote-detail?ssno=' + voteDetail.value.voteSsno)
+  router.push(
+    '/vote-detail?ssno=' + voteDetail.value.voteSsno + '&tab=' + initTab
+  )
 }
 </script>
 
