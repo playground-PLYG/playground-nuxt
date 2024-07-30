@@ -16,6 +16,7 @@
         :date="paramDate.date"
         :time="paramDate.time"
         :date-options="dateOption"
+        :time-options="timeOption"
         @send-date="setStartDateTimeValue"
       />
 
@@ -25,6 +26,7 @@
         :date="paramDate.date"
         :time="paramDate.time"
         :date-options="endDateOption"
+        :time-options="endTimeOption"
         @send-date="setEndDateTimeValue"
       />
 
@@ -61,6 +63,7 @@
             >
               <div v-if="question.voteKindCode === 'DTE'">
                 <dk-date-time-picker
+                  v-model="item.itemName"
                   :datetime="item.itemName"
                   label="항목"
                   :date="paramDate.date"
@@ -648,6 +651,33 @@ const endDateOption = (val: string) => {
   return val >= optDate
 }
 
+//시작시간옵션
+const timeOption = (hr: number, min: number | null) => {
+  const nowHour = date.getHours()
+  const nowMinute = date.getMinutes()
+
+  if (hr < nowHour || (hr === nowHour && min !== null && min < nowMinute)) {
+    return false
+  }
+
+  return true
+}
+
+//종료시간옵션
+const endTimeOption = (hr: number, min: number | null) => {
+  const beginDateHr = Number(voteData.value.voteBeginDate.slice(11, 13))
+  const beginDateMin = Number(voteData.value.voteBeginDate.slice(14, 16))
+
+  if (
+    hr < beginDateHr ||
+    (hr === beginDateHr && min !== null && min < beginDateMin)
+  ) {
+    return false
+  }
+
+  return true
+}
+
 // 시작시간 설정
 const setStartDateTimeValue = (val: string) => {
   voteData.value.voteBeginDate = val.replace(/T/g, ' ')
@@ -659,7 +689,9 @@ const setEndDateTimeValue = (val: string) => {
 }
 
 const setDateItem = (item: VoteItem, val: string) => {
-  item.itemName = val
+  if (item) {
+    item.itemName = val
+  }
 }
 
 // 식당 팝업
