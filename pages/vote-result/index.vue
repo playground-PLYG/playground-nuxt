@@ -109,6 +109,7 @@
           </q-card-section>
         </q-card>
         <dk-btn
+          v-show="voteResult.voteStatus == 'VTI'"
           class="q-mt-lg"
           icon="how_to_vote"
           push
@@ -121,6 +122,18 @@
           @click="
             $router.push('/vote-user?ssno=' + initVoteSsno + '&tab=' + initTab)
           "
+        />
+        <dk-btn
+          class="q-mt-lg"
+          icon="list"
+          push
+          color="white"
+          text-color="primary"
+          label="투표목록"
+          unelevated
+          rounded
+          style="width: 100%"
+          @click="$router.push('/vote-list?initTab=' + initTab)"
         />
       </div>
     </div>
