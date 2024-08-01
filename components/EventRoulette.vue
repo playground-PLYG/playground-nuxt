@@ -186,7 +186,16 @@ const drawRouletteWheel = () => {
 }
 
 const getColor = (item: number) => {
-  const colors = ['#33CCFF', '#2699E6', '#1A66CC', '#0D33B3', '#000099']
+  const colors = [
+    '#5cd3fb',
+    '#33CCFF',
+    '#2699E6',
+    '#1A66CC',
+    '#0252bc',
+    '#0D33B3',
+    '#0505da',
+    '#000099'
+  ]
   return colors[item % colors.length]
 }
 
