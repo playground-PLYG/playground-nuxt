@@ -254,9 +254,15 @@ const loginCheck = () => {
 }
 
 function handleRouletteCompleted(przwinPointValue: number) {
-  commUtil.alert({
-    message: `${przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
-  })
+  if (przwinPointValue === 0) {
+    commUtil.alert({
+      message: `다음 기회에..`
+    })
+  } else {
+    commUtil.alert({
+      message: `${przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
+    })
+  }
 }
 
 const participate = async () => {
@@ -281,12 +287,11 @@ const participate = async () => {
   )
     .then((res) => {
       joinRes.value = res.data
-      if (joinRes.value.eventPrizeAt == 'Y') {
+      if (event.value?.drwtMethodCodeId == 'RAND') {
+        // 랜덤이벤트 + 룰렛
         showRoulette()
-      } else {
-        commUtil.alert({
-          message: '랜덤 포인트가 모두 소진되었습니다.'
-        })
+      } else if (event.value?.drwtMethodCodeId == 'FRSC') {
+        handleRouletteCompleted(joinRes.value.przwinPointValue)
       }
 
       if (event.value) {

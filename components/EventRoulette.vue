@@ -49,12 +49,17 @@ const spinRoulette = () => {
   const initialRotation = rotation.value // 현재 회전 각도
 
   const apiWinningPoint = props.winningPoint ?? 0
-  const winningIndex =
+  const numSections = pointPaymentUnitValue.value.length
+  let winningIndex =
     props.pointPayments.findIndex(
       (p) => p.pointPaymentUnitValue === apiWinningPoint
     ) + 1 // pointPayments index
 
-  const arc = (Math.PI * 2) / pointPaymentUnitValue.value.length // 한 섹션 각도
+  if (numSections >= 7) {
+    winningIndex += 1 // 7개이상일때 winning section에 pointer 각도 조절..
+  }
+
+  const arc = (Math.PI * 2) / numSections // 한 섹션 각도
   const winningAngle = -winningIndex * arc - arc / 2 // 당첨포인트 각도
   const rotationOffset = Math.PI * 2 * 15 // 룰렛 회전 수
   const targetRotation = initialRotation + rotationOffset + winningAngle // 룰렛 회전 후 pointer 가리킬 각도
@@ -101,6 +106,9 @@ watch(
     pointPaymentUnitValue.value = newVal
       .map((x) => x.pointPaymentUnitValue)
       .filter((x): x is number => x !== null)
+    if (!pointPaymentUnitValue.value.includes(0)) {
+      pointPaymentUnitValue.value.push(0)
+    }
     if (localShowDialog.value) {
       nextTick(() => drawRouletteWheel())
     }
