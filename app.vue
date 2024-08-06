@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import 'pinpoint-node-agent'
 import { ofetch } from 'ofetch'
 import { useCookie, useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 import { nextTick, onMounted } from 'vue'
