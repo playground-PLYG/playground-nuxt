@@ -77,12 +77,16 @@
 
                   <q-item-section side>
                     <template v-if="votelist.votePartcptnAt === 'Y'">
-                      <q-icon name="check" size="20px" class="text-green" />
-                      <span class="text-green">참여</span>
+                      <q-chip
+                        size="sm"
+                        outline
+                        color="green-4"
+                        icon="check_circle"
+                        label="참여"
+                      />
                     </template>
                     <template v-else>
-                      <!-- <q-icon name="close" size="20px" /> -->
-                      <span>미참여</span>
+                      <q-chip size="sm" outline color="grey" label="미참여" />
                     </template>
                   </q-item-section>
                 </q-item>
@@ -118,11 +122,16 @@
 
                   <q-item-section side>
                     <template v-if="votelist.votePartcptnAt === 'Y'">
-                      <q-icon name="check" size="20px" class="text-green" />
-                      <span class="text-green">참여</span>
+                      <q-chip
+                        size="sm"
+                        outline
+                        color="green-4"
+                        icon="check_circle"
+                        label="참여"
+                      />
                     </template>
                     <template v-else>
-                      <span>미참여</span>
+                      <q-chip size="sm" outline color="grey" label="미참여" />
                     </template>
                   </q-item-section>
                 </q-item>
@@ -158,11 +167,16 @@
 
                   <q-item-section side>
                     <template v-if="votelist.votePartcptnAt === 'Y'">
-                      <q-icon name="check" size="20px" class="text-green" />
-                      <span class="text-green">참여</span>
+                      <q-chip
+                        size="sm"
+                        outline
+                        color="green-4"
+                        icon="check_circle"
+                        label="참여"
+                      />
                     </template>
                     <template v-else>
-                      <span>미참여</span>
+                      <q-chip size="sm" outline color="grey" label="미참여" />
                     </template>
                   </q-item-section>
                 </q-item>
@@ -188,7 +202,7 @@ import { commUtil } from '~/utils/comm'
 const { loading } = useQuasar()
 const authStore = useAuthStore()
 const router = useRouter()
-const tab = ref('VTI')
+const tab = ref()
 const initTab = router.currentRoute.value.query.initTab
 
 // 조회 리스트
@@ -244,6 +258,8 @@ const fn_goVoteResult = (voteSsno: number) => {
 onMounted(() => {
   if (initTab) {
     tab.value = initTab.toString()
+  } else {
+    tab.value = 'VTI'
   }
   fn_click()
 })
