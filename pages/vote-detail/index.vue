@@ -69,6 +69,10 @@
                   :date="paramDate.date"
                   :time="paramDate.time"
                   :readonly="question.voteKindCode === 'DTE'"
+                  outlined
+                  round
+                  dense
+                  flat
                   @send-date="(val: string) => setDateItem(item, val)"
                 >
                   <template #after>
@@ -435,7 +439,7 @@ const valid = () => {
     }
     for (const item of question.voteQestnIemResponseList) {
       if (!item.itemName) {
-        commUtil.alert({ message: '항목 이름을 입력해 주세요.' })
+        commUtil.alert({ message: '항목을 입력해 주세요.' })
         return false
       }
     }
