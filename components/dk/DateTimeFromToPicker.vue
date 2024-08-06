@@ -3,14 +3,26 @@
     <q-input v-model="_dateFromText" outline>
       <template #prepend>
         <q-icon name="event" class="cursor-pointer">
-          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+          <q-popup-proxy
+            :ref="refLayerFromDate"
+            cover
+            persistent
+            transition-show="scale"
+            transition-hide="scale"
+          >
             <q-date
               v-model="_dateFrom"
               mask="YYYY-MM-DDTHH:mm"
               :options="optionsFromDate"
             >
               <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
+                <q-btn
+                  v-close-popup
+                  label="선택"
+                  color="primary"
+                  flat
+                  @click="() => {}"
+                />
               </div>
             </q-date>
           </q-popup-proxy>
@@ -18,14 +30,20 @@
       </template>
       <template #append>
         <q-icon name="access_time" class="cursor-pointer">
-          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+          <q-popup-proxy
+            :ref="refLayerFromTime"
+            cover
+            persistent
+            transition-show="scale"
+            transition-hide="scale"
+          >
             <q-time
               v-model="_dateFrom"
               mask="YYYY-MM-DDTHH:mm"
               :options="optionsFromDateTime"
             >
               <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
+                <q-btn v-close-popup label="선택" color="primary" flat />
               </div>
             </q-time>
           </q-popup-proxy>
@@ -36,14 +54,20 @@
     <q-input v-model="_dateToText" outline>
       <template #prepend>
         <q-icon name="event" class="cursor-pointer">
-          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+          <q-popup-proxy
+            :ref="refLayerToDate"
+            cover
+            persistent
+            transition-show="scale"
+            transition-hide="scale"
+          >
             <q-date
               v-model="_dateTo"
               mask="YYYY-MM-DDTHH:mm"
               :options="optionsToDate"
             >
               <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
+                <q-btn v-close-popup label="닫기" color="primary" flat />
               </div>
             </q-date>
           </q-popup-proxy>
@@ -51,14 +75,20 @@
       </template>
       <template #append>
         <q-icon name="access_time" class="cursor-pointer">
-          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+          <q-popup-proxy
+            :ref="refLayerToTime"
+            cover
+            persistent
+            transition-show="scale"
+            transition-hide="scale"
+          >
             <q-time
               v-model="_dateTo"
               mask="YYYY-MM-DDTHH:mm"
               :options="optionsToDateTime"
             >
               <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
+                <q-btn v-close-popup label="선택" color="primary" flat />
               </div>
             </q-time>
           </q-popup-proxy>
@@ -83,6 +113,11 @@ const _dateTo = ref(props.to)
 
 const _dateFromText = ref()
 const _dateToText = ref()
+
+const refLayerFromDate = ref()
+const refLayerFromTime = ref()
+const refLayerToDate = ref()
+const refLayerToTime = ref()
 
 onMounted(() => {
   if (_dateFrom.value) {

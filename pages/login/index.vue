@@ -105,13 +105,11 @@ async function naver() {
 
 const login = async () => {
   loading.show()
-  const _result = await $fetch<ApiResponse<ResData>>(
-    '/playground/public/member/signIn',
-    {
-      method: 'POST',
-      body: JSON.stringify(param.value)
-    }
-  )
+
+  await $fetch<ApiResponse<ResData>>('/playground/public/member/signIn', {
+    method: 'POST',
+    body: JSON.stringify(param.value)
+  })
     .then((result) => {
       loading.hide()
       const token = useCookie('token')
