@@ -10,7 +10,9 @@ export default defineNuxtConfig({
       enabled: true
     }
   },
+
   dev: true,
+
   runtimeConfig: {
     public: {
       envProfile: process.env.ENV_PROFILE,
@@ -18,6 +20,7 @@ export default defineNuxtConfig({
       kakaoApiKey: process.env.KAKAO_API_KEY
     }
   },
+
   modules: [
     'dayjs-nuxt',
     '@pinia/nuxt',
@@ -30,6 +33,7 @@ export default defineNuxtConfig({
     "@formkit/auto-animate/nuxt",
     "@vite-pwa/nuxt"
   ],
+
   quasar: {
     plugins: [
       'AppFullscreen',
@@ -59,9 +63,11 @@ export default defineNuxtConfig({
       animations: 'all'
     }
   },
+
   piniaPersistedstate: {
     storage: 'sessionStorage'
   },
+
   monacoEditor: {
     locale: 'ko',
     componentName: {
@@ -69,6 +75,7 @@ export default defineNuxtConfig({
       diffEditor: 'DiffEditor'
     }
   },
+
   vite: {
     optimizeDeps: {
       esbuildOptions: {
@@ -78,6 +85,7 @@ export default defineNuxtConfig({
       },
     }
   },
+
   pwa: {
     manifest: {
       id: "/?source=pwa",
@@ -151,5 +159,7 @@ export default defineNuxtConfig({
       enabled: process.env.ENV_PROFILE != "PROD",
       type: "module"
     }
-  }
+  },
+
+  compatibilityDate: "2024-08-06"
 })
