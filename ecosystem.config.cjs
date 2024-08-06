@@ -11,7 +11,10 @@ module.exports = {
       env: {
         HOST: '0.0.0.0',
         PORT: 3000,
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        ENV_TEXT: '${NODE_APP_INSTANCE}',
+        PINPOINT_AGENT_ID: 'nuxt',
+        PINPOINT_APPLICATION_NAME: 'playground-web'
       }
     }
   ]
