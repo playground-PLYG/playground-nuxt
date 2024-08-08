@@ -148,6 +148,13 @@ interface Data {
   mberId: string
 }
 
+interface RecvMessage {
+  message: string
+  messageType: string
+  sendDate: string
+  senderId: string
+}
+
 const param = ref<Data>({
   mberId: authStore.mberId
 })
@@ -306,21 +313,9 @@ onMounted(() => {
       console.debug('websocket connected', frame)
 
       stompClient.subscribe('/sub', (response) => {
-        const body = JSON.parse(response.body)
-        const caption = new Intl.DateTimeFormat('ko', {
-          timeStyle: 'medium'
-        }).format(new Date(body.sendDate))
+        const body = JSON.parse(response.body) as RecvMessage
 
-        // TODO Notification권한 체크해서 notification가능하면 push 아니면 notify
-        $q.notify({
-          message: body.message,
-          caption,
-          position: 'top',
-          icon: 'announcement',
-          color: 'teal',
-          progress: true,
-          html: body.messageType == 'HTML'
-        })
+        fn_notification(body)
       })
     },
     (error) => {
@@ -328,6 +323,62 @@ onMounted(() => {
     }
   )
 })
+
+const fn_notification = (body: RecvMessage) => {
+  const isHtml = body.messageType == 'HTML'
+  const htmlCheckRegex: RegExp = /(<([^>]+)>)/g
+  //a태그 있을 때 이벤트 처리
+
+  let messageWithoutHtmlTag = body.message
+
+  if (isHtml || htmlCheckRegex.test(body.message)) {
+    messageWithoutHtmlTag = body.message
+      .replaceAll(/(<(br|p)\/?>)/g, ' ')
+      .replaceAll(htmlCheckRegex, '')
+  }
+
+  const caption = new Intl.DateTimeFormat('ko', {
+    timeStyle: 'medium'
+  }).format(new Date(body.sendDate))
+
+  $q.notify({
+    message: body.message,
+    caption,
+    position: 'top',
+    icon: 'announcement',
+    color: 'teal',
+    progress: true,
+    html: isHtml
+  })
+
+  if (window.Notification) {
+    if (Notification.permission === 'granted') {
+      const notification = new Notification(messageWithoutHtmlTag)
+
+      setTimeout(() => {
+        notification.close()
+      }, 3000)
+    } else if (Notification.permission === 'denied') {
+      $q.notify({
+        message:
+          '브라우저 알림이 차단되어있습니다.\n브라우저의 사이트 설정에서 변경하실 수 있습니다.',
+        position: 'bottom-right',
+        icon: 'announcement',
+        color: 'teal'
+      })
+    } else {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          const notification = new Notification(messageWithoutHtmlTag)
+
+          setTimeout(() => {
+            notification.close()
+          }, 3000)
+        }
+      })
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

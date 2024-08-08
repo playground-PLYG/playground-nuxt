@@ -63,7 +63,7 @@ const authStore = useAuthStore()
 const { loading } = useQuasar()
 
 const messageType = ref<string>('TYPE_01')
-const messageTypeOption = ref<string[]>(['TYPE_01', 'TYPE_02'])
+const messageTypeOption = ref<string[]>(['TYPE_01', 'TYPE_02', 'HTML'])
 const senderId = ref<string>(authStore.mberId || 'test')
 const message = ref<string>('')
 const txtarea = ref<string>('')
