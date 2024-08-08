@@ -204,7 +204,7 @@ if (menuAsyncData.data.value?.data) {
   setMenu(menuAsyncData.data.value.data)
 
   currentMenu = menuAsyncData.data.value.data.find(
-    (item) => item.menuUrl == route.path
+    (item: MenuData) => item.menuUrl == route.path
   )
 } else {
   console.error('error: ', menuAsyncData)
@@ -221,7 +221,7 @@ if (currentMenu) {
 const fn_setSeoMenuExtends = async () => {
   if (menuAsyncData.data.value?.data) {
     currentMenu = menuAsyncData.data.value.data.find(
-      (item) => item.menuUrl == route.path
+      (item: MenuData) => item.menuUrl == route.path
     )
 
     if (currentMenu) {

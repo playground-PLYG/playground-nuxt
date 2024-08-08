@@ -228,7 +228,7 @@ const createPost = async () => {
       closePost()
     })
     .catch((error) => {
-      console.log(error)
+      console.error(error)
     })
 }
 

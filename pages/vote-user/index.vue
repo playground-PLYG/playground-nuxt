@@ -144,9 +144,9 @@ const initTab = router.currentRoute.value.query.tab
 
 onMounted(() => {
   console.group('##### 로그인 정보 확인 #####')
-  console.log('mberId : ', authStore.mberId)
-  console.log('token : ', authStore.token)
-  console.log('isLogin : ', authStore.isLogin)
+  console.debug('mberId : ', authStore.mberId)
+  console.debug('token : ', authStore.token)
+  console.debug('isLogin : ', authStore.isLogin)
   console.groupEnd()
   if (authStore?.isLogin) {
     fn_getVoteDetail(Number(initVoteSsno))
@@ -367,7 +367,7 @@ const settingVoteAnswer = async () => {
   })
     .then((result: ApiResponse<AlreadyAnswer>) => {
       setVoteAnswer.value = result.data
-      console.log('setVoteAnswer.value: ', setVoteAnswer.value)
+      console.debug('setVoteAnswer.value: ', setVoteAnswer.value)
       if (setVoteAnswer.value.isCheckAnswer) {
         const totalQestn: number = voteDetail.value.voteQestnResponseList.length
 
@@ -513,7 +513,7 @@ const fn_addVoteAnswer = async () => {
     }
   )
     .then((result: ApiResponse<VoteAnswerResponse[]>) => {
-      console.log('fn_voting start :::::result : ', result.data)
+      console.debug('fn_voting start :::::result : ', result.data)
       commUtil.alert({
         message: '투표가 완료 되었습니다.',
         callbackFn: fn_votingEndCallback
@@ -540,7 +540,7 @@ const fn_showVoteResult = () => {
 }
 
 const fn_goVoteModify = () => {
-  console.log('fn_goVoteModify start :::::')
+  console.debug('fn_goVoteModify start :::::')
   router.push(
     '/vote-detail?ssno=' + voteDetail.value.voteSsno + '&tab=' + initTab
   )

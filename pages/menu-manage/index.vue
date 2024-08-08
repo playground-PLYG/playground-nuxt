@@ -1,319 +1,324 @@
 <template>
-  <div class="content">
-    <div class="title">
-      <div class="text-h4"><q-icon name="chat" /> 메뉴관리</div>
-    </div>
-    <div class="search">
-      <q-form ref="searchForm">
-        <q-input
-          v-model="searchParam.menuNm"
-          outlined
-          stack-label
-          dense
-          class="input"
-          label="메뉴명"
-        />
-        <q-input
-          v-model="searchParam.menuUrl"
-          outlined
-          stack-label
-          dense
-          flat
-          class="input"
-          label="메뉴URL"
-        />
-        <q-select
-          v-model="searchParam.useAt"
-          outlined
-          stack-label
-          dense
-          flat
-          class="select"
-          label="사용여부"
-          :options="useAtSearchOption"
-          option-label="name"
-          option-value="code"
-          emit-values
-          map-options
-        />
-        <q-btn
-          push
-          class="button"
-          color="green-7"
-          label="조회"
-          @click="srchMenuList"
-        />
-        <q-btn
-          push
-          class="button"
-          color="green-7"
-          label="초기화"
-          @click="resetSearchParam"
-        />
-      </q-form>
-    </div>
-    <div class="table">
-      <q-table
-        v-model:selected="selected"
-        :rows="listData"
-        :columns="columns"
-        row-key="menuSn"
-        selection="multiple"
-        :rows-per-page-options="[0]"
-        @row-click="clickRow"
-      >
-        <template #bottom>
-          <pagination-layout
-            :total-page="totalPages"
-            :current-page="currentPage"
-            style="margin: 0 auto"
-            @send-event="reset"
+  <client-only>
+    <div class="content">
+      <div class="title">
+        <div class="text-h4"><q-icon name="chat" /> 메뉴관리</div>
+      </div>
+      <div class="search">
+        <q-form ref="searchForm">
+          <q-input
+            v-model="searchParam.menuNm"
+            outlined
+            stack-label
+            dense
+            class="input"
+            label="메뉴명"
           />
-        </template>
-      </q-table>
+          <q-input
+            v-model="searchParam.menuUrl"
+            outlined
+            stack-label
+            dense
+            flat
+            class="input"
+            label="메뉴URL"
+          />
+          <q-select
+            v-model="searchParam.useAt"
+            outlined
+            stack-label
+            dense
+            flat
+            class="select"
+            label="사용여부"
+            :options="useAtSearchOption"
+            option-label="name"
+            option-value="code"
+            emit-values
+            map-options
+          />
+          <q-btn
+            push
+            class="button"
+            color="green-7"
+            label="조회"
+            @click="srchMenuList"
+          />
+          <q-btn
+            push
+            class="button"
+            color="green-7"
+            label="초기화"
+            @click="resetSearchParam"
+          />
+        </q-form>
+      </div>
+      <div class="table">
+        <q-table
+          v-model:selected="selected"
+          :rows="listData"
+          :columns="columns"
+          row-key="menuSn"
+          selection="multiple"
+          :rows-per-page-options="[0]"
+          @row-click="clickRow"
+        >
+          <template #bottom>
+            <pagination-layout
+              :total-page="totalPages"
+              :current-page="currentPage"
+              style="margin: 0 auto"
+              @send-event="reset"
+            />
+          </template>
+        </q-table>
+      </div>
+      <div class="proc">
+        <q-btn
+          push
+          class="button"
+          color="primary"
+          label="등록"
+          @click="
+            () => {
+              showAddDialog = true
+              showModifyField = false
+            }
+          "
+        />
+        <q-btn
+          push
+          class="button"
+          color="negative"
+          label="삭제"
+          @click="removeMenuList"
+        />
+        <q-btn
+          push
+          class="buttonR"
+          color="warning"
+          label="사용여부 변경"
+          @click="modifyUseAtMenu"
+        />
+      </div>
     </div>
-    <div class="proc">
-      <q-btn
-        push
-        class="button"
-        color="primary"
-        label="등록"
-        @click="
-          () => {
-            showAddDialog = true
-            showModifyField = false
-          }
-        "
-      />
-      <q-btn
-        push
-        class="button"
-        color="negative"
-        label="삭제"
-        @click="removeMenuList"
-      />
-      <q-btn
-        push
-        class="buttonR"
-        color="warning"
-        label="사용여부 변경"
-        @click="modifyUseAtMenu"
-      />
+
+    <div class="popup">
+      <q-dialog v-model="showDetailDialog" @hide="resetDetailData">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>상세조회</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form ref="modifyForm">
+                  <q-input
+                    v-model="detailData.menuNm"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="메뉴명"
+                    :rules="[required_rules]"
+                    :readonly="mReadonly"
+                  />
+                  <q-input
+                    v-model="detailData.menuUrl"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="메뉴URL"
+                    :rules="[required_rules, menuUrl_rules]"
+                    :readonly="mReadonly"
+                  />
+                  <q-input
+                    v-model="detailData.upperMenuSn"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="상위메뉴ID"
+                    :rules="[number_rules]"
+                    :readonly="mReadonly"
+                  />
+                  <q-input
+                    v-model="detailData.menuSortOrdr"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="정렬순서"
+                    :rules="[number_rules]"
+                    :readonly="mReadonly"
+                  />
+                  <q-select
+                    v-model="detailData.useAt"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="사용여부"
+                    :options="useAtInputOption"
+                    option-label="name"
+                    option-value="code"
+                    :readonly="mReadonly"
+                  />
+                </q-form>
+                <q-field stack-label class="q-pb-sm" label="최초등록자">
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ detailData.registUsrId }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field stack-label class="q-pb-sm" label="최초등록일시">
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{
+                        date.formatDate(
+                          detailData.registDt,
+                          'YYYY/MM/DD HH:mm:ss'
+                        )
+                      }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field stack-label class="q-pb-sm" label="최종수정자">
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{ detailData.updtUsrId }}
+                    </div>
+                  </template>
+                </q-field>
+                <q-field stack-label class="q-pb-sm" label="최종수정일시">
+                  <template #control>
+                    <div class="self-center full-width no-outline">
+                      {{
+                        date.formatDate(
+                          detailData.updtDt,
+                          'YYYY/MM/DD HH:mm:ss'
+                        )
+                      }}
+                    </div>
+                  </template>
+                </q-field>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+          <q-footer>
+            <q-toolbar class="bg-white">
+              <q-toolbar-title />
+              <q-btn
+                v-if="showModifyField != true"
+                push
+                color="primary"
+                class="q-mr-sm"
+                label="수정"
+                @click=";(showModifyField = true), (mReadonly = false)"
+              />
+              <q-btn
+                v-if="showModifyField != true"
+                push
+                color="negative"
+                label="삭제"
+                @click="removeMenuList"
+              />
+              <q-btn
+                v-if="showModifyField == true"
+                push
+                color="primary"
+                class="q-mr-sm"
+                label="저장"
+                @click="modifyMenu"
+              />
+              <q-btn
+                v-if="showModifyField == true"
+                push
+                color="primary"
+                label="취소"
+                @click=";(showModifyField = false), (mReadonly = true)"
+              />
+            </q-toolbar>
+          </q-footer>
+        </q-layout>
+      </q-dialog>
     </div>
-  </div>
 
-  <div class="popup">
-    <q-dialog v-model="showDetailDialog" @hide="resetDetailData">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>상세조회</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form ref="modifyForm">
-                <q-input
-                  v-model="detailData.menuNm"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="메뉴명"
-                  :rules="[required_rules]"
-                  :readonly="mReadonly"
-                />
-                <q-input
-                  v-model="detailData.menuUrl"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="메뉴URL"
-                  :rules="[required_rules, menuUrl_rules]"
-                  :readonly="mReadonly"
-                />
-                <q-input
-                  v-model="detailData.upperMenuSn"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="상위메뉴ID"
-                  :rules="[number_rules]"
-                  :readonly="mReadonly"
-                />
-                <q-input
-                  v-model="detailData.menuSortOrdr"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="정렬순서"
-                  :rules="[number_rules]"
-                  :readonly="mReadonly"
-                />
-                <q-select
-                  v-model="detailData.useAt"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="사용여부"
-                  :options="useAtInputOption"
-                  option-label="name"
-                  option-value="code"
-                  :readonly="mReadonly"
-                />
-              </q-form>
-              <q-field stack-label class="q-pb-sm" label="최초등록자">
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ detailData.registUsrId }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field stack-label class="q-pb-sm" label="최초등록일시">
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{
-                      date.formatDate(
-                        detailData.registDt,
-                        'YYYY/MM/DD HH:mm:ss'
-                      )
-                    }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field stack-label class="q-pb-sm" label="최종수정자">
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{ detailData.updtUsrId }}
-                  </div>
-                </template>
-              </q-field>
-              <q-field stack-label class="q-pb-sm" label="최종수정일시">
-                <template #control>
-                  <div class="self-center full-width no-outline">
-                    {{
-                      date.formatDate(detailData.updtDt, 'YYYY/MM/DD HH:mm:ss')
-                    }}
-                  </div>
-                </template>
-              </q-field>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title />
-            <q-btn
-              v-if="showModifyField != true"
-              push
-              color="primary"
-              class="q-mr-sm"
-              label="수정"
-              @click=";(showModifyField = true), (mReadonly = false)"
-            />
-            <q-btn
-              v-if="showModifyField != true"
-              push
-              color="negative"
-              label="삭제"
-              @click="removeMenuList"
-            />
-            <q-btn
-              v-if="showModifyField == true"
-              push
-              color="primary"
-              class="q-mr-sm"
-              label="저장"
-              @click="modifyMenu"
-            />
-            <q-btn
-              v-if="showModifyField == true"
-              push
-              color="primary"
-              label="취소"
-              @click=";(showModifyField = false), (mReadonly = true)"
-            />
-          </q-toolbar>
-        </q-footer>
-      </q-layout>
-    </q-dialog>
-  </div>
-
-  <div class="popup">
-    <q-dialog v-model="showAddDialog" @hide="resetInputData">
-      <q-layout container>
-        <q-header>
-          <q-toolbar class="bg-primary">
-            <q-toolbar-title>등록</q-toolbar-title>
-            <q-btn v-close-popup flat round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="bg-white">
-          <q-card>
-            <q-card-section>
-              <q-form ref="addForm">
-                <q-input
-                  v-model="inputData.menuNm"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="메뉴명"
-                  :rules="[required_rules]"
-                />
-                <q-input
-                  v-model="inputData.menuUrl"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="메뉴URL"
-                  :rules="[required_rules, menuUrl_rules]"
-                />
-                <q-input
-                  v-model="inputData.upperMenuSn"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="상위메뉴ID"
-                  :rules="[number_rules]"
-                />
-                <q-input
-                  v-model="inputData.menuSortOrdr"
-                  outlined
-                  stack-label
-                  class="q-pb-lg"
-                  label="정렬순서"
-                  :rules="[number_rules]"
-                />
-                <q-select
-                  v-model="inputData.useAt"
-                  outlined
-                  stack-label
-                  label="사용여부"
-                  :options="useAtInputOption"
-                  option-label="name"
-                  option-value="code"
-                />
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </q-page-container>
-        <q-footer>
-          <q-toolbar class="bg-white">
-            <q-toolbar-title />
-            <q-btn push color="primary" label="저장" @click="addMenu" />
-          </q-toolbar>
-        </q-footer>
-      </q-layout>
-    </q-dialog>
-  </div>
+    <div class="popup">
+      <q-dialog v-model="showAddDialog" @hide="resetInputData">
+        <q-layout container>
+          <q-header>
+            <q-toolbar class="bg-primary">
+              <q-toolbar-title>등록</q-toolbar-title>
+              <q-btn v-close-popup flat round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="bg-white">
+            <q-card>
+              <q-card-section>
+                <q-form ref="addForm">
+                  <q-input
+                    v-model="inputData.menuNm"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="메뉴명"
+                    :rules="[required_rules]"
+                  />
+                  <q-input
+                    v-model="inputData.menuUrl"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="메뉴URL"
+                    :rules="[required_rules, menuUrl_rules]"
+                  />
+                  <q-input
+                    v-model="inputData.upperMenuSn"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="상위메뉴ID"
+                    :rules="[number_rules]"
+                  />
+                  <q-input
+                    v-model="inputData.menuSortOrdr"
+                    outlined
+                    stack-label
+                    class="q-pb-lg"
+                    label="정렬순서"
+                    :rules="[number_rules]"
+                  />
+                  <q-select
+                    v-model="inputData.useAt"
+                    outlined
+                    stack-label
+                    label="사용여부"
+                    :options="useAtInputOption"
+                    option-label="name"
+                    option-value="code"
+                  />
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-page-container>
+          <q-footer>
+            <q-toolbar class="bg-white">
+              <q-toolbar-title />
+              <q-btn push color="primary" label="저장" @click="addMenu" />
+            </q-toolbar>
+          </q-footer>
+        </q-layout>
+      </q-dialog>
+    </div>
+  </client-only>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, date } from 'quasar'
-import { type ApiResponse } from '../../interface/server'
+import type { ApiPagingResponse, ApiResponse } from '../../interface/server'
 import paginationLayout from '~/components/PaginationComponent.vue'
 
 // 페이징을 위한 파라미터
@@ -444,7 +449,7 @@ const getMenuPageList = async () => {
     searchParam.value.useAt = searchParam.value.useAt.code
   }
 
-  const result = await $fetch<ApiResponse<Data[]>>(
+  const result = await $fetch<ApiPagingResponse<Data>>(
     '/playground/public/menu/getMenuPageList?page=' +
       (currentPage.value - 1) +
       '&size=' +
@@ -508,7 +513,7 @@ const clickRow = async (evt: any, row: any) => {
 
   const menuSn = row.menuSn
 
-  const result = await $fetch<ApiResponse<Data[]>>(
+  const result = await $fetch<ApiResponse<Data>>(
     '/playground/public/menu/getMenuDetail?menuSn=' + menuSn
   )
 
@@ -531,8 +536,8 @@ const addMenu = async () => {
       return
     }
 
-    if (upperMenuSn && upperMenuSn != '') {
-      const result = await $fetch<ApiResponse<Data[]>>(
+    if (upperMenuSn) {
+      const result = await $fetch<ApiResponse<Data>>(
         '/playground/public/menu/getMenuDetail?menuSn=' + upperMenuSn
       )
 
@@ -549,9 +554,7 @@ const addMenu = async () => {
     }
 
     if (valid && upperMenuSnValid) {
-      if (inputData.value.useAt) {
-        inputData.value.useAt = inputData.value.useAt.code
-      } else {
+      if (!inputData.value.useAt) {
         inputData.value.useAt = 'N'
       }
 
@@ -564,7 +567,7 @@ const addMenu = async () => {
       }
 
       // 저장 API 호출
-      await $fetch<ApiResponse<Data[]>>('/playground/public/menu/addMenu', {
+      await $fetch<ApiResponse<Data>>('/playground/public/menu/addMenu', {
         method: 'POST',
         body: JSON.stringify(inputData.value)
       })
@@ -603,7 +606,7 @@ const modifyMenu = async () => {
     }
 
     if (upperMenuSn && upperMenuSn > 0) {
-      const result = await $fetch<ApiResponse<Data[]>>(
+      const result = await $fetch<ApiResponse<Data>>(
         '/playground/public/menu/getMenuDetail?menuSn=' + upperMenuSn
       )
 
@@ -620,10 +623,6 @@ const modifyMenu = async () => {
     }
 
     if (valid && upperMenuSnValid) {
-      if (detailData.value.useAt.code) {
-        detailData.value.useAt = detailData.value.useAt.code
-      }
-
       if (!inputData.value.upperMenuSn) {
         inputData.value.upperMenuSn = 1
       }

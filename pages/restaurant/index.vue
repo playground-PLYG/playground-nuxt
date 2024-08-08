@@ -717,6 +717,11 @@ interface Restaurant {
   imageFileIds: number[]
 }
 
+interface ImgFile {
+  fileSerialNo: number
+  restaurantSerialNo: number
+}
+
 /* 식당 상세 */
 interface RestaurantDetail {
   restaurantSerialNo: number
@@ -730,7 +735,7 @@ interface RestaurantDetail {
   imageFileId: number | null
   imageUrl: string | undefined
   menuList: Menu[] | []
-  fileList: number[] | []
+  fileList: ImgFile[] | []
 }
 
 /* 메뉴 */
@@ -994,7 +999,7 @@ const fn_selectRestaurant = async (restaurantSerialNo: number) => {
       })
     }
   )
-    .then((result: ApiResponse<RestaurantDetail>) => {
+    .then(async (result: ApiResponse<RestaurantDetail>) => {
       if (result.data != null) {
         restaurantDetail.value = result.data
         restaurantDetail.value.restaurantKindCodeName = restaurantDetail.value
@@ -1006,7 +1011,9 @@ const fn_selectRestaurant = async (restaurantSerialNo: number) => {
 
         restaurantDetail.value.fileList = result.data.fileList
         restaurantDetail.value.imageUrl = restaurantDetail.value.fileList[0]
-          ? imageUtil.getImageUrl(restaurantDetail.value.fileList[0])
+          ? imageUtil.getImageUrl(
+              restaurantDetail.value.fileList[0].fileSerialNo
+            )
           : '/icon/no-image.png'
 
         if (restaurantDetail.value.menuList) {
@@ -1020,7 +1027,7 @@ const fn_selectRestaurant = async (restaurantSerialNo: number) => {
             }
           })
         } else {
-          fn_getMenuList(restaurantDetail.value.restaurantSerialNo)
+          await fn_getMenuList(restaurantDetail.value.restaurantSerialNo)
         }
 
         restaurantDetailTab.value = 'basic'

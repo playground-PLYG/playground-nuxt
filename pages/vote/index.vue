@@ -1,6 +1,6 @@
 <template>
   <!-- notice dialogRef here -->
-  <q-form ref="dialogRef" @hide="">
+  <q-form ref="dialogRef">
     <q-card class="q-dialog-plugin" style="width: 700px; max-width: 80vw">
       <div class="q-pa-md">
         <div class="row items-start q-gutter-md">
@@ -17,9 +17,9 @@
           <q-card-section>
             <div class="text-h4">
               <q-input
+                v-model="showVoteData.voteSubject"
                 outlined
                 :readonly="true"
-                v-model="showVoteData.voteSubject"
                 style="font-size: xx-large"
               />
             </div>
@@ -30,9 +30,9 @@
             </q-chip>
             <div style="margin-left: 50px">
               <q-checkbox
+                v-model="showVoteData.anonymityVoteAlternativeBoo"
                 color="black"
                 :disable="true"
-                v-model="showVoteData.anonymityVoteAlternativeBoo"
                 label="익명투표여부"
               />
             </div>
@@ -42,10 +42,9 @@
               종료일시 : {{ showVoteData.voteEndDate }}
             </q-chip>
             <div style="margin-left: 50px">
-              <!-- :options="codeName" -->
               <q-select
-                outlined
                 v-model="showVoteData.voteKindName"
+                outlined
                 label="투표종류"
                 round
                 dense
@@ -58,9 +57,9 @@
         </q-card>
       </div>
       <div
-        class="q-pa-md"
         v-for="(qestn, index) in showVoteData.qestnResponseList"
         :key="qestn.questionSsno"
+        class="q-pa-md"
       >
         <q-card class="my-card">
           <q-card-section class="bg-light-blue-6 text-white">
@@ -69,9 +68,9 @@
               style="width: 90%; display: inline-flex"
             >
               <q-input
+                v-model="qestn.questionContents"
                 filled
                 :name="'qc' + index"
-                v-model="qestn.questionContents"
                 style="font-size: x-large"
                 :dense="true"
                 :readonly="true"
@@ -79,7 +78,10 @@
             </div>
           </q-card-section>
           <q-list>
-            <q-item v-for="iem in qestn.voteIemResponseList">
+            <q-item
+              v-for="(iem, voteItemIndex) in qestn.voteIemResponseList"
+              :key="voteItemIndex"
+            >
               <q-item-section avatar>
                 <q-radio
                   v-model="selectVal[index]"
@@ -116,8 +118,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { type ApiResponse } from '../../interface/server'
 import { useRouter } from 'vue-router'
+import { type ApiResponse } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
 
 const { loading } = useQuasar()
@@ -128,9 +130,9 @@ const $q = useQuasar()
 
 onMounted(() => {
   console.group('##### 로그인 정보 확인 #####')
-  console.log('mberId : ', authStore.mberId)
-  console.log('token : ', authStore.token)
-  console.log('isLogin : ', authStore.isLogin)
+  console.debug('mberId : ', authStore.mberId)
+  console.debug('token : ', authStore.token)
+  console.debug('isLogin : ', authStore.isLogin)
   console.groupEnd()
 
   if (authStore?.isLogin) {
@@ -177,9 +179,9 @@ interface kindCodeType {
   upperCode: string
 }
 
-let selectVal = ref<String[]>([''])
+const selectVal = ref<string[]>([''])
 
-let showVoteData = ref<VoteDetailDataType>({
+const showVoteData = ref<VoteDetailDataType>({
   voteSsno: 0,
   voteKindCode: '',
   voteKindName: '',
@@ -193,18 +195,18 @@ let showVoteData = ref<VoteDetailDataType>({
 
 const isDuplicateVote = async () => {
   loading.show()
-  await $fetch<ApiResponse<Boolean>>(
+  await $fetch<ApiResponse<boolean>>(
     '/playground/public/voteAnswer/isDuplicateVote',
     {
       method: 'POST',
       body: JSON.stringify({
-        voteSsno: voteSsno,
+        voteSsno,
         answerUserId: authStore.mberId
       })
     }
   )
     .then((result) => {
-      console.log('######### isDuplicateVote : result : ', result.data) // true(중복투표) false(처음투표)
+      console.debug('######### isDuplicateVote : result : ', result.data) // true(중복투표) false(처음투표)
       if (result.data) {
         $q.dialog({
           title: '알림',
@@ -221,8 +223,8 @@ const isDuplicateVote = async () => {
     })
 }
 
-let kindCode = ref<kindCodeType[]>([])
-let kindCodeNm = ref<String[]>([])
+const kindCode = ref<kindCodeType[]>([])
+const kindCodeNm = ref<string[]>([])
 const setKindCode = async () => {
   loading.show()
   await $fetch<ApiResponse<kindCodeType[]>>(
@@ -237,7 +239,7 @@ const setKindCode = async () => {
     }
   )
     .then((result) => {
-      let resData = result.data
+      const resData = result.data
       resData.forEach((item) => {
         const kindItem: kindCodeType = {
           code: item.code,
@@ -260,12 +262,12 @@ const setVoteDetail = async () => {
     {
       method: 'POST',
       body: JSON.stringify({
-        voteSsno: voteSsno
+        voteSsno
       })
     }
   )
     .then((res) => {
-      let resData = res.data
+      const resData = res.data
       let kindNm: string = ''
       kindCode.value.forEach((code) => {
         if (resData.voteKindCode == code.code) {
@@ -294,7 +296,10 @@ const setVoteDetail = async () => {
           qestnResponseList: resData.qestnResponseList
         }
 
-        console.log('init showVoteData.value ######### : ', showVoteData.value)
+        console.debug(
+          'init showVoteData.value ######### : ',
+          showVoteData.value
+        )
 
         loading.hide()
       }
@@ -306,8 +311,8 @@ const setVoteDetail = async () => {
 
 const dateTimeFormatter = (dt: string) => {
   //"yyyy-MM-ddTHH:mm:ss.SSS"
-  let dtTimeHH = dt?.toString().split('T')[1].substring(0, 2)
-  let amPm = 0 <= Number(dtTimeHH) && Number(dtTimeHH) < 12 ? 'AM' : 'PM'
+  const dtTimeHH = dt?.toString().split('T')[1].substring(0, 2)
+  const amPm = 0 <= Number(dtTimeHH) && Number(dtTimeHH) < 12 ? 'AM' : 'PM'
   return (
     dt?.toString().split('T')[0] +
     '  ' +
@@ -330,13 +335,13 @@ interface answerResponseType extends answerType {
 }
 
 const settingAnswer = () => {
-  console.log('############### settingAnswer #################')
-  console.log('## settingAnswer ####### : select :', showVoteData.value)
-  let voteData = showVoteData.value
-  let insertVoteResult: answerType[] = []
+  console.debug('############### settingAnswer #################')
+  console.debug('## settingAnswer ####### : select :', showVoteData.value)
+  const voteData = showVoteData.value
+  const insertVoteResult: answerType[] = []
 
-  console.log('## settingAnswer ####### : selectVal :', selectVal.value)
-  let selectedData = selectVal.value
+  console.debug('## settingAnswer ####### : selectVal :', selectVal.value)
+  const selectedData = selectVal.value
 
   voteData.qestnResponseList.forEach((qestn, index) => {
     let selectIemSsno: number = 0
@@ -358,8 +363,8 @@ const settingAnswer = () => {
 }
 
 const addAnswer = async (resultList: answerType[]) => {
-  console.log('############### addAnswer #################')
-  console.log('## addAnswer ####### : resultList :', resultList)
+  console.debug('############### addAnswer #################')
+  console.debug('## addAnswer ####### : resultList :', resultList)
   loading.show()
   await $fetch<ApiResponse<answerResponseType>>(
     '/playground/public/voteAnswer/addAnswer',
@@ -369,7 +374,7 @@ const addAnswer = async (resultList: answerType[]) => {
     }
   )
     .then((res) => {
-      console.log('##### addAnswer res :', res.data)
+      console.debug('##### addAnswer res :', res.data)
       if (res.data) {
         $q.dialog({
           title: '알림',

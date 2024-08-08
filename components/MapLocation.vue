@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
 import { useQuasar } from 'quasar'
-import { onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 
 const config = useRuntimeConfig()
 
@@ -58,24 +58,36 @@ const props = defineProps<{
 
 watch(
   props,
-  () => {
-    diaplayPlace()
+  async () => {
+    await nextTick(() =>
+      loadScript(() => {
+        diaplayPlace()
+      })
+    )
   },
   { deep: true }
 )
 
-onMounted(() => {
-  loadScript()
+onMounted(async () => {
+  await nextTick(loadScript)
 })
 
-const loadScript = () => {
-  const script = document.createElement('script')
-  script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services,clusterer,drawing`
-  script.onload = () => kakao.maps.load(loadMap)
-  document.head.appendChild(script)
+const loadScript = (callbackFnc?: () => void) => {
+  if (typeof kakao == 'undefined') {
+    const script = document.createElement('script')
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services,clusterer,drawing`
+    script.onload = () => {
+      loadMap(callbackFnc)
+    }
+    document.head.appendChild(script)
+  } else if (typeof bounds == 'undefined') {
+    loadMap(callbackFnc)
+  } else if (callbackFnc) {
+    callbackFnc()
+  }
 }
 
-const loadMap = () => {
+const loadMap = (callbackFnc?: () => void) => {
   kakao.maps.load(() => {
     const container = mapArea.value //지도를 담을 영역의 DOM 레퍼런스
     const options = {
@@ -151,6 +163,10 @@ const loadMap = () => {
       position: markerPosition,
       draggable: true
     })
+
+    if (callbackFnc) {
+      callbackFnc()
+    }
   })
 }
 

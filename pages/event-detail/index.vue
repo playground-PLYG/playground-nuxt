@@ -182,8 +182,8 @@
               color="white"
               text-color="primary"
               label="+"
-              @click="addFixedPoint"
               :disabled="isReadOnly"
+              @click="addFixedPoint"
             />
             <q-btn
               v-if="index > 0"
@@ -191,8 +191,8 @@
               color="white"
               text-color="primary"
               label="-"
-              @click="removeFixedPoint(index)"
               :disabled="isReadOnly"
+              @click="removeFixedPoint(index)"
             />
           </div>
         </q-card-section>
@@ -228,8 +228,8 @@
             color="white"
             text-color="primary"
             label="+"
-            @click="addFixedPoint"
             :disabled="isReadOnly"
+            @click="addFixedPoint"
           />
           <q-btn
             v-if="index > 0"
@@ -237,8 +237,8 @@
             color="white"
             text-color="primary"
             label="-"
-            @click="removeFixedPoint(index)"
             :disabled="isReadOnly"
+            @click="removeFixedPoint(index)"
           />
         </div>
       </q-card-section>
@@ -267,7 +267,7 @@
           :rules="[event_rules]"
         />
       </q-card-section>
-      <div class="q-gutter-md row items-start left-align" v-if="isReadOnly">
+      <div v-if="isReadOnly" class="q-gutter-md row items-start left-align">
         <q-btn
           v-if="eventStore.progrsSttus === 'PRE'"
           color="primary"
@@ -298,12 +298,12 @@
         />
         <q-btn color="primary" label="취소" @click="updateOutEvent" />
       </div>
-      <div class="q-gutter-md row items-start right-align" v-if="!isReadOnly">
+      <div v-if="!isReadOnly" class="q-gutter-md row items-start right-align">
         <q-btn
           color="primary"
           label="저장"
-          @click="addEvent"
           :disabled="!isFormValid"
+          @click="addEvent"
         />
         <q-btn color="primary" label="취소" @click="outEvent" />
       </div>
@@ -315,7 +315,7 @@
             <q-header>
               <q-toolbar class="bg-primary">
                 <q-toolbar-title>이벤트 결과보기</q-toolbar-title>
-                <q-btn flat v-close-popup round dense icon="close" />
+                <q-btn v-close-popup flat round dense icon="close" />
               </q-toolbar>
             </q-header>
             <q-page-container class="bg-white items-start">

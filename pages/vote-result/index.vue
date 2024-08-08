@@ -32,7 +32,10 @@
                 {{ qestn.questionContents }}
               </div>
 
-              <div v-for="(iem, index) in qestn.resultDetailList" :key="index">
+              <div
+                v-for="(iem, dtailIndex) in qestn.resultDetailList"
+                :key="dtailIndex"
+              >
                 <div
                   class="row q-mb-sm"
                   :class="{ highlight: iem.bestItem == true }"
@@ -62,8 +65,8 @@
                   "
                 >
                   <div
-                    v-for="(userId, index) in iem.selUserIdList"
-                    :key="index"
+                    v-for="(userId, userIndex) in iem.selUserIdList"
+                    :key="userIndex"
                     class="q-ml-xs q-mr-xs"
                   >
                     <q-icon name="person" class="text-grey" />
@@ -227,7 +230,7 @@ const fn_getVoteResult = async (ssno: number) => {
   })
     .then((result) => {
       voteResult.value = result.data
-      console.log('fn_getVoteResult : voteResult.value : ', voteResult.value)
+      console.debug('fn_getVoteResult : voteResult.value : ', voteResult.value)
 
       // 1. 투표상태 정의
       // 현재시간이랑 투표기간 비교해서 -> 투표전, 투표중, 투표완료 가져오기

@@ -157,7 +157,7 @@ const voteSsno = ref<number>(0)
 const noCount = ref<boolean>(false)
 
 const initFunc = (ssno: number, subject: string) => {
-  console.log('voteStatistics initFunc statisticsSsno : ', ssno, subject)
+  console.debug('voteStatistics initFunc statisticsSsno : ', ssno, subject)
   voteSsno.value = ssno
   settingStatisctics(ssno, subject)
 }
@@ -250,7 +250,7 @@ const settingStatisctics = async (ssno: number, subject: string) => {
   )
     .then((res) => {
       statResponse.value = res.data
-      console.log(
+      console.debug(
         'settingStatisctics :::::: statResponse.value : ',
         statResponse.value
       )

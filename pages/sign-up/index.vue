@@ -214,14 +214,14 @@ const _getTokenKAKAO = async () => {
     headers: config,
     body: `grant_type=authorization_code&client_id=${client_id}&redirect_uri=${redirect_uri}&code=${code}`
   }).then((data) => {
-    console.log('data: ', data.access_token)
+    console.debug('data: ', data.access_token)
     config.Authorization += data.access_token
     token = data.access_token
     $fetch<KakaoUser>('https://kapi.kakao.com/v2/user/me', {
       method: 'POST',
       headers: config
     }).then((response) => {
-      console.log(
+      console.debug(
         'id : ' +
           response.id +
           ', email : ' +

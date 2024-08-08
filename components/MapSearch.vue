@@ -51,7 +51,7 @@
                 :max="1200"
                 :step="100"
                 @change="
-                  (val) => {
+                  (val: number) => {
                     searchRadius = val
                   }
                 "
@@ -59,7 +59,7 @@
             </div>
           </div>
         </div>
-        <hr >
+        <hr />
         <div id="placesList" class="q-pa-none q-ma-none" />
         <div id="pagination" />
       </div>
@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { useRuntimeConfig } from 'nuxt/app'
-import type { SliderMarkerLabelDefinitionRequiredValue} from 'quasar';
+import type { SliderMarkerLabelDefinitionRequiredValue } from 'quasar'
 import { useQuasar } from 'quasar'
 import { onMounted, ref, watch } from 'vue'
 
@@ -138,7 +138,7 @@ onMounted(() => {
 const loadScript = () => {
   const script = document.createElement('script')
   script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${config.public.kakaoApiKey}&autoload=false&libraries=services`
-  script.onload = () => kakao.maps.load(loadMap)
+  script.onload = loadMap
   document.head.appendChild(script)
 }
 

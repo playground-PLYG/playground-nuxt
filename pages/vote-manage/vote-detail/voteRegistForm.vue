@@ -1,6 +1,6 @@
 <template>
   <!-- notice dialogRef here -->
-  <q-dialog ref="dialogRef" @hide="">
+  <q-dialog ref="dialogRef">
     <q-card class="q-dialog-plugin" style="width: 700px; max-width: 80vw">
       <div class="q-pa-md">
         <div class="row items-start q-gutter-md">
@@ -17,9 +17,9 @@
           <q-card-section>
             <div class="text-h4">
               <q-input
+                v-model="registVoteData.voteSubject"
                 outlined
                 style="font-size: xx-large"
-                v-model="registVoteData.voteSubject"
                 :disable="!insertMode"
               />
             </div>
@@ -37,34 +37,28 @@
                 >
                   <div class="row items-center justify-end q-gutter-sm">
                     <q-btn
+                      v-close-popup
                       label="OK"
                       color="primary"
                       flat
                       @click="onClickDate('BEGIN')"
-                      v-close-popup
                     />
-                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                    <q-btn v-close-popup label="Cancel" color="primary" flat />
                   </div>
                 </q-date>
               </q-popup-proxy>
             </q-btn>
             <q-btn flat round icon="access_time" :disable="!insertMode">
               <q-popup-proxy
+                ref="beginTimeProxy"
                 cover
                 transition-show="scale"
                 transition-hide="scale"
-                ref="beginTimeProxy"
               >
                 <q-time v-model="registDateTime.beginTime">
                   <div class="row items-center justify-end q-gutter-sm">
-                    <q-btn
-                      label="OK"
-                      color="primary"
-                      flat
-                      @click=""
-                      v-close-popup
-                    />
-                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                    <q-btn v-close-popup label="OK" color="primary" flat />
+                    <q-btn v-close-popup label="Cancel" color="primary" flat />
                   </div>
                 </q-time>
               </q-popup-proxy>
@@ -81,9 +75,9 @@
             </q-btn>
             <div style="margin-left: 50px">
               <q-checkbox
+                v-model="registVoteData.anonymityVoteAlternativeBoo"
                 :disable="!insertMode"
                 color="black"
-                v-model="registVoteData.anonymityVoteAlternativeBoo"
                 label="익명투표여부"
               />
             </div>
@@ -101,34 +95,28 @@
                 >
                   <div class="row items-center justify-end q-gutter-sm">
                     <q-btn
+                      v-close-popup
                       label="OK"
                       color="primary"
                       flat
                       @click="onClickDate('FINISH')"
-                      v-close-popup
                     />
-                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                    <q-btn v-close-popup label="Cancel" color="primary" flat />
                   </div>
                 </q-date>
               </q-popup-proxy>
             </q-btn>
             <q-btn flat round icon="access_time" :disable="!insertMode">
               <q-popup-proxy
+                ref="finishTimeProxy"
                 cover
                 transition-show="scale"
                 transition-hide="scale"
-                ref="finishTimeProxy"
               >
                 <q-time v-model="registDateTime.finishTime">
                   <div class="row items-center justify-end q-gutter-sm">
-                    <q-btn
-                      label="OK"
-                      color="primary"
-                      flat
-                      @click=""
-                      v-close-popup
-                    />
-                    <q-btn label="Cancel" color="primary" flat v-close-popup />
+                    <q-btn v-close-popup label="OK" color="primary" flat />
+                    <q-btn v-close-popup label="Cancel" color="primary" flat />
                   </div>
                 </q-time>
               </q-popup-proxy>
@@ -144,8 +132,8 @@
             </q-btn>
             <div style="margin-left: 50px">
               <q-select
-                outlined
                 v-model="registVoteData.voteKindName"
+                outlined
                 :options="codeName"
                 label="투표종류"
                 round
@@ -160,9 +148,9 @@
       </div>
 
       <div
-        class="q-pa-md"
         v-for="(qestn, index) in registVoteData.qestnRequestList"
         :key="qestn.questionSsno"
+        class="q-pa-md"
       >
         <q-card class="my-card">
           <q-card-section class="bg-light-blue-6 text-white">
@@ -171,19 +159,19 @@
               style="width: 90%; display: inline-flex"
             >
               <q-input
-                filled
-                :readonly="!insertMode"
                 :id="qestn.questionContents + index"
                 v-model="qestn.questionContents"
+                filled
+                :readonly="!insertMode"
                 style="font-size: x-large"
                 :dense="true"
               />
             </div>
             <div class="q-pl-lg" style="display: inline-flex">
               <q-btn
+                v-show="insertMode"
                 align="center"
                 size="xs"
-                v-show="insertMode"
                 :disable="!insertMode"
                 icon="close"
                 outline
@@ -195,23 +183,23 @@
                     질문을 삭제하시겠습니까?
                     <q-card-actions align="center">
                       <q-btn
+                        v-close-popup
                         push
                         color="white"
                         size="xs"
                         text-color="black"
                         label="삭제"
                         style="margin-top: 5px"
-                        v-close-popup
                         @click="delQuestion(qestn.questionSsno)"
                       />
                       <q-btn
+                        v-close-popup
                         push
                         color="white"
                         size="xs"
                         text-color="black"
                         label="취소"
                         style="margin-top: 5px"
-                        v-close-popup
                       />
                     </q-card-actions>
                   </q-banner>
@@ -223,8 +211,8 @@
             <q-item
               v-for="(iem, ind) in qestn.voteIemRequestList"
               :key="iem.itemSsno"
-              tag="label"
               v-ripple
+              tag="label"
             >
               <q-item-section avatar>
                 <q-radio
@@ -252,23 +240,23 @@
                       항목을 삭제하시겠습니까?
                       <q-card-actions align="center">
                         <q-btn
+                          v-close-popup
                           push
                           color="white"
                           size="xs"
                           text-color="black"
                           label="삭제"
                           style="margin-top: 5px"
-                          v-close-popup
                           @click="delVoteItem(qestn.questionSsno, iem.itemSsno)"
                         />
                         <q-btn
+                          v-close-popup
                           push
                           color="white"
                           size="xs"
                           text-color="black"
                           label="취소"
                           style="margin-top: 5px"
-                          v-close-popup
                         />
                       </q-card-actions>
                     </q-banner>
@@ -277,7 +265,6 @@
               </q-item-section>
             </q-item>
             <q-card-actions align="left">
-              <!-- <q-checkbox color="black" v-model="selectSubjective" label="주관식여부" /> -->
               <q-btn
                 size="sm"
                 outline
@@ -289,39 +276,39 @@
                   <q-banner class="bg-indigo-5 text-white">
                     항목 검색해서 세팅하는 형식으로 변경 예정
                     <q-input
-                      standout="bg-grey text-white"
                       v-model="addVoteItemData.itemName"
+                      standout="bg-grey text-white"
                       label="Item Name"
                       label-color="white"
                       :dense="true"
                       color="white"
                     />
                     <q-input
-                      standout="bg-grey text-white"
                       v-model="addVoteItemData.itemSsno"
+                      standout="bg-grey text-white"
                       label="Item ID"
                       label-color="white"
                       :dense="true"
                     />
                     <q-card-actions align="center">
                       <q-btn
+                        v-close-popup
                         push
                         color="white"
                         size="xs"
                         text-color="black"
                         label="추가"
                         style="margin-top: 5px"
-                        v-close-popup
                         @click="addVoteItem(qestn.questionSsno)"
                       />
                       <q-btn
+                        v-close-popup
                         push
                         color="white"
                         size="xs"
                         text-color="black"
                         label="취소"
                         style="margin-top: 5px"
-                        v-close-popup
                         @click="resetAddVoteItemData"
                       />
                     </q-card-actions>
@@ -329,16 +316,16 @@
                 </q-popup-proxy>
               </q-btn>
               <q-btn
-                size="sm"
-                outline
-                color="indigo-7"
-                label="식당검색"
-                :disable="!insertMode"
                 v-show="
                   registVoteData.voteKindName.indexOf('식사') > -1
                     ? true
                     : false
                 "
+                size="sm"
+                outline
+                color="indigo-7"
+                label="식당검색"
+                :disable="!insertMode"
               />
             </q-card-actions>
           </q-list>
@@ -352,8 +339,8 @@
           rounded
           color="indigo-7"
           label="질문추가하기"
-          @click="addQuestion"
           :disable="!insertMode"
+          @click="addQuestion"
         />
       </q-card-actions>
       <q-card-actions align="center">
@@ -376,18 +363,18 @@
               <span class="q-ml-sm">투표내용을 수정하시겠습니까?</span>
             </q-card-section>
             <q-card-actions align="right">
-              <q-btn flat label="수정" color="primary" @click="" />
-              <q-btn flat label="취소" color="primary" v-close-popup />
+              <q-btn flat label="수정" color="primary" />
+              <q-btn v-close-popup flat label="취소" color="primary" />
             </q-card-actions>
           </q-card>
         </q-dialog>
         <q-btn
+          v-close-popup
           align="between"
           class="btn-fixed-width"
           color="blue-grey-5"
           label="닫기"
           icon="flight_takeoff"
-          v-close-popup
         />
       </q-card-actions>
     </q-card>
@@ -396,8 +383,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { type ApiResponse } from '../../../interface/server'
 import { useQuasar } from 'quasar'
+import { type ApiResponse } from '../../../interface/server'
 const { loading } = useQuasar()
 const $q = useQuasar()
 
@@ -454,7 +441,7 @@ interface PropsType {
 
 const props = defineProps<PropsType>()
 
-let registDateTime = ref<registDateTimeType>({
+const registDateTime = ref<registDateTimeType>({
   //new Date().getFullYear() + '/' + new Date().getMonth() + '/' + new Date().getDay()
   //new Date().getHours() + ':' + new Date().getMinutes()
   beginDate: '',
@@ -463,10 +450,10 @@ let registDateTime = ref<registDateTimeType>({
   finishTime: ''
 })
 
-let insertMode = ref<boolean>(true)
-let insertBtnLabe = ref<string>('등록하기')
-let isInsertConfirm = ref<boolean>(false)
-let registVoteData = ref<VoteDetailDataType>({
+const insertMode = ref<boolean>(true)
+const insertBtnLabe = ref<string>('등록하기')
+const isInsertConfirm = ref<boolean>(false)
+const registVoteData = ref<VoteDetailDataType>({
   voteSsno: 0,
   voteKindCode: '',
   voteKindName: '',
@@ -483,13 +470,13 @@ let registVoteData = ref<VoteDetailDataType>({
   qestnRequestList: []
 })
 
-let addVoteItemData = ref<VoteItemDetailDataType>({
+const addVoteItemData = ref<VoteItemDetailDataType>({
   itemSsno: 0,
   itemName: ''
 })
 
 const setInsertData = () => {
-  let reqVote = registVoteData.value
+  const reqVote = registVoteData.value
   registVoteData.value.anonymityVoteAlternative =
     reqVote.anonymityVoteAlternativeBoo ? 'Y' : 'N'
 
@@ -527,11 +514,11 @@ const setInsertData = () => {
     return false
   }
 
-  let setBeginDate = dateTimeFormatter(
+  const setBeginDate = dateTimeFormatter(
     registDateTime.value.beginDate,
     registDateTime.value.beginTime
   )
-  let setEndDate = dateTimeFormatter(
+  const setEndDate = dateTimeFormatter(
     registDateTime.value.finishData,
     registDateTime.value.finishTime
   )
@@ -539,8 +526,8 @@ const setInsertData = () => {
   registVoteData.value.voteEndDate = setEndDate
 
   // 2. 등록하기 버튼 클릭시 투표종류코드 만들어서 보내기 -> props.codeData 사용
-  let codeDataList = props.codeData
-  let reqCodeName = reqVote.voteKindName
+  const codeDataList = props.codeData
+  const reqCodeName = reqVote.voteKindName
   registVoteData.value.voteKindCode = 'ETC'
   if (
     reqVote.voteKindName == '' ||
@@ -561,7 +548,7 @@ const setInsertData = () => {
   }
 
   // 3. 등록하기 버튼 클릭시 qestnRequestList 돌려서 voteIemrequestList 0개 있는거 파악해서 alert 뿌리기
-  let qestnListLength: number = registVoteData.value.qestnRequestList.length
+  const qestnListLength: number = registVoteData.value.qestnRequestList.length
   if (qestnListLength == 0) {
     $q.dialog({
       title: '알림',
@@ -599,7 +586,7 @@ const insertVote = async () => {
     }
   )
     .then((res) => {
-      console.log('###### insertVote res : ', res)
+      console.debug('###### insertVote res : ', res)
       if (res.data) {
         emits('chgShowVoteRegist', false)
       } else {
@@ -615,10 +602,10 @@ const insertVote = async () => {
     })
 }
 
-let tempVoteNo: number = 999
+const tempVoteNo: number = 999
 let tempQestnNo: number = 0
 const addQuestion = () => {
-  let qestnList = registVoteData.value.qestnRequestList
+  const qestnList = registVoteData.value.qestnRequestList
   qestnList.push({
     questionSsno: tempQestnNo,
     voteSsno: tempVoteNo,
@@ -640,15 +627,17 @@ const delQuestion = (questionSsno: number) => {
     return false
   } else {
     qestnList = qestnList.filter((qes) => {
-      if (qes.questionSsno != questionSsno) return qes
+      if (qes.questionSsno != questionSsno) {
+        return qes
+      }
     })
   }
   registVoteData.value.qestnRequestList = qestnList
 }
 
 const addVoteItem = (questionSsno: number) => {
-  let valItemSsno = addVoteItemData.value.itemSsno
-  let valItemName = addVoteItemData.value.itemName
+  const valItemSsno = addVoteItemData.value.itemSsno
+  const valItemName = addVoteItemData.value.itemName
   if (
     valItemSsno == 0 ||
     valItemSsno == undefined ||
@@ -662,7 +651,7 @@ const addVoteItem = (questionSsno: number) => {
     return false
   }
 
-  let qestnList = registVoteData.value.qestnRequestList
+  const qestnList = registVoteData.value.qestnRequestList
   qestnList.forEach((qes) => {
     if (qes.questionSsno == questionSsno) {
       qes.voteIemRequestList.push({
@@ -678,7 +667,7 @@ const addVoteItem = (questionSsno: number) => {
 }
 
 const delVoteItem = (questionSsno: number, itemSsno: number) => {
-  let qestnList = registVoteData.value.qestnRequestList
+  const qestnList = registVoteData.value.qestnRequestList
   qestnList.forEach((qes) => {
     if (qes.questionSsno == questionSsno) {
       if (qes.voteIemRequestList.length <= 1) {
@@ -689,7 +678,9 @@ const delVoteItem = (questionSsno: number, itemSsno: number) => {
         return false
       } else {
         qes.voteIemRequestList = qes.voteIemRequestList.filter((iem) => {
-          if (iem.itemSsno != itemSsno) return iem
+          if (iem.itemSsno != itemSsno) {
+            return iem
+          }
         })
       }
     }
@@ -698,7 +689,7 @@ const delVoteItem = (questionSsno: number, itemSsno: number) => {
 }
 
 const beginDateLimitFn = (date: string) => {
-  let chkFinDate: string = registDateTime.value.finishData
+  const chkFinDate: string = registDateTime.value.finishData
   return (
     date <=
     (chkFinDate == '' || chkFinDate == undefined || chkFinDate == null
@@ -708,7 +699,7 @@ const beginDateLimitFn = (date: string) => {
 }
 
 const finishDateLimitFn = (date: string) => {
-  let chkStrDate: string = registDateTime.value.beginDate
+  const chkStrDate: string = registDateTime.value.beginDate
   return (
     date >=
     (chkStrDate == '' || chkStrDate == undefined || chkStrDate == null

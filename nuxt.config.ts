@@ -41,7 +41,8 @@ export default defineNuxtConfig({
       'Dialog',
       'Loading',
       'LoadingBar',
-      'Notify'
+      'Notify',
+      'AddressbarColor'
     ],
     //sassVariables: 'css/quasar.variables.sass',
     sassVariables: true,
@@ -61,7 +62,10 @@ export default defineNuxtConfig({
         'bootstrap-icons'
       ],
       animations: 'all'
-    }
+    },
+    boot: [
+      'addressbar-color'
+    ]
   },
 
   piniaPersistedstate: {

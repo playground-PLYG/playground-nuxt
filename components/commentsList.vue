@@ -196,7 +196,7 @@ const removeComment = async () => {
       window.location.reload()
     })
     .catch((error) => {
-      console.log(error)
+      console.error(error)
     })
 }
 </script>
