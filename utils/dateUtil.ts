@@ -97,7 +97,7 @@ export const dateUtil = {
    * 절대값 없이 차이를 반환한다.
    * date1 > date2 결과값 : (+)
    * date2 > date1 결과값 : (-)
-   * */
+   */
   getDiffDateWithoutAbs: (
     dateDiff1: Date,
     dateDiff2: Date,
