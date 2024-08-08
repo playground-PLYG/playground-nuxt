@@ -8,7 +8,7 @@ module.exports = {
       autostart: true,
       watch: true,
       script: './.output/server/index.mjs',
-      //node_args: ['-r', 'pinpoint-node-agent'],
+      node_args: ['-r', 'pinpoint-node-agent'],
       env: {
         HOST: '0.0.0.0',
         PORT: 3000,

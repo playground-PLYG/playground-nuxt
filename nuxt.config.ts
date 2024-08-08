@@ -1,5 +1,3 @@
-import 'pinpoint-node-agent'
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import materialIcons from 'quasar/icon-set/svg-material-icons'
 import materialIconsRound from 'quasar/icon-set/svg-material-icons-round'
@@ -32,7 +30,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'nuxt-monaco-editor',
     "@formkit/auto-animate/nuxt",
-    "@vite-pwa/nuxt"
+    "@vite-pwa/nuxt",
+    "@nuxt/scripts"
   ],
 
   quasar: {
@@ -157,7 +156,7 @@ export default defineNuxtConfig({
       installPrompt: true
     },
     devOptions: {
-      enabled: process.env.ENV_PROFILE != "PROD",
+      enabled: true,
       type: "module"
     }
   },
