@@ -347,7 +347,7 @@
                   color="blue"
                   text-color="black"
                   label="엑셀 다운로드"
-                  :href="`https://august-cascade-385602.uw.r.appspot.com/playground/public/event/getEventExcelList?eventSn=${eventStore.eventSn}`"
+                  :href="`https://playground-api.duckdns.org/playground/public/event/getEventExcelList?eventSn=${eventStore.eventSn}`"
                   target="_blank"
                 />
               </div>
@@ -622,14 +622,15 @@ const addEvent = async () => {
   for (const item of pointPayment.value) {
     countSum += Number(item.fixingPointPayrCount)
   }
-  if (param.value.przwnerCount !== countSum) {
+  if (
+    param.value.pointPymntMethodCodeId === 'FXTN' &&
+    param.value.przwnerCount !== countSum
+  ) {
     commUtil.alert({
       message: "'당첨자 수'와 '고정포인트 지급자 수'의 합이 같지 않습니다"
     })
     return
-  }
-
-  if (
+  } else if (
     await commUtil.confirmSync({
       message: '저장하시겠습니까?'
     })
