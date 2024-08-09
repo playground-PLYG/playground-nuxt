@@ -139,7 +139,7 @@ const messageTypeOption = ref<string[]>(['TYPE_01', 'TYPE_02', 'HTML'])
 const senderId = ref<string>(authStore.mberId || 'test')
 const message = ref<string>('')
 const txtarea = ref<string>('')
-const etcList = ref<Array<{ key: string; val: any }>>([])
+const etcList = ref<Array<{ key: string; val: string }>>([])
 
 const onClickSend = async () => {
   if (message.value == '') {
@@ -147,7 +147,7 @@ const onClickSend = async () => {
       message: '메시지를 입력해주세요'
     })
   } else {
-    const etcObj: { [key: string]: any } = {}
+    const etcObj: { [key: string]: string } = {}
     if (etcList.value.length > 0) {
       etcList.value.forEach((obj) => (etcObj[obj.key] = obj.val))
     }

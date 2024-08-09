@@ -111,12 +111,14 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from 'vue'
 import {
+  navigateTo,
   useAsyncData,
   useNuxtApp,
   useRoute,
   useRuntimeConfig,
   useSeoMeta
 } from 'nuxt/app'
+import type { QNotifyCreateOptions } from 'quasar'
 import { LoadingBar, useQuasar } from 'quasar'
 import Stomp from 'webstomp-client'
 import SockJS from 'sockjs-client'
@@ -153,6 +155,7 @@ interface RecvMessage {
   messageType: string
   sendDate: string
   senderId: string
+  etc: { [key: string]: string }
 }
 
 const param = ref<Data>({
@@ -327,7 +330,8 @@ onMounted(() => {
 const fn_notification = (body: RecvMessage) => {
   const isHtml = body.messageType == 'HTML'
   const htmlCheckRegex: RegExp = /(<([^>]+)>)/g
-  //a태그 있을 때 이벤트 처리
+
+  const hasHref: boolean = body.etc?.href?.length > 0
 
   let messageWithoutHtmlTag = body.message
 
@@ -341,19 +345,51 @@ const fn_notification = (body: RecvMessage) => {
     timeStyle: 'medium'
   }).format(new Date(body.sendDate))
 
-  $q.notify({
+  const notifyOptions: QNotifyCreateOptions = {
     message: body.message,
     caption,
     position: 'top',
     icon: 'announcement',
     color: 'teal',
     progress: true,
+    group: body.message + '|' + new Date().getTime(),
     html: isHtml
-  })
+  }
+
+  if (hasHref) {
+    const label = body.etc.hrefBtnName || '이동'
+
+    notifyOptions.actions = [
+      {
+        label,
+        color: 'white',
+        handler: () => {
+          navigateTo(body.etc.href, {
+            external: body.etc.href.includes('http')
+          })
+        },
+        'aria-label': label
+      }
+    ]
+  }
+
+  $q.notify(notifyOptions)
 
   if (window.Notification) {
     if (Notification.permission === 'granted') {
       const notification = new Notification(messageWithoutHtmlTag)
+
+      if (hasHref) {
+        notification.onclick = (e) => {
+          e.preventDefault()
+
+          window.focus()
+
+          navigateTo(body.etc.href, {
+            external: body.etc.href.includes('http')
+          })
+        }
+      }
 
       setTimeout(() => {
         notification.close()
@@ -370,6 +406,18 @@ const fn_notification = (body: RecvMessage) => {
       Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
           const notification = new Notification(messageWithoutHtmlTag)
+
+          if (hasHref) {
+            notification.onclick = (e) => {
+              e.preventDefault()
+
+              window.focus()
+
+              navigateTo(body.etc.href, {
+                external: body.etc.href.includes('http')
+              })
+            }
+          }
 
           setTimeout(() => {
             notification.close()
