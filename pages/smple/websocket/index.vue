@@ -128,7 +128,6 @@ import { useRuntimeConfig } from 'nuxt/app'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '~/stores/useAuthStore'
 import type { ApiPagingResponse } from '~/interface/server'
-import { commUtil } from '~/utils/comm'
 
 const config = useRuntimeConfig()
 const authStore = useAuthStore()

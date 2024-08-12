@@ -126,7 +126,6 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import { imageUtil } from '~/utils/image'
 
 const imgCheckIdLazy = ref<number>(1)
 const imgCheckId = ref<number>(1)

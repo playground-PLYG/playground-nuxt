@@ -197,7 +197,6 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { ApiResponse, PageListInfo } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { commUtil } from '~/utils/comm'
 
 const { loading } = useQuasar()
 const authStore = useAuthStore()

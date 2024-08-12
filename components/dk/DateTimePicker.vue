@@ -41,7 +41,6 @@
 import { onMounted, ref, useAttrs, useSlots, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import type { QInputProps, QInputSlots } from 'quasar'
-import { dateUtil } from '@/utils/dateUtil'
 
 const slots = useSlots() as unknown as QInputSlots
 const attrs = useAttrs() as unknown as QInputProps

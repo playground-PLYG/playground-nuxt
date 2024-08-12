@@ -10,14 +10,13 @@
     "strict": true,
     "noImplicitAny": true,
     "allowJs": true,
-    "noEmit": true,
     "noUnusedLocals": true,
-    "resolveJsonModule": true,
     "types": [
+      "quasar",
+      "nuxt-quasar-ui",
       "nuxt",
       "@nuxt/types",
       "@types/node",
-      "quasar",
       "kakao.maps.d.ts",
       "@types/daum-postcode",
       "@vite-pwa/nuxt",
@@ -25,22 +24,10 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./*"],
-      "@/*": ["./*"],
       "#internal/nitro": ["./node_modules/nitropack/dist/runtime"],
       "#internal/nitro/app": ["./node_modules/nitropack/dist/runtime/app"],
-      "#internal/nitro/utils": ["./node_modules/nitropack/dist/runtime/utils"],
-      "#vue-router": ["./node_modules/vue-router"]
+      "#internal/nitro/utils": ["./node_modules/nitropack/dist/runtime/utils"]
     }
   },
-  "exclude": [
-    "**/dist/**",
-    "**/.nuxt/**",
-    "**/nuxt.d.ts",
-    "**/examples/**",
-    "**/docs/**",
-    "**/playground/**",
-    "**/test/fixtures/**",
-    "test/nuxt/**"
-  ]
+  "extends": "./.nuxt/tsconfig.json"
 }

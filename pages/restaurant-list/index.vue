@@ -74,7 +74,7 @@
             </q-toolbar>
           </q-header>
           <q-page-container class="bg-white">
-            <MapSearch
+            <map-search
               :location="currentLocation"
               @marker-click="selectRstrnt"
             />
@@ -144,7 +144,7 @@
                   lo: param.lo
                 }"
               />
-              <MapSearch
+              <map-search
                 v-if="!showMapLocation"
                 :location="currentLocation"
                 @marker-click="selectRstrnt"
@@ -348,9 +348,6 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, useQuasar } from 'quasar'
 import { type ApiResponse } from '../../interface/server'
-import { commUtil } from '~/utils/comm'
-import MapSearch from '~/components/MapSearch.vue'
-import MapLocation from '~/components/MapLocation.vue'
 
 const router = useRouter()
 const { loading } = useQuasar()

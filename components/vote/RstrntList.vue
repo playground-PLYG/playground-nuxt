@@ -103,10 +103,7 @@
 <!-- 함수정의 -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { commUtil } from '~/utils/comm'
 import { type ApiResponse, type Code } from '@/interface/server'
-import { codeUtil } from '@/utils/code'
-import { imageUtil } from '~/utils/image'
 
 const emit = defineEmits([
   'close-callback',

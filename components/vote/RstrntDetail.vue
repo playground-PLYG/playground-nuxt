@@ -139,9 +139,6 @@
 import { onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '@/interface/server'
-import { codeUtil } from '@/utils/code'
-import { imageUtil } from '~/utils/image'
-import { commUtil } from '~/utils/comm'
 
 const { loading } = useQuasar()
 

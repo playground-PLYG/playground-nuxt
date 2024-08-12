@@ -9,9 +9,6 @@ export default defineNuxtConfig({
       enabled: true
     }
   },
-
-  dev: true,
-
   runtimeConfig: {
     public: {
       envProfile: process.env.ENV_PROFILE,
@@ -19,7 +16,6 @@ export default defineNuxtConfig({
       kakaoApiKey: process.env.KAKAO_API_KEY
     }
   },
-
   modules: [
     'dayjs-nuxt',
     '@pinia/nuxt',
@@ -91,6 +87,8 @@ export default defineNuxtConfig({
   },
 
   pwa: {
+
+    disable: process.env.ENV_PROFILE !== "PROD",
     manifest: {
       id: "/?source=pwa",
       start_url: "/?source=pwa",

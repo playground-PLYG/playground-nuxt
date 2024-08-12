@@ -696,8 +696,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { QInput, useQuasar } from 'quasar'
 import { josa } from 'hangul-util'
 import { type ApiResponse, type Code } from '@/interface/server'
-import { codeUtil } from '@/utils/code'
-import { imageUtil } from '~/utils/image'
 
 const { loading, platform } = useQuasar()
 

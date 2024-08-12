@@ -69,9 +69,6 @@ import type { QRejectedEntry, QUploaderFactoryObject } from 'quasar'
 import { nextTick, onMounted, ref, toRefs } from 'vue'
 import { useQuasar } from 'quasar'
 import type { ApiResponse } from '@/interface/server'
-import { formatUtil } from '~/utils/format'
-import { fileUtil } from '~/utils/file'
-import { imageUtil } from '~/utils/image'
 
 const config = useRuntimeConfig()
 const { loading } = useQuasar()

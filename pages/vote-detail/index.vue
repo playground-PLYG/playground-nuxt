@@ -268,8 +268,6 @@ import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import type { ApiResponse, Code } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { codeUtil } from '../../utils/code'
-import { commUtil } from '../../utils/comm'
 
 const { loading } = useQuasar()
 

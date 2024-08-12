@@ -225,7 +225,6 @@ import { onMounted, ref } from 'vue'
 import { QBtnToggle, useQuasar } from 'quasar'
 import { type ApiResponse, type Code } from '../../interface/server'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { codeUtil } from '@/utils/code'
 
 const { loading } = useQuasar()
 const authStore = useAuthStore()

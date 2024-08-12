@@ -94,7 +94,6 @@ import { type QTableProps, date, useQuasar } from 'quasar'
 
 import type { ApiResponse, Code, Page, PageListInfo } from '@/interface/server'
 
-import { codeUtil } from '@/utils/code'
 import { useEventStore } from '@/stores/useEventStore'
 import paginationLayout from '@/components/PaginationComponent.vue'
 

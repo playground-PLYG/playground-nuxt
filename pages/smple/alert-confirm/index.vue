@@ -184,7 +184,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { commUtil } from '~/utils/comm'
 
 const $q = useQuasar()
 
@@ -223,10 +222,7 @@ const fn_alertCallbackSampleCallback = () => {
   alertCallbackResult.value += 'alert callback 함수 호출!<br/>'
 }
 
-const alertCallbackSampleCode =
-  ref<string>(`import { commUtil } from '~/utils/comm'
-
-const fn_alert호출함수 => () => {
+const alertCallbackSampleCode = ref<string>(`const fn_alert호출함수 => () => {
   /**
    * Alert 호출 후 callback 호출
    *
@@ -257,9 +253,7 @@ const fn_alertSyncSample = async () => {
 
   alertSyncResult.value += 'alert 확인 버튼 클릭<br/>'
 }
-const alertSyncSampleCode = ref<string>(`import { commUtil } from '~/utils/comm'
-
-/*
+const alertSyncSampleCode = ref<string>(`/*
  * Promise를 활용하기 때문에 호출하려는 함수에 async
  * commUtil.alertSync 호출부에 await을 필수로 붙여준다.
  * 
@@ -304,9 +298,7 @@ const fn_confirmCallbackSampleCallback = (isConfirm: boolean) => {
 }
 
 const confirmCallbackSampleCode =
-  ref<string>(`import { commUtil } from '~/utils/comm'
-
-const fn_confirm호출함수 => () => {
+  ref<string>(`const fn_confirm호출함수 => () => {
   /**
    * confirm 호출 후 callback 호출
    *
@@ -346,10 +338,7 @@ const fn_confirmSyncSample = async () => {
     confirmSyncResult.value += "'취소' 버튼 클릭<br/>"
   }
 }
-const confirmSyncSampleCode =
-  ref<string>(`import { commUtil } from '~/utils/comm'
-
-/*
+const confirmSyncSampleCode = ref<string>(`/*
  * Promise를 활용하기 때문에 호출하려는 함수에 async
  * commUtil.confirmSync 호출부에 await을 필수로 붙여준다.
  * 

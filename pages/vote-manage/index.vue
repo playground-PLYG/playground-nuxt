@@ -171,7 +171,7 @@ import { type ApiResponse } from '../../interface/server'
 import voteDetail from './vote-detail/voteDetail.vue'
 import voteRegistForm from './vote-detail/voteRegistForm.vue'
 import voteStatistics from './statistics/voteStatistics.vue'
-// import { dateUtil } from '~/utils/dateUtil'
+
 const { loading } = useQuasar()
 const $q = useQuasar()
 

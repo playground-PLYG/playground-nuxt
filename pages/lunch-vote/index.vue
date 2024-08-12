@@ -91,7 +91,6 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { ApiResponse } from '~/interface/server'
 import { useAuthStore } from '~/stores/useAuthStore'
-import { dateUtil } from '~/utils/dateUtil'
 
 const { loading } = useQuasar()
 const router = useRouter()
