@@ -60,6 +60,13 @@
         />
       </div>
     </div>
+    <EventRoulette
+      v-model:showDialog="showDialog"
+      :point-payments="event?.pointPayment ?? []"
+      :winning-point="joinRes?.przwinPointValue ?? null"
+      @roulette-completed="handleRouletteCompleted"
+    />
+    <TurtleRace v-model:showDialog="showRaceDialog" />
 
     <q-dialog v-model="isOpenPop" :maximized="false" :full-width="false">
       <q-card
@@ -116,6 +123,10 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { type ApiResponse } from '../../../interface/server'
+import EventRoulette from '../../../components/EventRoulette.vue'
+import TurtleRace from '../../../components/TurtleRace.vue'
+import { dateUtil } from '../../../utils/dateUtil'
+import { commUtil } from '../../../utils/comm'
 
 const { loading, platform } = useQuasar()
 const authStore = useAuthStore()
@@ -130,6 +141,16 @@ const detailReq = ref<EventReq>({ eventSerial: Number(eventSn) })
 const joinRes = ref<JoinRes>()
 const isOpenPop = ref<boolean>(false)
 const prize = ref<Prize | null>(null)
+const showDialog = ref(false)
+const showRaceDialog = ref(false)
+
+const showRoulette = () => {
+  showDialog.value = true
+}
+
+const showRace = () => {
+  showRaceDialog.value = true
+}
 
 interface Payment {
   pointPaymentUnitValue: number | null
@@ -239,6 +260,18 @@ const loginCheck = () => {
   }
 }
 
+function handleRouletteCompleted(przwinPointValue: number) {
+  if (przwinPointValue === 0) {
+    commUtil.alert({
+      message: `다음 기회에..`
+    })
+  } else {
+    commUtil.alert({
+      message: `${przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
+    })
+  }
+}
+
 const participate = async () => {
   if (event.value?.participationAt === 'Y') {
     commUtil.alert({
@@ -261,14 +294,12 @@ const participate = async () => {
   )
     .then((res) => {
       joinRes.value = res.data
-      if (joinRes.value.eventPrizeAt == 'Y') {
-        commUtil.alert({
-          message: `${joinRes.value.przwinPointValue}포인트 당첨되었습니다! 축하드립니다!`
-        })
-      } else {
-        commUtil.alert({
-          message: '다음기회에..'
-        })
+      if (event.value?.drwtMethodCodeId == 'RAND') {
+        // 랜덤이벤트 + 룰렛
+        showRoulette()
+      } else if (event.value?.drwtMethodCodeId == 'FRSC') {
+        showRace()
+        // handleRouletteCompleted(joinRes.value.przwinPointValue)
       }
 
       if (event.value) {
