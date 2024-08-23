@@ -15,7 +15,7 @@
         <button @click="checkSolution">확인</button>
       </div>
       <div class="timer">시간: {{ formatTime(timer) }}</div>
-      <div class="grid">
+      <div v-if="!isViewCorrectAnswerBoard" class="grid problem">
         <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
           <div
             v-for="(cell, colIndex) in row"
@@ -49,7 +49,38 @@
           </div>
         </div>
       </div>
+      <div v-else class="grid correctAnswer">
+        <div
+          v-for="(row, rowIndex) in correctAnswerBoard"
+          :key="rowIndex"
+          class="row"
+        >
+          <div
+            v-for="(cell, colIndex) in row"
+            :key="colIndex"
+            class="cell"
+            :class="{
+              initial: initialBoard[rowIndex][colIndex] !== 0,
+              'not-initial': initialBoard[rowIndex][colIndex] === 0,
+              'box-border-right': colIndex % 3 === 2 && colIndex !== 8,
+              'box-border-bottom': rowIndex % 3 === 2 && rowIndex !== 8
+            }"
+          >
+            <div class="cell-value">
+              {{ cell.value }}
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="mobile-controls">
+        <button
+          @mousedown="isViewCorrectAnswerBoard = true"
+          @mouseup="isViewCorrectAnswerBoard = false"
+          @touchstart="isViewCorrectAnswerBoard = true"
+          @touchend="isViewCorrectAnswerBoard = false"
+        >
+          정답보기
+        </button>
         <button @click="toggleNoteMode">
           메모 모드: {{ noteModeActive ? '켜짐' : '꺼짐' }}
         </button>
@@ -72,6 +103,8 @@ const { loading } = useQuasar()
 const difficulty = ref(1)
 const initialBoard = ref<number[][]>([])
 const board = ref<Cell[][]>([])
+const correctAnswerBoard = ref<Cell[][]>([])
+const isViewCorrectAnswerBoard = ref<boolean>(false)
 const message = ref('')
 const timer = ref(0)
 const timerInterval = ref<number | null>(null)
@@ -99,6 +132,13 @@ const generateBoardPromise = (): Promise<boolean> => {
       81 - Math.floor((difficulty.value - 1 + 9) * 0.75) * 4
     )
     const newBoard = completeBoard.map((row) => [...row])
+
+    correctAnswerBoard.value = newBoard.map((row) =>
+      row.map((cell) => ({
+        value: cell === 0 ? '' : cell.toString(),
+        notes: []
+      }))
+    )
 
     removeNumbers(newBoard, 81 - numClues)
 
@@ -430,6 +470,8 @@ onUnmounted(() => {
 
   .mobile-controls {
     margin-top: 20px;
+    display: flex;
+    gap: 10px;
 
     button {
       padding: 10px 20px;
