@@ -14,7 +14,9 @@
         <button @click="clearBoard">지우기</button>
         <button @click="checkSolution">확인</button>
       </div>
+
       <div class="timer">시간: {{ formatTime(timer) }}</div>
+
       <div v-if="!isViewCorrectAnswerBoard" class="grid problem">
         <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
           <div
@@ -50,6 +52,7 @@
           </div>
         </div>
       </div>
+
       <div v-else class="grid correctAnswer">
         <div
           v-for="(row, rowIndex) in correctAnswerBoard"
@@ -73,6 +76,7 @@
           </div>
         </div>
       </div>
+
       <div class="mobile-controls">
         <button
           @mousedown="isViewCorrectAnswerBoard = true"
@@ -86,8 +90,9 @@
           메모 모드: {{ noteModeActive ? '켜짐' : '꺼짐' }}
         </button>
       </div>
+
       <div class="mobile-controls vertical">
-        <div class="num-buttons vertical">
+        <div class="num-buttons center">
           <button class="btn-num" @click="clickClearButton">X</button>
         </div>
         <div class="num-buttons">
@@ -149,6 +154,7 @@ const generateBoardPromise = (): Promise<boolean> => {
     const numClues = Math.floor(
       81 - Math.floor((difficulty.value - 1 + 9) * 0.75) * 4
     )
+
     const newBoard = completeBoard.map((row) => [...row])
 
     correctAnswerBoard.value = newBoard.map((row) =>
@@ -161,6 +167,7 @@ const generateBoardPromise = (): Promise<boolean> => {
     removeNumbers(newBoard, 81 - numClues)
 
     initialBoard.value = JSON.parse(JSON.stringify(newBoard))
+
     board.value = newBoard.map((row) =>
       row.map((cell) => ({
         value: cell === 0 ? '' : cell.toString(),
@@ -175,6 +182,7 @@ const generateBoardPromise = (): Promise<boolean> => {
 const fillBoard = (board: number[][]): boolean => {
   // 빈 칸을 찾습니다.
   const emptySpot = findEmptySpot(board)
+
   if (!emptySpot) {
     return true // 빈 칸이 없다면 보드가 완성된 것
   }
@@ -201,12 +209,14 @@ const fillBoard = (board: number[][]): boolean => {
 
 const removeNumbers = (board: number[][], numRemove: number) => {
   let attempts = numRemove
+
   while (attempts > 0) {
     const row = Math.floor(Math.random() * 9)
     const col = Math.floor(Math.random() * 9)
 
     if (board[row][col] !== 0) {
       const backup = board[row][col]
+
       board[row][col] = 0
 
       const copyBoard = board.map((row) => [...row])
@@ -228,6 +238,7 @@ const findEmptySpot = (board: number[][]): [number, number] | null => {
       }
     }
   }
+
   return null
 }
 
@@ -244,8 +255,10 @@ const hasUniqueSolution = (board: number[][]): boolean => {
 
   const countSolutions = (board: number[][]): boolean => {
     const emptySpot = findEmptySpot(board)
+
     if (!emptySpot) {
       solutionCount++
+
       return solutionCount > 1 // 두 개 이상의 해가 있다면 false
     }
 
@@ -267,6 +280,7 @@ const hasUniqueSolution = (board: number[][]): boolean => {
   }
 
   countSolutions(board)
+
   return solutionCount === 1
 }
 
@@ -298,6 +312,7 @@ const isValidPlacement = (
 
 const isInvalid = (row: number, col: number): boolean => {
   const value = board.value[row][col].value
+
   if (value === '') {
     return false
   }
@@ -320,6 +335,7 @@ const isInvalid = (row: number, col: number): boolean => {
   // 3x3 박스 검사
   const boxRow = Math.floor(row / 3) * 3
   const boxCol = Math.floor(col / 3) * 3
+
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
       if (
@@ -359,6 +375,7 @@ const resetTimer = () => {
   if (timerInterval.value) {
     clearInterval(timerInterval.value)
   }
+
   timer.value = 0
   timerInterval.value = setInterval(() => {
     timer.value++
@@ -368,6 +385,7 @@ const resetTimer = () => {
 const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
+
   return `${minutes.toString().padStart(2, '0')}:${remainingSeconds
     .toString()
     .padStart(2, '0')}`
@@ -390,6 +408,7 @@ const resetBoard = () => {
 const selectCell = (row: number, col: number) => {
   if (initialBoard.value[row][col] === 0) {
     highlightCell(row, col)
+
     selectedCell.value = { row, col }
   }
 }
@@ -402,6 +421,7 @@ const isHighlighted = computed(() => (row: number, col: number) => {
   if (!highlightedCell.value) {
     return false
   }
+
   return row === highlightedCell.value.row || col === highlightedCell.value.col
 })
 
@@ -422,6 +442,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
     if (event.shiftKey || noteModeActive.value) {
       // 노트 모드
       const num = Number.parseInt(event.key)
+
       toggleNote(row, col, num)
     } else {
       // 일반 입력 모드
@@ -434,11 +455,13 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 const toggleNote = (row: number, col: number, num: number) => {
   const noteIndex = board.value[row][col].notes.indexOf(num)
+
   if (noteIndex === -1) {
     board.value[row][col].notes.push(num)
   } else {
     board.value[row][col].notes.splice(noteIndex, 1)
   }
+
   board.value[row][col].notes.sort((a, b) => a - b)
 }
 
@@ -470,6 +493,7 @@ const clickClearButton = () => {
 
 const touchStart = (row: number, col: number) => {
   selectCell(row, col)
+
   longPressTimer.value = setTimeout(() => {
     noteModeActive.value = true
   }, 500) // 0.5초 long press
@@ -483,6 +507,7 @@ const touchEnd = () => {
 
 onMounted(() => {
   generateBoard()
+
   window.addEventListener('keydown', handleKeyDown)
 })
 
@@ -490,6 +515,7 @@ onUnmounted(() => {
   if (timerInterval.value) {
     clearInterval(timerInterval.value)
   }
+
   window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
@@ -542,7 +568,7 @@ onUnmounted(() => {
       }
     }
 
-    .num-buttons.vertical {
+    .num-buttons.center {
       justify-content: center;
     }
   }
