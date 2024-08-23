@@ -104,7 +104,7 @@ const currentPiece = ref<{
 } | null>(null)
 const score = ref(0)
 const time = ref(0)
-const gameInterval = ref<number | null>(null)
+const gameInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const gameSpeed = ref(1000)
 const isGameOver = ref(false)
 

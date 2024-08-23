@@ -125,7 +125,7 @@ const correctAnswerBoard = ref<Cell[][]>([])
 const isViewCorrectAnswerBoard = ref<boolean>(false)
 const message = ref('')
 const timer = ref(0)
-const timerInterval = ref<number | null>(null)
+const timerInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const selectedCell = ref<{ row: number; col: number } | null>(null)
 const highlightedCell = ref<{ row: number; col: number } | null>(null)
 
@@ -231,7 +231,7 @@ const findEmptySpot = (board: number[][]): [number, number] | null => {
   return null
 }
 
-const shuffle = <T>(array: T[]): T[] => {
+const shuffle = (array: number[]): number[] => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[array[i], array[j]] = [array[j], array[i]]
@@ -301,7 +301,6 @@ const isInvalid = (row: number, col: number): boolean => {
   if (value === '') {
     return false
   }
-  const num = Number.parseInt(value)
 
   // 행 검사
   if (
@@ -342,6 +341,7 @@ const checkSolution = () => {
       if (cell.value === '') {
         return false
       }
+
       return isValidPlacement(
         board.value.map((r) =>
           r.map((c) => (c.value === '' ? 0 : Number.parseInt(c.value)))
@@ -406,7 +406,7 @@ const isHighlighted = computed(() => (row: number, col: number) => {
 })
 
 const noteModeActive = ref(false)
-const longPressTimer = ref<number | null>(null)
+const longPressTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
 const toggleNoteMode = () => {
   noteModeActive.value = !noteModeActive.value
