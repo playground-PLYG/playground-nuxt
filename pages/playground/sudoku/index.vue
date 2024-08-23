@@ -1,6 +1,6 @@
 <template>
   <div class="q-gutter-md q-pa-md">
-    <div class="sudoku">
+    <div :class="['sudoku', isMobile ? 'mobile' : '']">
       <div class="controls">
         <label
           >난이도:
@@ -28,7 +28,8 @@
               selected:
                 selectedCell &&
                 selectedCell.row === rowIndex &&
-                selectedCell.col === colIndex,
+                selectedCell.col === colIndex &&
+                initialBoard[rowIndex][colIndex] === 0,
               invalid: isInvalid(rowIndex, colIndex),
               'box-border-right': colIndex % 3 === 2 && colIndex !== 8,
               'box-border-bottom': rowIndex % 3 === 2 && rowIndex !== 8
@@ -98,7 +99,9 @@ interface Cell {
   notes: number[]
 }
 
-const { loading } = useQuasar()
+const { loading, platform } = useQuasar()
+
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const difficulty = ref(1)
 const initialBoard = ref<number[][]>([])
@@ -370,9 +373,8 @@ const resetBoard = () => {
 }
 
 const selectCell = (row: number, col: number) => {
-  highlightCell(row, col)
-
   if (initialBoard.value[row][col] === 0) {
+    highlightCell(row, col)
     selectedCell.value = { row, col }
   }
 }
@@ -572,6 +574,15 @@ onUnmounted(() => {
             align-items: center;
           }
         }
+      }
+    }
+  }
+
+  &.mobile {
+    .grid {
+      .row .cell {
+        width: 40px;
+        height: 40px;
       }
     }
   }
