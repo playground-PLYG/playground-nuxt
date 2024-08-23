@@ -597,6 +597,10 @@ onUnmounted(() => {
           background-color: #b3d9ff;
         }
 
+        &.initial.highlighted {
+          background-color: #d3d9df;
+        }
+
         &.invalid {
           color: red;
         }
