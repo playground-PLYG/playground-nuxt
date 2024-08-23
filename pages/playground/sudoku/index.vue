@@ -500,6 +500,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   font-family: Arial, sans-serif;
+  user-select: none;
 
   .controls {
     display: flex;
