@@ -86,6 +86,21 @@
           메모 모드: {{ noteModeActive ? '켜짐' : '꺼짐' }}
         </button>
       </div>
+      <div class="mobile-controls vertical">
+        <div class="num-buttons vertical">
+          <button class="btn-num" @click="clickClearButton">X</button>
+        </div>
+        <div class="num-buttons">
+          <button
+            v-for="i in 9"
+            :key="i"
+            class="btn-num"
+            @click="clickButton(i)"
+          >
+            {{ i }}
+          </button>
+        </div>
+      </div>
       <p v-if="message">{{ message }}</p>
     </div>
   </div>
@@ -427,6 +442,32 @@ const toggleNote = (row: number, col: number, num: number) => {
   board.value[row][col].notes.sort((a, b) => a - b)
 }
 
+const clickButton = (num: number) => {
+  if (!selectedCell.value) {
+    return
+  }
+
+  const { row, col } = selectedCell.value
+
+  if (noteModeActive.value) {
+    // 노트 모드
+    toggleNote(row, col, num)
+  } else {
+    // 일반 입력 모드
+    board.value[row][col].value = num.toString()
+  }
+}
+
+const clickClearButton = () => {
+  if (!selectedCell.value) {
+    return
+  }
+
+  const { row, col } = selectedCell.value
+
+  board.value[row][col].value = ''
+}
+
 const touchStart = (row: number, col: number) => {
   selectCell(row, col)
   longPressTimer.value = setTimeout(() => {
@@ -487,6 +528,26 @@ onUnmounted(() => {
         background-color: #45a049;
       }
     }
+
+    .num-buttons {
+      display: flex;
+      gap: 2px;
+
+      button {
+        padding: 10px 15px;
+        background-color: #84898d;
+        border: 1px solid darkgray;
+        border-radius: 10px;
+      }
+    }
+
+    .num-buttons.vertical {
+      justify-content: center;
+    }
+  }
+
+  .mobile-controls.vertical {
+    flex-direction: column;
   }
 
   .timer {
