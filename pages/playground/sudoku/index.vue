@@ -5,7 +5,7 @@
         <label
           >난이도:
           <select v-model="difficulty" @change="generateBoard">
-            <option v-for="n in 10" :key="n + 4" :value="n + 4">
+            <option v-for="n in 10" :key="n" :value="n">
               {{ n }}
             </option>
           </select>
@@ -69,7 +69,7 @@ interface Cell {
 
 const { loading } = useQuasar()
 
-const difficulty = ref(5)
+const difficulty = ref(1)
 const initialBoard = ref<number[][]>([])
 const board = ref<Cell[][]>([])
 const message = ref('')
@@ -95,7 +95,9 @@ const generateBoardPromise = (): Promise<boolean> => {
     fillBoard(completeBoard)
 
     // 2. 난이도에 따라 힌트를 제거합니다.
-    const numClues = Math.floor(81 - (difficulty.value - 1) * 5)
+    const numClues = Math.floor(
+      81 - Math.floor((difficulty.value - 1 + 9) * 0.75) * 4
+    )
     const newBoard = completeBoard.map((row) => [...row])
 
     removeNumbers(newBoard, 81 - numClues)
