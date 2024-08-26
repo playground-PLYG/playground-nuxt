@@ -1,5 +1,5 @@
 <template>
-  <div class="q-gutter-md q-pa-md">
+  <div class="q-gutter-md q-pa-md" @contextmenu.prevent>
     <div :class="['sudoku', isMobile ? 'mobile' : '']">
       <div class="controls">
         <label
@@ -10,6 +10,12 @@
             </option>
           </select>
         </label>
+        <label class="highlightInvalidNumbers">
+          중복 숫자 강조:
+          <input v-model="highlightInvalidNumbers" type="checkbox" />
+        </label>
+      </div>
+      <div class="controls">
         <button @click="resetBoard">새 게임</button>
         <button @click="clearBoard">지우기</button>
         <button @click="checkSolution">확인</button>
@@ -133,6 +139,7 @@ const timer = ref(0)
 const timerInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const selectedCell = ref<{ row: number; col: number } | null>(null)
 const highlightedCell = ref<{ row: number; col: number } | null>(null)
+const highlightInvalidNumbers = ref(false)
 
 const generateBoard = async () => {
   loading.show()
@@ -311,6 +318,10 @@ const isValidPlacement = (
 }
 
 const isInvalid = (row: number, col: number): boolean => {
+  if (!highlightInvalidNumbers.value) {
+    return false
+  }
+
   const value = board.value[row][col].value
 
   if (value === '') {
@@ -354,20 +365,35 @@ const isInvalid = (row: number, col: number): boolean => {
 const checkSolution = () => {
   const isValid = board.value.every((row, rowIndex) =>
     row.every((cell, colIndex) => {
-      if (cell.value === '') {
+      const value = cell.value
+
+      if (value === '') {
         return false
       }
 
-      return isValidPlacement(
-        board.value.map((r) =>
-          r.map((c) => (c.value === '' ? 0 : Number.parseInt(c.value)))
-        ),
+      // Convert board to numbers for validation
+      const numBoard = board.value.map((r) =>
+        r.map((c) => (c.value === '' ? 0 : Number.parseInt(c.value)))
+      )
+
+      // Temporarily clear the current cell for accurate validation
+      numBoard[rowIndex][colIndex] = 0
+
+      // Validate current cell
+      const valid = isValidPlacement(
+        numBoard,
         rowIndex,
         colIndex,
-        Number.parseInt(cell.value)
+        Number.parseInt(value)
       )
+
+      // Restore the current cell value
+      numBoard[rowIndex][colIndex] = Number.parseInt(value)
+
+      return valid
     })
   )
+
   message.value = isValid ? '정답입니다!' : '오답입니다. 다시 확인해보세요.'
 }
 
@@ -432,10 +458,66 @@ const toggleNoteMode = () => {
   noteModeActive.value = !noteModeActive.value
 }
 
+// 방향키로 비어있는 셀로 이동하는 함수
+const handleArrowKey = (direction: string) => {
+  if (!selectedCell.value) {
+    return
+  }
+
+  let { row, col } = selectedCell.value
+  let found = false // 비어있는 셀을 찾았는지 여부
+
+  // 방향에 따라 셀의 위치를 이동시키는 함수
+  const moveToNextEmptyCell = (newRow: number, newCol: number) => {
+    if (newRow < 0 || newRow > 8 || newCol < 0 || newCol > 8) {
+      return
+    }
+
+    // 비어있는 셀인지 확인
+    if (initialBoard.value[newRow][newCol] === 0) {
+      selectCell(newRow, newCol)
+      found = true // 비어있는 셀을 찾음
+    }
+  }
+
+  // 선택된 셀에서 이동 가능한 셀을 찾기 위해 반복
+  while (!found) {
+    switch (direction) {
+      case 'ArrowUp':
+        moveToNextEmptyCell(row - 1, col)
+        row-- // 계속 위로 이동
+        break
+      case 'ArrowDown':
+        moveToNextEmptyCell(row + 1, col)
+        row++ // 계속 아래로 이동
+        break
+      case 'ArrowLeft':
+        moveToNextEmptyCell(row, col - 1)
+        col-- // 계속 왼쪽으로 이동
+        break
+      case 'ArrowRight':
+        moveToNextEmptyCell(row, col + 1)
+        col++ // 계속 오른쪽으로 이동
+        break
+    }
+
+    // 이동이 불가능한 경우 루프 종료
+    if (row < 0 || row > 8 || col < 0 || col > 8) {
+      break
+    }
+  }
+}
+
 const handleKeyDown = (event: KeyboardEvent) => {
   if (!selectedCell.value) {
     return
   }
+
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+    handleArrowKey(event.key)
+    return
+  }
+
   const { row, col } = selectedCell.value
 
   if (event.key >= '1' && event.key <= '9') {
@@ -447,6 +529,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
     } else {
       // 일반 입력 모드
       board.value[row][col].value = event.key
+
+      if (board.value.every((row) => row.every((cell) => cell.value !== ''))) {
+        checkSolution()
+      }
     }
   } else if (event.key === 'Backspace' || event.key === 'Delete') {
     board.value[row][col].value = ''
@@ -478,6 +564,10 @@ const clickButton = (num: number) => {
   } else {
     // 일반 입력 모드
     board.value[row][col].value = num.toString()
+
+    if (board.value.every((row) => row.every((cell) => cell.value !== ''))) {
+      checkSolution()
+    }
   }
 }
 
@@ -671,6 +761,14 @@ onUnmounted(() => {
   }
 
   &.mobile {
+    .controls {
+      gap: 6px;
+
+      .highlightInvalidNumbers {
+        padding: 5px;
+      }
+    }
+
     .grid {
       .row .cell {
         width: 40px;

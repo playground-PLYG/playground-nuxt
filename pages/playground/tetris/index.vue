@@ -1,5 +1,5 @@
 <template>
-  <div class="q-gutter-md q-pa-md">
+  <div class="q-gutter-md q-pa-md" @contextmenu.prevent>
     <div :class="['tetris-game', isMobile ? 'mobile' : '']">
       <div class="game-container">
         <div class="board-wrap">
