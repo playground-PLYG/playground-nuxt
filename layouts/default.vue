@@ -318,7 +318,9 @@ onMounted(() => {
       stompClient.subscribe('/sub', (response) => {
         const body = JSON.parse(response.body) as RecvMessage
 
-        fn_notification(body)
+        if (body && body.messageType == 'TYPE_01') {
+          fn_notification(body)
+        }
       })
     },
     (error) => {

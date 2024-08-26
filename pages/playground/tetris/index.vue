@@ -45,7 +45,9 @@
           <div class="score-board-wrap">
             <div class="score-board">
               <div class="text-h5 q-mb-md">Score: {{ score }}</div>
-              <div class="text-h5 q-mb-md">Time: {{ formatTime(time) }}</div>
+              <div class="text-h5 q-mb-md">
+                게임 시간: {{ formatTime(time) }}
+              </div>
             </div>
           </div>
         </div>
@@ -54,6 +56,7 @@
         <button @click="startGame">시작</button>
         <button @click="pauseGame">일시정지</button>
         <button @click="resetGame">리셋</button>
+        <button @click="showRank">랭킹</button>
       </div>
 
       <!-- 새로운 모바일 키보드 버튼 -->
@@ -72,6 +75,29 @@
         </div>
       </div>
     </div>
+
+    <playground-game-rank-list-popup
+      :is-visible="isVisibleRank"
+      :fields="rankListFields"
+      game-ty-code="TETRIS"
+      @update:is-visible="
+        (isVisible) => {
+          isVisibleRank = isVisible
+        }
+      "
+    />
+
+    <playground-save-rank
+      :is-visible="isVisibleRankSave"
+      game-ty-code="TETRIS"
+      :game-time="time"
+      :game-one-atrb-cn="scoreStr"
+      @update:is-visible="
+        (isVisible) => {
+          isVisibleRank = isVisible
+        }
+      "
+    />
   </div>
 </template>
 
@@ -81,6 +107,33 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 const { platform } = useQuasar()
 
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
+const isVisibleRank = ref<boolean>(false)
+const isVisibleRankSave = ref<boolean>(false)
+const rankListFields = {
+  gameOneAtrbCn: {
+    show: true,
+    title: '점수',
+    formatFnc: (txt: string) => {
+      return txt + '점'
+    }
+  },
+
+  gameTwoAtrbCn: {
+    show: false
+  },
+
+  gameThreeAtrbCn: {
+    show: false
+  },
+
+  gameFourAtrbCn: {
+    show: false
+  },
+
+  gameFiveAtrbCn: {
+    show: false
+  }
+}
 const BOARD_WIDTH = 10
 const BOARD_HEIGHT = 25
 const SHAPES = [
@@ -122,6 +175,7 @@ const currentPiece = ref<{
   y: number
 } | null>(null)
 const score = ref(0)
+const scoreStr = ref('')
 const time = ref(0)
 const gameInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const gameSpeed = ref(1000)
@@ -316,6 +370,7 @@ const startGame = () => {
 const pauseGame = () => {
   if (gameInterval.value) {
     clearInterval(gameInterval.value)
+
     gameInterval.value = null
   }
   isGameOver.value = true // 이렇게 하면 gameLoop가 멈춥니다
@@ -324,6 +379,7 @@ const pauseGame = () => {
 const resetGame = () => {
   pauseGame()
   initializeBoard()
+
   currentPiece.value = null
   nextPiece.value = []
   holdPiece.value = []
@@ -334,8 +390,19 @@ const resetGame = () => {
 
 const gameOver = () => {
   isGameOver.value = true
+
   pauseGame()
-  alert(`Game Over! Your score: ${score.value}`)
+
+  scoreStr.value = score.value.toString()
+
+  commUtil.confirm({
+    message: `Game Over! \n점수: ${score.value} \n랭킹에 등록하시겠습니까?`,
+    callbackFn: (isConfirm) => {
+      if (isConfirm) {
+        isVisibleRankSave.value = true
+      }
+    }
+  })
 }
 
 const holdCurrentPiece = () => {
@@ -384,6 +451,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
+
   return `${mins.toString().padStart(2, '0')}:${secs
     .toString()
     .padStart(2, '0')}`
@@ -393,6 +461,10 @@ const dropPiece = () => {
   while (movePiece(0, 1)) {
     // Do nothing
   }
+}
+
+const showRank = () => {
+  isVisibleRank.value = true
 }
 
 onMounted(() => {
@@ -604,6 +676,8 @@ onUnmounted(() => {
     }
 
     .board-wrap {
+      margin-left: 35px;
+
       .board {
         grid-template-rows: repeat(25, minmax(auto, 20px));
         grid-template-columns: repeat(10, minmax(auto, 20px));

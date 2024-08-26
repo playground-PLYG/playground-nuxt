@@ -18,7 +18,8 @@
       <div class="controls">
         <button @click="resetBoard">새 게임</button>
         <button @click="clearBoard">지우기</button>
-        <button @click="checkSolution">확인</button>
+        <button @click="checkSolution">정답 확인</button>
+        <button @click="showRank">랭킹</button>
       </div>
 
       <div class="timer">시간: {{ formatTime(timer) }}</div>
@@ -114,6 +115,28 @@
       </div>
       <p v-if="message">{{ message }}</p>
     </div>
+
+    <playground-game-rank-list-popup
+      :is-visible="isVisibleRank"
+      :fields="rankListFields"
+      game-ty-code="SUDOKU"
+      @update:is-visible="
+        (isVisible) => {
+          isVisibleRank = isVisible
+        }
+      "
+    />
+
+    <playground-save-rank
+      :is-visible="isVisibleRankSave"
+      game-ty-code="SUDOKU"
+      :game-time="timer"
+      @update:is-visible="
+        (isVisible) => {
+          isVisibleRank = isVisible
+        }
+      "
+    />
   </div>
 </template>
 
@@ -140,6 +163,29 @@ const timerInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const selectedCell = ref<{ row: number; col: number } | null>(null)
 const highlightedCell = ref<{ row: number; col: number } | null>(null)
 const highlightInvalidNumbers = ref(false)
+const isVisibleRank = ref<boolean>(false)
+const isVisibleRankSave = ref<boolean>(false)
+const rankListFields = {
+  gameOneAtrbCn: {
+    show: false
+  },
+
+  gameTwoAtrbCn: {
+    show: false
+  },
+
+  gameThreeAtrbCn: {
+    show: false
+  },
+
+  gameFourAtrbCn: {
+    show: false
+  },
+
+  gameFiveAtrbCn: {
+    show: false
+  }
+}
 
 const generateBoard = async () => {
   loading.show()
@@ -395,6 +441,21 @@ const checkSolution = () => {
   )
 
   message.value = isValid ? '정답입니다!' : '오답입니다. 다시 확인해보세요.'
+
+  if (isValid) {
+    resetTimer()
+
+    commUtil.confirm({
+      message: `정답입니다! \n랭킹에 등록하시겠습니까?`,
+      callbackFn: (isConfirm) => {
+        if (isConfirm) {
+          isVisibleRankSave.value = true
+        }
+      }
+    })
+  } else {
+    commUtil.alert({ message: '오답입니다. 다시 확인해보세요.' })
+  }
 }
 
 const resetTimer = () => {
@@ -579,6 +640,10 @@ const clickClearButton = () => {
   const { row, col } = selectedCell.value
 
   board.value[row][col].value = ''
+}
+
+const showRank = () => {
+  isVisibleRank.value = true
 }
 
 const touchStart = (row: number, col: number) => {
