@@ -1,6 +1,6 @@
 <template>
   <div class="q-gutter-md q-pa-md">
-    <div class="tetris-game">
+    <div :class="['tetris-game', isMobile ? 'mobile' : '']">
       <div class="game-container">
         <div class="board-wrap">
           <div class="board">
@@ -55,6 +55,22 @@
         <button @click="pauseGame">일시정지</button>
         <button @click="resetGame">리셋</button>
       </div>
+
+      <!-- 새로운 모바일 키보드 버튼 -->
+      <div class="mobile-controls">
+        <div class="mobile-controls-row">
+          <button @click="rotatePiece">↻</button>
+        </div>
+        <div class="mobile-controls-row">
+          <button @click="movePiece(-1, 0)">←</button>
+          <button @click="movePiece(0, 1)">↓</button>
+          <button @click="movePiece(1, 0)">→</button>
+        </div>
+        <div class="mobile-controls-row">
+          <button @click="holdCurrentPiece">Hold</button>
+          <button @click="dropPiece">Drop</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -62,6 +78,9 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
+const { platform } = useQuasar()
+
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 const BOARD_WIDTH = 10
 const BOARD_HEIGHT = 25
 const SHAPES = [
@@ -370,6 +389,12 @@ const formatTime = (seconds: number) => {
     .padStart(2, '0')}`
 }
 
+const dropPiece = () => {
+  while (movePiece(0, 1)) {
+    // Do nothing
+  }
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
 })
@@ -386,32 +411,40 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   font-family: Arial, sans-serif;
+  max-width: 100vw;
+  overflow-x: hidden;
 
   .game-container {
     display: flex;
     gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .board-wrap {
     height: fit-content;
     background-color: #222;
     border: 2px solid #444;
+    max-width: 100%;
+    overflow: hidden;
 
     .board {
       display: grid;
-      grid-template-rows: repeat(25, 25px);
-      grid-template-columns: repeat(10, 25px);
+      grid-template-rows: repeat(25, minmax(auto, 25px));
+      grid-template-columns: repeat(10, minmax(auto, 25px));
       gap: 1px;
-      padding: 10px;
+      padding: 5px;
 
       .row {
         display: contents;
       }
 
       .cell {
-        width: 25px;
-        height: 25px;
+        width: 100%;
+        height: 100%;
         border: 1px solid #444;
+        min-width: 15px;
+        min-height: 15px;
 
         &.color-0 {
           background-color: #111;
@@ -444,7 +477,7 @@ onUnmounted(() => {
   .side-panel {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 15px;
 
     .piece-preview-wrap {
       width: max-content;
@@ -455,8 +488,8 @@ onUnmounted(() => {
 
       .piece-preview {
         display: grid;
-        grid-template-rows: repeat(7, 15px);
-        grid-template-columns: repeat(7, 15px);
+        grid-template-rows: repeat(7, minmax(auto, 15px));
+        grid-template-columns: repeat(7, minmax(auto, 15px));
         gap: 1px;
 
         .row {
@@ -464,9 +497,11 @@ onUnmounted(() => {
         }
 
         .cell {
-          width: 15px;
-          height: 15px;
+          width: 100%;
+          height: 100%;
           border: 1px solid #444;
+          min-width: 10px;
+          min-height: 10px;
 
           &.color-0 {
             background-color: #111;
@@ -497,15 +532,19 @@ onUnmounted(() => {
     }
 
     .score-board-wrap {
-      padding-top: 120px;
+      padding-top: 20px;
     }
   }
 
-  .controls {
+  .controls,
+  .mobile-controls {
     margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 
     button {
-      margin: 0 10px;
+      margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
       background-color: #4caf50;
@@ -516,6 +555,109 @@ onUnmounted(() => {
 
       &:hover {
         background-color: #45a049;
+      }
+    }
+  }
+}
+
+.mobile-controls {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+
+  .mobile-controls-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+
+    button {
+      width: 50px;
+      height: 50px;
+      margin: 0 5px;
+      font-size: 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #45a049;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .tetris-game.mobile {
+    font-size: 10px;
+    .text-h5 {
+      font-size: 15px;
+    }
+
+    .game-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-gap: 10px;
+      width: 100vw;
+    }
+
+    .board-wrap {
+      .board {
+        grid-template-rows: repeat(25, minmax(auto, 20px));
+        grid-template-columns: repeat(10, minmax(auto, 20px));
+      }
+    }
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .score-board-wrap,
+      .piece-preview-wrap {
+        width: 100%;
+      }
+
+      .score-board-wrap {
+        padding-top: 0;
+        text-align: center;
+      }
+
+      .piece-preview-wrap {
+        text-align: center;
+      }
+    }
+
+    .controls {
+      margin-top: 5px;
+    }
+
+    .controls,
+    .mobile-controls {
+      button {
+        margin: 2px;
+        padding: 4px 7px;
+        font-size: 12px;
+      }
+    }
+
+    .mobile-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      margin-top: 5px;
+
+      .mobile-controls-row {
+        gap: 20px;
+        margin-bottom: 1px;
+
+        button {
+          width: 50px;
+          height: 50px;
+        }
       }
     }
   }
