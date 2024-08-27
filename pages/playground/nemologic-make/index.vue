@@ -6,6 +6,10 @@
 
     <div class="controls">
       <div class="control-row">
+        <div class="control-item">
+          <span>퍼즐명</span>
+          <q-input v-model="puzzleName" maxlength="50" />
+        </div>
         <div class="control-item" @wheel.prevent="handleWheel($event, 'row')">
           <span>행 수</span>
           <q-btn
