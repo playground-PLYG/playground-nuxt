@@ -51,9 +51,65 @@
       </div>
     </div>
 
+    <div
+      v-if="isViewCorrectAnswerBoard"
+      class="game-board q-mt-lg"
+      :style="boardStyle"
+    >
+      <div class="row-hints">
+        <div
+          v-for="(hint, index) in rowHints"
+          :key="`row-${index}`"
+          class="row-hint"
+        >
+          <span
+            v-for="(hintCell, hintCellIndex) in hint"
+            :key="`row-${index}-${hintCellIndex}`"
+            class="row-hint-cell"
+          >
+            {{ hintCell }}
+          </span>
+        </div>
+      </div>
+      <div class="col-hints">
+        <div
+          v-for="(hint, index) in colHints"
+          :key="`col-${index}`"
+          class="col-hint"
+        >
+          <span
+            v-for="(hintCell, hintCellIndex) in hint"
+            :key="`col-${index}-${hintCellIndex}`"
+            class="col-hint-cell"
+          >
+            {{ hintCell }}
+          </span>
+        </div>
+      </div>
+      <div class="cells">
+        <div
+          v-for="(cell, index) in puzzleData.cells"
+          :key="`cell-${index}`"
+          class="cell"
+          :class="{ filled: cell.filled }"
+          :style="{ backgroundColor: cell.color }"
+          @click="toggleCell(index)"
+          @contextmenu.prevent="markCell(index)"
+        />
+      </div>
+    </div>
+
     <div class="game-controls">
       <q-btn color="primary" label="확인" @click="checkSolution" />
       <q-btn color="secondary" label="리셋" @click="resetGame" />
+      <q-btn
+        @mousedown="isViewCorrectAnswerBoard = true"
+        @mouseup="isViewCorrectAnswerBoard = false"
+        @touchstart="isViewCorrectAnswerBoard = true"
+        @touchend="isViewCorrectAnswerBoard = false"
+      >
+        정답보기(테스트용)
+      </q-btn>
     </div>
   </div>
 </template>
@@ -78,6 +134,8 @@ interface GameCell {
 }
 
 const $q = useQuasar()
+
+const isViewCorrectAnswerBoard = ref<boolean>(false)
 
 // 퍼즐 데이터 (실제로는 props나 store에서 받아올 수 있습니다)
 const puzzleData = ref<PuzzleData>({
