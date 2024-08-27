@@ -1,117 +1,121 @@
 <template>
-  <div class="game-play-container">
-    <div class="game-header">
-      <h2>{{ puzzleData.name }}</h2>
-      <div class="game-info">
-        <span>난이도: {{ puzzleData.difficulty }}</span>
-        <span>카테고리: {{ puzzleData.category }}</span>
-      </div>
-    </div>
+  <client-only>
+    <div class="q-gutter-md q-pa-md" @contextmenu.prevent>
+      <div :class="['game-play-container', isMobile ? 'mobile' : '']">
+        <div class="game-header">
+          <h2>{{ puzzleData.name }}</h2>
+          <div class="game-info">
+            <span>난이도: {{ puzzleData.difficulty }}</span>
+            <span>카테고리: {{ puzzleData.category }}</span>
+          </div>
+        </div>
 
-    <div class="game-board" :style="boardStyle">
-      <div class="row-hints">
-        <div
-          v-for="(hint, index) in rowHints"
-          :key="`row-${index}`"
-          class="row-hint"
-        >
-          <span
-            v-for="(hintCell, hintCellIndex) in hint"
-            :key="`row-${index}-${hintCellIndex}`"
-            class="row-hint-cell"
-          >
-            {{ hintCell }}
-          </span>
+        <div class="game-board" :style="boardStyle">
+          <div class="row-hints">
+            <div
+              v-for="(hint, index) in rowHints"
+              :key="`row-${index}`"
+              class="row-hint"
+            >
+              <span
+                v-for="(hintCell, hintCellIndex) in hint"
+                :key="`row-${index}-${hintCellIndex}`"
+                class="row-hint-cell"
+              >
+                {{ hintCell }}
+              </span>
+            </div>
+          </div>
+          <div class="col-hints">
+            <div
+              v-for="(hint, index) in colHints"
+              :key="`col-${index}`"
+              class="col-hint"
+            >
+              <span
+                v-for="(hintCell, hintCellIndex) in hint"
+                :key="`col-${index}-${hintCellIndex}`"
+                class="col-hint-cell"
+              >
+                {{ hintCell }}
+              </span>
+            </div>
+          </div>
+          <div class="cells">
+            <div
+              v-for="(cell, index) in gameState"
+              :key="`cell-${index}`"
+              class="cell"
+              :class="{ filled: cell.filled, marked: cell.marked }"
+              @click="toggleCell(index)"
+              @contextmenu.prevent="markCell(index)"
+            />
+          </div>
         </div>
-      </div>
-      <div class="col-hints">
-        <div
-          v-for="(hint, index) in colHints"
-          :key="`col-${index}`"
-          class="col-hint"
-        >
-          <span
-            v-for="(hintCell, hintCellIndex) in hint"
-            :key="`col-${index}-${hintCellIndex}`"
-            class="col-hint-cell"
-          >
-            {{ hintCell }}
-          </span>
-        </div>
-      </div>
-      <div class="cells">
-        <div
-          v-for="(cell, index) in gameState"
-          :key="`cell-${index}`"
-          class="cell"
-          :class="{ filled: cell.filled, marked: cell.marked }"
-          @click="toggleCell(index)"
-          @contextmenu.prevent="markCell(index)"
-        />
-      </div>
-    </div>
 
-    <div
-      v-if="isViewCorrectAnswerBoard"
-      class="game-board q-mt-lg"
-      :style="boardStyle"
-    >
-      <div class="row-hints">
         <div
-          v-for="(hint, index) in rowHints"
-          :key="`row-${index}`"
-          class="row-hint"
+          v-if="isViewCorrectAnswerBoard"
+          class="game-board q-mt-lg"
+          :style="boardStyle"
         >
-          <span
-            v-for="(hintCell, hintCellIndex) in hint"
-            :key="`row-${index}-${hintCellIndex}`"
-            class="row-hint-cell"
-          >
-            {{ hintCell }}
-          </span>
+          <div class="row-hints">
+            <div
+              v-for="(hint, index) in rowHints"
+              :key="`row-${index}`"
+              class="row-hint"
+            >
+              <span
+                v-for="(hintCell, hintCellIndex) in hint"
+                :key="`row-${index}-${hintCellIndex}`"
+                class="row-hint-cell"
+              >
+                {{ hintCell }}
+              </span>
+            </div>
+          </div>
+          <div class="col-hints">
+            <div
+              v-for="(hint, index) in colHints"
+              :key="`col-${index}`"
+              class="col-hint"
+            >
+              <span
+                v-for="(hintCell, hintCellIndex) in hint"
+                :key="`col-${index}-${hintCellIndex}`"
+                class="col-hint-cell"
+              >
+                {{ hintCell }}
+              </span>
+            </div>
+          </div>
+          <div class="cells">
+            <div
+              v-for="(cell, index) in puzzleData.cells"
+              :key="`cell-${index}`"
+              class="cell"
+              :class="{ filled: cell.filled }"
+              :style="{ backgroundColor: cell.color }"
+              @click="toggleCell(index)"
+              @contextmenu.prevent="markCell(index)"
+            />
+          </div>
         </div>
-      </div>
-      <div class="col-hints">
-        <div
-          v-for="(hint, index) in colHints"
-          :key="`col-${index}`"
-          class="col-hint"
-        >
-          <span
-            v-for="(hintCell, hintCellIndex) in hint"
-            :key="`col-${index}-${hintCellIndex}`"
-            class="col-hint-cell"
-          >
-            {{ hintCell }}
-          </span>
-        </div>
-      </div>
-      <div class="cells">
-        <div
-          v-for="(cell, index) in puzzleData.cells"
-          :key="`cell-${index}`"
-          class="cell"
-          :class="{ filled: cell.filled }"
-          :style="{ backgroundColor: cell.color }"
-          @click="toggleCell(index)"
-          @contextmenu.prevent="markCell(index)"
-        />
-      </div>
-    </div>
 
-    <div class="game-controls">
-      <q-btn color="primary" label="확인" @click="checkSolution" />
-      <q-btn color="secondary" label="리셋" @click="resetGame" />
-      <q-btn
-        @mousedown="isViewCorrectAnswerBoard = true"
-        @mouseup="isViewCorrectAnswerBoard = false"
-        @touchstart="isViewCorrectAnswerBoard = true"
-        @touchend="isViewCorrectAnswerBoard = false"
-      >
-        정답보기(테스트용)
-      </q-btn>
+        <div class="game-controls">
+          <q-btn color="primary" label="확인" @click="checkSolution" />
+          <q-btn color="secondary" label="리셋" @click="resetGame" />
+          <q-btn
+            @mousedown="isViewCorrectAnswerBoard = true"
+            @mouseup="isViewCorrectAnswerBoard = false"
+            @touchstart="isViewCorrectAnswerBoard = true"
+            @touchend="isViewCorrectAnswerBoard = false"
+          >
+            정답보기(테스트용)
+          </q-btn>
+        </div>
+      </div>
     </div>
-  </div>
+  </client-only>
 </template>
 
 <script lang="ts" setup>
@@ -130,14 +134,15 @@ interface PuzzleData {
 interface GameCell {
   filled: boolean
   marked: boolean
-  correct: boolean
 }
 
 const $q = useQuasar()
+const { platform } = useQuasar()
+
+const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const isViewCorrectAnswerBoard = ref<boolean>(false)
 
-// 퍼즐 데이터 (실제로는 props나 store에서 받아올 수 있습니다)
 const puzzleData = ref<PuzzleData>({
   name: 'GPS',
   difficulty: 'easy',
@@ -255,8 +260,7 @@ const gameState = ref<GameCell[]>(
     .map((_cell) => {
       return {
         filled: false,
-        marked: false,
-        correct: false
+        marked: false
       }
     })
 )
@@ -285,12 +289,14 @@ function calculateHints(
   isRow: boolean
 ): number[][] {
   const hints: number[][] = []
+
   for (let i = 0; i < size; i++) {
     const line = isRow
       ? cells.slice(i * size, (i + 1) * size)
       : cells.filter((_, index) => index % size === i)
     let currentCount = 0
     const lineHints: number[] = []
+
     for (const cell of line) {
       if (cell.filled) {
         currentCount++
@@ -299,11 +305,14 @@ function calculateHints(
         currentCount = 0
       }
     }
+
     if (currentCount > 0) {
       lineHints.push(currentCount)
     }
+
     hints.push(lineHints.length ? lineHints : [0])
   }
+
   return hints
 }
 
@@ -322,10 +331,14 @@ function markCell(index: number) {
 // 솔루션 확인 함수
 function checkSolution() {
   let correct = true
-  gameState.value.forEach((cell, index) => {
-    cell.correct = cell.filled === puzzleData.value.cells[index].filled
-    if (!cell.correct) {
+
+  gameState.value.some((cell, index) => {
+    if (cell.filled !== puzzleData.value.cells[index].filled) {
       correct = false
+
+      return true
+    } else {
+      return false
     }
   })
 
@@ -348,13 +361,12 @@ function checkSolution() {
 function resetGame() {
   gameState.value = gameState.value.map(() => ({
     filled: false,
-    marked: false,
-    correct: false
+    marked: false
   }))
 }
 
 onMounted(() => {
-  // 여기서 퍼즐 데이터를 로드하거나 초기화할 수 있습니다.
+  // api 조회
 })
 </script>
 
