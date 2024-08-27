@@ -48,7 +48,12 @@
               class="cell"
               :class="{ filled: cell.filled, marked: cell.marked }"
               @click="toggleCell(index)"
-              @contextmenu.prevent="markCell(index)"
+              @contextmenu.prevent="
+                () => {
+                  isMarkingMode = false
+                  toggleCell(index)
+                }
+              "
             />
           </div>
         </div>
@@ -96,7 +101,12 @@
               :class="{ filled: cell.filled }"
               :style="{ backgroundColor: cell.color }"
               @click="toggleCell(index)"
-              @contextmenu.prevent="markCell(index)"
+              @contextmenu.prevent="
+                () => {
+                  isMarkingMode = false
+                  toggleCell(index)
+                }
+              "
             />
           </div>
         </div>
@@ -112,6 +122,15 @@
           >
             정답보기(테스트용)
           </q-btn>
+          <q-btn
+            :color="isMarkingMode ? 'primary' : 'secondary'"
+            :label="isMarkingMode ? '마킹 모드' : '선택 모드'"
+            @click="
+              () => {
+                isMarkingMode = !isMarkingMode
+              }
+            "
+          />
         </div>
       </div>
     </div>
@@ -142,6 +161,7 @@ const { platform } = useQuasar()
 const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const isViewCorrectAnswerBoard = ref<boolean>(false)
+const isMarkingMode = ref(false)
 
 const puzzleData = ref<PuzzleData>({
   name: 'GPS',
@@ -318,14 +338,13 @@ function calculateHints(
 
 // 셀 토글 함수
 function toggleCell(index: number) {
-  gameState.value[index].filled = !gameState.value[index].filled
-  gameState.value[index].marked = false
-}
-
-// 셀 마킹 함수
-function markCell(index: number) {
-  gameState.value[index].filled = false
-  gameState.value[index].marked = !gameState.value[index].marked
+  if (isMarkingMode.value) {
+    gameState.value[index].marked = !gameState.value[index].marked
+    gameState.value[index].filled = false
+  } else {
+    gameState.value[index].filled = !gameState.value[index].filled
+    gameState.value[index].marked = false
+  }
 }
 
 // 솔루션 확인 함수
