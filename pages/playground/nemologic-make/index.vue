@@ -6,7 +6,7 @@
 
     <div class="controls">
       <div class="control-row">
-        <div class="control-item">
+        <div class="control-item" @wheel.prevent="handleWheel($event, 'row')">
           <span>행 수</span>
           <q-btn
             flat
@@ -23,7 +23,7 @@
             @click="adjustGridSize('row', 1)"
           />
         </div>
-        <div class="control-item">
+        <div class="control-item" @wheel.prevent="handleWheel($event, 'col')">
           <span>열 수</span>
           <q-btn
             flat
@@ -40,50 +40,52 @@
             @click="adjustGridSize('col', 1)"
           />
         </div>
+        <div class="control-item">
+          <span>난이도</span>
+          <q-select
+            v-model="difficulty"
+            :options="difficultyOptions"
+            label="난이도"
+            class="difficulty-select"
+          />
+        </div>
+        <div class="control-item">
+          <span>카테고리</span>
+          <q-select
+            v-model="category"
+            :options="categoryOptions"
+            label="카테고리"
+            class="category-select"
+          />
+        </div>
       </div>
-      <q-btn
-        label="그리드 크기 재설정"
-        color="primary"
-        class="reset-button"
-        @click="resetGrid"
-      />
       <q-toggle
         v-model="showImagePreview"
         label="이미지 미리보기"
         color="primary"
         class="toggle-preview"
       />
-      <q-select
-        v-model="difficulty"
-        :options="difficultyOptions"
-        label="난이도"
-        class="difficulty-select"
-      />
-      <q-select
-        v-model="category"
-        :options="categoryOptions"
-        label="카테고리"
-        class="category-select"
-      />
     </div>
 
-    <div class="upload-section">
-      <input type="file" accept="image/*" @change="handleImageUpload" />
-    </div>
+    <div class="content-wrapper">
+      <div class="upload-section">
+        <input type="file" accept="image/*" @change="handleImageUpload" />
+      </div>
 
-    <div v-if="showImagePreview && imageSrc" class="image-preview">
-      <img :src="imageSrc" alt="Uploaded Image" />
-    </div>
+      <div v-if="showImagePreview && imageSrc" class="image-preview">
+        <img :src="imageSrc" alt="Uploaded Image" />
+      </div>
 
-    <div class="grid-wrapper">
-      <div v-if="cells.length > 0" class="puzzle-grid" :style="gridStyle">
-        <div
-          v-for="(cell, index) in cells"
-          :key="index"
-          class="cell"
-          :style="{ backgroundColor: cell.color }"
-          @click="toggleCell(index)"
-        />
+      <div class="grid-wrapper">
+        <div v-if="cells.length > 0" class="puzzle-grid" :style="gridStyle">
+          <div
+            v-for="(cell, index) in cells"
+            :key="index"
+            class="cell"
+            :style="{ backgroundColor: cell.color }"
+            @click="toggleCell(index)"
+          />
+        </div>
       </div>
     </div>
 
@@ -153,19 +155,27 @@ const gridStyle = computed(() => {
 
   const containerWidth = window.innerWidth * 0.9
   const containerHeight = window.innerHeight * 0.6
-  const maxCellSize = Math.min(
+
+  const finalCellSize = Math.min(
     containerWidth / numCols.value,
     containerHeight / numRows.value
   )
 
   return {
-    gridTemplateColumns: `repeat(${numCols.value}, ${maxCellSize}px)`,
-    gridTemplateRows: `repeat(${numRows.value}, ${maxCellSize}px)`,
-    width: `${maxCellSize * numCols.value}px`,
-    height: `${maxCellSize * numRows.value}px`,
-    overflow: 'auto' // 그리드 스크롤 허용
+    gridTemplateColumns: `repeat(${numCols.value}, ${finalCellSize - 1}px)`,
+    gridTemplateRows: `repeat(${numRows.value}, ${finalCellSize - 1}px)`,
+    width: `${finalCellSize * numCols.value}px`,
+    height: `${finalCellSize * numRows.value}px`,
+    maxWidth: '100%',
+    maxHeight: '100%'
   }
 })
+
+// 마우스 휠 이벤트 핸들러
+const handleWheel = (event: WheelEvent, type: GridAdjustmentType) => {
+  const delta = Math.sign(event.deltaY)
+  adjustGridSize(type, -delta)
+}
 
 // 그리드 크기 조정 함수
 const adjustGridSize = (type: GridAdjustmentType, adjustment: number) => {
@@ -295,103 +305,145 @@ const calculateAverageColor = (
     const r = Math.round(rTotal / count)
     const g = Math.round(gTotal / count)
     const b = Math.round(bTotal / count)
-    return { color: `rgb(${r}, ${g}, ${b})`, filled: false }
-  } else {
-    return { color: '#fff', filled: false }
+    return {
+      color: `rgb(${r}, ${g}, ${b})`,
+      filled: true
+    }
   }
+
+  return { color: '#fff', filled: false }
 }
 
-// 윈도우 리사이즈 이벤트 처리
-const adjustGridOnResize = () => {
-  resetGrid()
+// 이미지 업로드 처리 함수
+const handleImageUpload = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imageSrc.value = e.target?.result as string
+    resetGrid()
+  }
+  reader.readAsDataURL(file)
 }
 
 onMounted(() => {
-  window.addEventListener('resize', adjustGridOnResize)
   resetGrid()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', adjustGridOnResize)
+  cells.value = []
 })
-
-// 이미지 업로드 처리 함수
-const handleImageUpload = (event: Event) => {
-  const file = (event.target as HTMLInputElement)?.files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      imageSrc.value = e.target?.result as string
-      resetGrid()
-    }
-    reader.readAsDataURL(file)
-  }
-}
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+$puzzle-padding: 10px;
+$control-item-margin-bottom: 10px;
+$save-button-margin: 20px;
+$gap-size: 1px;
+$background-color: #ccc;
+
 .puzzle-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
-}
-
-.header {
-  margin-bottom: 10px;
-}
-
-.controls {
+  padding: $puzzle-padding;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  box-sizing: border-box;
+
+  .header {
+    margin-bottom: $control-item-margin-bottom;
+    text-align: center;
+  }
+
+  .controls {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $control-item-margin-bottom;
+
+    .control-row {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      margin-bottom: $control-item-margin-bottom;
+
+      .control-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: $control-item-margin-bottom;
+
+        .q-select {
+          width: 150px;
+          margin-left: 15px;
+        }
+      }
+    }
+  }
+
+  .upload-section {
+    margin-bottom: $control-item-margin-bottom;
+    width: 100%;
+    text-align: center;
+  }
+
+  .image-preview {
+    max-width: 100%;
+    margin-bottom: $control-item-margin-bottom;
+    display: flex;
+    justify-content: center;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  .grid-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: $save-button-margin;
+
+    .puzzle-grid {
+      display: grid;
+      gap: $gap-size;
+      background-color: $background-color;
+      box-sizing: border-box; // 그리드가 부모 요소의 크기를 초과하지 않도록 조정
+      max-width: 100%; // 그리드가 .grid-wrapper 영역을 벗어나지 않도록
+      max-height: 100%; // 동일한 이유로 최대 높이도 설정
+
+      .cell {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .save-button {
+    position: fixed;
+    bottom: $save-button-margin;
+    right: $save-button-margin;
+  }
 }
 
-.control-row {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
+@media (max-width: 600px) {
+  .control-row {
+    flex-direction: column;
 
-.control-item {
-  display: flex;
-  align-items: center;
-}
+    .control-item {
+      margin-bottom: $control-item-margin-bottom;
+    }
+  }
 
-.upload-section {
-  margin-bottom: 10px;
-}
-
-.image-preview {
-  max-width: 100%;
-  max-height: 200px;
-  margin-bottom: 10px;
-}
-
-.grid-wrapper {
-  width: 100%;
-  max-height: 60vh;
-  overflow: auto;
-}
-
-.puzzle-grid {
-  display: grid;
-  gap: 1px;
-  background-color: #ccc;
-}
-
-.cell {
-  width: 100%;
-  height: 100%;
-}
-
-.save-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+  .save-button {
+    bottom: 15px;
+    right: 15px;
+  }
 }
 </style>
