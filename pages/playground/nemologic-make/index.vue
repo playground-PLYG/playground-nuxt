@@ -124,6 +124,11 @@ interface PuzzleData {
   }>
 }
 
+interface SelectOption {
+  label: string
+  value: string
+}
+
 type GridAdjustmentType = 'row' | 'col'
 
 // Ref 변수 초기화
@@ -133,21 +138,24 @@ const cells = ref<Cell[]>([])
 const imageSrc = ref<string | null>(null)
 const showImagePreview = ref<boolean>(false)
 const puzzleName = ref<string>('')
-const difficulty = ref<string>('')
-const category = ref<string>('')
+const difficulty = ref<SelectOption>({
+  label: '',
+  value: ''
+})
+const category = ref<SelectOption>({ label: '', value: '' })
 
 // 선택 옵션들 초기화
-const difficultyOptions = [
+const difficultyOptions = ref<SelectOption[]>([
   { label: '쉬움', value: 'easy' },
   { label: '중간', value: 'medium' },
   { label: '어려움', value: 'hard' }
-]
+])
 
-const categoryOptions = [
+const categoryOptions = ref<SelectOption[]>([
   { label: '일반', value: 'general' },
   { label: '게임', value: 'games' },
   { label: '퍼즐', value: 'puzzles' }
-]
+])
 
 const baseCellSize = 30
 
@@ -208,8 +216,8 @@ const savePuzzle = () => {
 
   const puzzleData: PuzzleData = {
     name: puzzleName.value,
-    difficulty: difficulty.value,
-    category: category.value,
+    difficulty: difficulty.value.value,
+    category: category.value.value,
     rows: numRows.value,
     cols: numCols.value,
     cells: cells.value.map((cell) => ({
