@@ -674,8 +674,6 @@ const calculateHints = (
     hints.push(lineHints.length ? lineHints : [0])
   }
 
-  console.debug(size, isRow, hints)
-
   const maxLength = hints.reduce((max, current) => {
     return Math.max(max, current.length)
   }, 0)
@@ -704,7 +702,6 @@ const getClickedCellIndex = (event: MouseEvent | TouchEvent): number | null => {
 }
 
 const startDrag = (event: MouseEvent) => {
-  console.debug(rowHints.value)
   const cellIndex = getClickedCellIndex(event)
 
   if (cellIndex === null) {
