@@ -10,7 +10,17 @@
           </div>
         </div>
 
-        <div class="game-board" :style="boardStyle">
+        <div
+          class="game-board"
+          :style="boardStyle"
+          @mousedown.prevent="startDrag"
+          @mousemove="continueDrag"
+          @mouseup="endDrag"
+          @mouseleave="endDrag"
+          @touchstart.prevent="touchStartDrag"
+          @touchmove.prevent="touchMoveDrag"
+          @touchend.prevent="endDrag"
+        >
           <div class="row-hints">
             <div
               v-for="(hint, index) in rowHints"
@@ -46,14 +56,14 @@
               v-for="(cell, index) in gameState"
               :key="`cell-${index}`"
               class="cell"
-              :class="{ filled: cell.filled, marked: cell.marked }"
-              @click="toggleCell(index)"
-              @contextmenu.prevent="
-                () => {
-                  isMarkingMode = false
-                  toggleCell(index)
-                }
-              "
+              :class="{
+                filled: cell.filled,
+                marked: cell.marked,
+                'preview-filled': dragPreview[index]?.filled,
+                'preview-unfilled': dragPreview[index]?.unfilled,
+                'preview-marked': dragPreview[index]?.marked,
+                'preview-unmarked': dragPreview[index]?.unmarked
+              }"
             />
           </div>
         </div>
@@ -62,6 +72,13 @@
           v-if="isViewCorrectAnswerBoard"
           class="game-board q-mt-lg"
           :style="boardStyle"
+          @mousedown.prevent="startDrag"
+          @mousemove="continueDrag"
+          @mouseup="endDrag"
+          @mouseleave="endDrag"
+          @touchstart.prevent="touchStartDrag"
+          @touchmove.prevent="touchMoveDrag"
+          @touchend.prevent="endDrag"
         >
           <div class="row-hints">
             <div
@@ -100,13 +117,6 @@
               class="cell"
               :class="{ filled: cell.filled }"
               :style="{ backgroundColor: cell.color }"
-              @click="toggleCell(index)"
-              @contextmenu.prevent="
-                () => {
-                  isMarkingMode = false
-                  toggleCell(index)
-                }
-              "
             />
           </div>
         </div>
@@ -162,6 +172,18 @@ const isMobile = ref<boolean | undefined>(platform.is.mobile)
 
 const isViewCorrectAnswerBoard = ref<boolean>(false)
 const isMarkingMode = ref(false)
+const isDragging = ref(false)
+const dragStartIndex = ref<number | null>(null)
+const initialCellState = ref<{ filled: boolean; marked: boolean } | null>(null)
+const dragPreview = ref<
+  {
+    filled: boolean
+    unfilled: boolean
+    marked: boolean
+    unmarked: boolean
+    isTarget: boolean
+  }[]
+>([])
 
 const puzzleData = ref<PuzzleData>({
   name: 'GPS',
@@ -336,15 +358,155 @@ function calculateHints(
   return hints
 }
 
-// 셀 토글 함수
-function toggleCell(index: number) {
-  if (isMarkingMode.value) {
-    gameState.value[index].marked = !gameState.value[index].marked
-    gameState.value[index].filled = false
-  } else {
-    gameState.value[index].filled = !gameState.value[index].filled
-    gameState.value[index].marked = false
+function getClickedCellIndex(event: MouseEvent | Touch): number | null {
+  const target = event.target as HTMLElement
+  const cellElement = target.closest('.cell') as HTMLElement | null
+
+  if (cellElement && cellElement.parentElement?.classList.contains('cells')) {
+    const cells = Array.from(cellElement.parentElement.children)
+    const index = cells.indexOf(cellElement)
+
+    return index !== -1 ? index : null
   }
+
+  return null
+}
+
+function startDrag(event: MouseEvent) {
+  const cellIndex = getClickedCellIndex(event)
+
+  if (cellIndex === null) {
+    return
+  }
+
+  isDragging.value = true
+  dragStartIndex.value = cellIndex
+
+  initialCellState.value = {
+    filled: gameState.value[cellIndex].filled,
+    marked: gameState.value[cellIndex].marked
+  }
+
+  updateDragPreview(cellIndex, cellIndex)
+}
+
+function continueDrag(event: MouseEvent) {
+  if (!isDragging.value || dragStartIndex.value === null) {
+    return
+  }
+
+  const cellIndex = getClickedCellIndex(event)
+  if (cellIndex === null) {
+    return
+  }
+
+  updateDragPreview(dragStartIndex.value, cellIndex)
+}
+
+function endDrag() {
+  if (isDragging.value && dragStartIndex.value !== null) {
+    applyDragAction()
+  }
+  isDragging.value = false
+  dragStartIndex.value = null
+  initialCellState.value = null
+  dragPreview.value = []
+}
+
+function updateDragPreview(startIndex: number, endIndex: number) {
+  const startRow = Math.floor(startIndex / puzzleData.value.cols)
+  const startCol = startIndex % puzzleData.value.cols
+  const endRow = Math.floor(endIndex / puzzleData.value.cols)
+  const endCol = endIndex % puzzleData.value.cols
+
+  const minRow = Math.min(startRow, endRow)
+  const maxRow = Math.max(startRow, endRow)
+  const minCol = Math.min(startCol, endCol)
+  const maxCol = Math.max(startCol, endCol)
+
+  dragPreview.value = Array(puzzleData.value.rows * puzzleData.value.cols)
+    .fill(undefined)
+    .map((_cell) => {
+      return {
+        filled: false,
+        unfilled: false,
+        marked: false,
+        unmarked: false,
+        isTarget: false
+      }
+    })
+
+  for (let row = minRow; row <= maxRow; row++) {
+    for (let col = minCol; col <= maxCol; col++) {
+      const index = row * puzzleData.value.cols + col
+
+      if (isMarkingMode.value) {
+        dragPreview.value[index] = {
+          filled: false,
+          unfilled: false,
+          marked: !initialCellState.value!.marked,
+          unmarked: initialCellState.value!.marked,
+          isTarget: true
+        }
+      } else {
+        dragPreview.value[index] = {
+          filled: !initialCellState.value!.filled,
+          unfilled: initialCellState.value!.filled,
+          marked: false,
+          unmarked: false,
+          isTarget: true
+        }
+      }
+    }
+  }
+}
+
+function applyDragAction() {
+  if (initialCellState.value === null || dragStartIndex.value === null) {
+    return
+  }
+
+  dragPreview.value.forEach((preview, index) => {
+    if (preview.isTarget) {
+      if (isMarkingMode.value) {
+        gameState.value[index].marked = preview.marked
+        gameState.value[index].filled = false
+      } else {
+        gameState.value[index].filled = preview.filled
+        gameState.value[index].marked = false
+      }
+    }
+  })
+}
+
+function touchStartDrag(event: TouchEvent) {
+  const touch = event.touches[0]
+  const cellIndex = getClickedCellIndex(touch)
+  if (cellIndex === null) {
+    return
+  }
+
+  isDragging.value = true
+  dragStartIndex.value = cellIndex
+  initialCellState.value = {
+    filled: gameState.value[cellIndex].filled,
+    marked: gameState.value[cellIndex].marked
+  }
+  updateDragPreview(cellIndex, cellIndex)
+}
+
+function touchMoveDrag(event: TouchEvent) {
+  if (!isDragging.value || dragStartIndex.value === null) {
+    return
+  }
+
+  const touch = event.touches[0]
+  const cellIndex = getClickedCellIndex(touch)
+  if (cellIndex === null) {
+    return
+  }
+
+  updateDragPreview(dragStartIndex.value, cellIndex)
 }
 
 // 솔루션 확인 함수
@@ -397,6 +559,11 @@ onMounted(() => {
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 
   .game-header {
     text-align: center;
@@ -479,6 +646,33 @@ onMounted(() => {
 
         &.correct {
           border-color: #4caf50;
+        }
+
+        &.preview-filled,
+        &.preview-unfilled {
+          background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        &.preview-marked::after {
+          content: '×';
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          font-size: 1.5em;
+          color: rgba(255, 0, 0, 0.5);
+        }
+
+        &.preview-unmarked::after {
+          content: '';
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          font-size: 1.5em;
+          color: rgba(255, 0, 0, 0.5);
         }
       }
     }
