@@ -10,17 +10,7 @@
           </div>
         </div>
 
-        <div
-          class="game-board"
-          :style="boardStyle"
-          @mousedown.prevent="startDrag"
-          @mousemove="continueDrag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @touchstart.prevent="touchStartDrag"
-          @touchmove.prevent="touchMoveDrag"
-          @touchend.prevent="endDrag"
-        >
+        <div class="game-board" :style="boardStyle">
           <div class="row-hints">
             <div
               v-for="(hint, index) in rowHints"
@@ -51,7 +41,16 @@
               </span>
             </div>
           </div>
-          <div class="cells">
+          <div
+            class="cells"
+            @mousedown.prevent="startDrag"
+            @mousemove="continueDrag"
+            @mouseup="endDrag"
+            @mouseleave="endDrag"
+            @touchstart.prevent="touchStartDrag"
+            @touchmove.prevent="touchMoveDrag"
+            @touchend.prevent="endDrag"
+          >
             <div
               v-for="(cell, index) in gameState"
               :key="`cell-${index}`"
@@ -72,13 +71,6 @@
           v-if="isViewCorrectAnswerBoard"
           class="game-board q-mt-lg"
           :style="boardStyle"
-          @mousedown.prevent="startDrag"
-          @mousemove="continueDrag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @touchstart.prevent="touchStartDrag"
-          @touchmove.prevent="touchMoveDrag"
-          @touchend.prevent="endDrag"
         >
           <div class="row-hints">
             <div
@@ -110,7 +102,16 @@
               </span>
             </div>
           </div>
-          <div class="cells">
+          <div
+            class="cells"
+            @mousedown.prevent="startDrag"
+            @mousemove="continueDrag"
+            @mouseup="endDrag"
+            @mouseleave="endDrag"
+            @touchstart.prevent="touchStartDrag"
+            @touchmove.prevent="touchMoveDrag"
+            @touchend.prevent="endDrag"
+          >
             <div
               v-for="(cell, index) in puzzleData.cells"
               :key="`cell-${index}`"
@@ -186,16 +187,21 @@ const dragPreview = ref<
 >([])
 
 const puzzleData = ref<PuzzleData>({
-  name: 'GPS',
-  difficulty: 'easy',
-  category: 'general',
-  rows: 10,
-  cols: 10,
+  name: 'Cloud',
+  difficulty: '',
+  category: '',
+  rows: 20,
+  cols: 20,
   cells: [
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
     { color: 'rgb(0, 0, 0)', filled: true },
     { color: 'rgb(0, 0, 0)', filled: true },
     { color: '#fff', filled: false },
@@ -204,73 +210,33 @@ const puzzleData = ref<PuzzleData>({
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: 'rgb(0, 0, 0)', filled: true },
     { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
-    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
@@ -286,8 +252,343 @@ const puzzleData = ref<PuzzleData>({
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
     { color: 'rgb(0, 0, 0)', filled: true },
     { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: 'rgb(0, 0, 0)', filled: true },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
+    { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
     { color: '#fff', filled: false },
@@ -324,12 +625,16 @@ const boardStyle = computed(() => {
   }
 })
 
+const cellMinWidth = computed(() => {
+  return 40 - puzzleData.value.cols + 'px'
+})
+
 // 힌트 계산 함수
-function calculateHints(
+const calculateHints = (
   cells: PuzzleData['cells'],
   size: number,
   isRow: boolean
-): number[][] {
+): number[][] => {
   const hints: number[][] = []
 
   for (let i = 0; i < size; i++) {
@@ -358,7 +663,7 @@ function calculateHints(
   return hints
 }
 
-function getClickedCellIndex(event: MouseEvent | Touch): number | null {
+const getClickedCellIndex = (event: MouseEvent | TouchEvent): number | null => {
   const target = event.target as HTMLElement
   const cellElement = target.closest('.cell') as HTMLElement | null
 
@@ -372,7 +677,7 @@ function getClickedCellIndex(event: MouseEvent | Touch): number | null {
   return null
 }
 
-function startDrag(event: MouseEvent) {
+const startDrag = (event: MouseEvent) => {
   const cellIndex = getClickedCellIndex(event)
 
   if (cellIndex === null) {
@@ -390,12 +695,13 @@ function startDrag(event: MouseEvent) {
   updateDragPreview(cellIndex, cellIndex)
 }
 
-function continueDrag(event: MouseEvent) {
+const continueDrag = (event: MouseEvent) => {
   if (!isDragging.value || dragStartIndex.value === null) {
     return
   }
 
   const cellIndex = getClickedCellIndex(event)
+
   if (cellIndex === null) {
     return
   }
@@ -403,7 +709,7 @@ function continueDrag(event: MouseEvent) {
   updateDragPreview(dragStartIndex.value, cellIndex)
 }
 
-function endDrag() {
+const endDrag = () => {
   if (isDragging.value && dragStartIndex.value !== null) {
     applyDragAction()
   }
@@ -413,7 +719,7 @@ function endDrag() {
   dragPreview.value = []
 }
 
-function updateDragPreview(startIndex: number, endIndex: number) {
+const updateDragPreview = (startIndex: number, endIndex: number) => {
   const startRow = Math.floor(startIndex / puzzleData.value.cols)
   const startCol = startIndex % puzzleData.value.cols
   const endRow = Math.floor(endIndex / puzzleData.value.cols)
@@ -461,7 +767,7 @@ function updateDragPreview(startIndex: number, endIndex: number) {
   }
 }
 
-function applyDragAction() {
+const applyDragAction = () => {
   if (initialCellState.value === null || dragStartIndex.value === null) {
     return
   }
@@ -479,29 +785,31 @@ function applyDragAction() {
   })
 }
 
-function touchStartDrag(event: TouchEvent) {
-  const touch = event.touches[0]
-  const cellIndex = getClickedCellIndex(touch)
+const touchStartDrag = (event: TouchEvent) => {
+  const cellIndex = getClickedCellIndex(event)
+
   if (cellIndex === null) {
     return
   }
 
   isDragging.value = true
   dragStartIndex.value = cellIndex
+
   initialCellState.value = {
     filled: gameState.value[cellIndex].filled,
     marked: gameState.value[cellIndex].marked
   }
+
   updateDragPreview(cellIndex, cellIndex)
 }
 
-function touchMoveDrag(event: TouchEvent) {
+const touchMoveDrag = (event: TouchEvent) => {
   if (!isDragging.value || dragStartIndex.value === null) {
     return
   }
 
-  const touch = event.touches[0]
-  const cellIndex = getClickedCellIndex(touch)
+  const cellIndex = getClickedCellIndex(event)
+
   if (cellIndex === null) {
     return
   }
@@ -581,6 +889,7 @@ onMounted(() => {
     gap: 1px;
     background-color: #ccc;
     border: 1px solid #ccc;
+    overflow: auto;
 
     .row-hints {
       grid-column: 1;
@@ -619,6 +928,7 @@ onMounted(() => {
       display: grid;
       grid-template-columns: repeat(v-bind('puzzleData.cols'), 1fr);
       gap: 1px;
+      min-width: v-bind('cellMinWidth');
 
       .cell {
         aspect-ratio: 1;
