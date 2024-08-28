@@ -22,7 +22,7 @@
                 :key="`row-${index}-${hintCellIndex}`"
                 class="row-hint-cell"
               >
-                {{ hintCell }}
+                {{ hintCell > 0 ? hintCell : '' }}
               </span>
             </div>
           </div>
@@ -37,7 +37,7 @@
                 :key="`col-${index}-${hintCellIndex}`"
                 class="col-hint-cell"
               >
-                {{ hintCell }}
+                {{ hintCell > 0 ? hintCell : '' }}
               </span>
             </div>
           </div>
@@ -617,6 +617,12 @@ const colHints = computed(() => {
   return calculateHints(puzzleData.value.cells, puzzleData.value.rows, false)
 })
 
+const rowHintsMaxLength = computed(() => {
+  return rowHints.value.reduce((max, current) => {
+    return Math.max(max, current.length)
+  }, 0)
+})
+
 // 보드 스타일
 const boardStyle = computed(() => {
   return {
@@ -625,8 +631,14 @@ const boardStyle = computed(() => {
   }
 })
 
-const cellMinWidth = computed(() => {
-  return 40 - puzzleData.value.cols + 'px'
+const cellMinSize = computed(() => {
+  return (
+    40 -
+    (puzzleData.value.cols > puzzleData.value.rows
+      ? puzzleData.value.cols
+      : puzzleData.value.rows) +
+    'px'
+  )
 })
 
 // 힌트 계산 함수
@@ -657,10 +669,24 @@ const calculateHints = (
       lineHints.push(currentCount)
     }
 
+    hints
+
     hints.push(lineHints.length ? lineHints : [0])
   }
 
-  return hints
+  console.debug(size, isRow, hints)
+
+  const maxLength = hints.reduce((max, current) => {
+    return Math.max(max, current.length)
+  }, 0)
+
+  return hints.map((arr) => {
+    const diff = maxLength - arr.length
+    if (diff > 0) {
+      return Array(diff).fill(-1).concat(arr)
+    }
+    return arr
+  })
 }
 
 const getClickedCellIndex = (event: MouseEvent | TouchEvent): number | null => {
@@ -678,6 +704,7 @@ const getClickedCellIndex = (event: MouseEvent | TouchEvent): number | null => {
 }
 
 const startDrag = (event: MouseEvent) => {
+  console.debug(rowHints.value)
   const cellIndex = getClickedCellIndex(event)
 
   if (cellIndex === null) {
@@ -894,31 +921,37 @@ onMounted(() => {
     .row-hints {
       grid-column: 1;
       grid-row: 2 / -1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      align-items: flex-end;
-      padding-right: 5px;
+      display: grid;
+      grid-template-rows: repeat(v-bind('puzzleData.rows'), 1fr);
+      gap: 1px;
+      border-right: 1px solid whitesmoke;
 
       .row-hint {
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: repeat(v-bind('rowHintsMaxLength'), 1fr);
+        gap: 5px;
+        min-height: v-bind('cellMinSize');
+        text-align: center;
+        border-bottom: 2px solid whitesmoke;
       }
     }
 
     .col-hints {
       grid-column: 2 / -1;
       grid-row: 1;
-      display: flex;
-      justify-content: space-around;
-      align-items: flex-end;
-      padding-bottom: 5px;
+      display: grid;
+      grid-template-columns: repeat(v-bind('puzzleData.cols'), 1fr);
+      gap: 1px;
+      border-bottom: 1px solid whitesmoke;
 
       .col-hint {
-        display: flex;
-        flex-direction: column;
+        display: grid;
         gap: 1px;
+        min-width: v-bind('cellMinSize');
+        align-content: end;
+        grid-template-columns: repeat(1, 1fr);
+        text-align: center;
+        border-left: 2px solid whitesmoke;
       }
     }
 
@@ -928,13 +961,14 @@ onMounted(() => {
       display: grid;
       grid-template-columns: repeat(v-bind('puzzleData.cols'), 1fr);
       gap: 1px;
-      min-width: v-bind('cellMinWidth');
 
       .cell {
         aspect-ratio: 1;
         background-color: white;
         border: 1px solid #ccc;
         cursor: pointer;
+        min-width: v-bind('cellMinSize');
+        min-height: v-bind('cellMinSize');
 
         &.filled {
           background-color: black;
