@@ -113,23 +113,17 @@ const rankListFields = {
   gameOneAtrbCn: {
     show: true,
     title: '점수',
-    formatFnc: (txt: string) => {
-      return txt + '점'
-    }
+    formatFnc: (txt: string) => `${txt}점`
   },
-
   gameTwoAtrbCn: {
     show: false
   },
-
   gameThreeAtrbCn: {
     show: false
   },
-
   gameFourAtrbCn: {
     show: false
   },
-
   gameFiveAtrbCn: {
     show: false
   }
@@ -189,8 +183,10 @@ const initializeBoard = () => {
 
 const displayBoard = computed(() => {
   const display = board.value.map((row) => [...row])
+
   if (currentPiece.value) {
     const { shape, x, y } = currentPiece.value
+
     shape.forEach((row, dy) => {
       row.forEach((value, dx) => {
         if (
@@ -205,6 +201,7 @@ const displayBoard = computed(() => {
       })
     })
   }
+
   return display
 })
 
@@ -212,6 +209,7 @@ const centerPiece = (piece: number[][]) => {
   const display = Array(SIDE_Y)
     .fill(0)
     .map(() => Array(SIDE_X).fill(0))
+
   if (piece && piece.length) {
     const width = piece[0].length
     const height = piece.length
@@ -229,16 +227,13 @@ const centerPiece = (piece: number[][]) => {
   return display
 }
 
-const nextPieceDisplay = computed(() => {
-  return centerPiece(nextPiece.value)
-})
+const nextPieceDisplay = computed(() => centerPiece(nextPiece.value))
 
-const holdPieceDisplay = computed(() => {
-  return centerPiece(holdPiece.value)
-})
+const holdPieceDisplay = computed(() => centerPiece(holdPiece.value))
 
 const newPiece = () => {
   const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)]
+
   return {
     shape,
     x: Math.floor(BOARD_WIDTH / 2) - Math.floor(shape[0].length / 2),
@@ -246,15 +241,21 @@ const newPiece = () => {
   }
 }
 
-const canMove = (piece: typeof currentPiece.value, dx: number, dy: number) => {
+const canMove = (
+  piece: typeof currentPiece.value,
+  dx: number,
+  dy: number
+): boolean => {
   if (!piece) {
     return false
   }
+
   for (let y = 0; y < piece.shape.length; y++) {
     for (let x = 0; x < piece.shape[y].length; x++) {
       if (piece.shape[y][x]) {
         const newX = piece.x + x + dx
         const newY = piece.y + y + dy
+
         if (
           newX < 0 ||
           newX >= BOARD_WIDTH ||
@@ -266,15 +267,18 @@ const canMove = (piece: typeof currentPiece.value, dx: number, dy: number) => {
       }
     }
   }
+
   return true
 }
 
-const movePiece = (dx: number, dy: number) => {
+const movePiece = (dx: number, dy: number): boolean => {
   if (currentPiece.value && canMove(currentPiece.value, dx, dy)) {
     currentPiece.value.x += dx
     currentPiece.value.y += dy
+
     return true
   }
+
   return false
 }
 
@@ -282,11 +286,15 @@ const rotatePiece = () => {
   if (!currentPiece.value) {
     return
   }
+
   const rotated = currentPiece.value.shape[0].map((_, i) =>
     currentPiece.value!.shape.map((row) => row[i]).reverse()
   )
+
   const originalShape = currentPiece.value.shape
+
   currentPiece.value.shape = rotated
+
   if (!canMove(currentPiece.value, 0, 0)) {
     currentPiece.value.shape = originalShape
   }
@@ -296,6 +304,7 @@ const mergePiece = () => {
   if (!currentPiece.value) {
     return
   }
+
   for (let y = 0; y < currentPiece.value.shape.length; y++) {
     for (let x = 0; x < currentPiece.value.shape[y].length; x++) {
       if (currentPiece.value.shape[y][x]) {
@@ -308,6 +317,7 @@ const mergePiece = () => {
 
 const clearLines = () => {
   let linesCleared = 0
+
   for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
     if (board.value[y].every((cell) => cell !== 0)) {
       board.value.splice(y, 1)
@@ -316,6 +326,7 @@ const clearLines = () => {
       y++
     }
   }
+
   if (linesCleared > 0) {
     score.value += linesCleared * 100
   }
@@ -331,13 +342,18 @@ const gameLoop = () => {
       nextPiece.value.length > 0
         ? { shape: nextPiece.value, x: 4, y: 0 }
         : newPiece()
+
     nextPiece.value = newPiece().shape
+
     if (!canMove(currentPiece.value, 0, 0)) {
       gameOver()
+
       return
     }
+
     // 새 블록이 생성되면 즉시 다음 루프 실행
     requestAnimationFrame(gameLoop)
+
     return
   }
 
@@ -359,6 +375,7 @@ const startGame = () => {
     initializeBoard()
     nextPiece.value = newPiece().shape
     requestAnimationFrame(gameLoop) // 게임 루프 시작
+
     gameInterval.value = setInterval(() => {
       if (!isGameOver.value) {
         time.value++
@@ -373,6 +390,7 @@ const pauseGame = () => {
 
     gameInterval.value = null
   }
+
   isGameOver.value = true // 이렇게 하면 gameLoop가 멈춥니다
 }
 
@@ -409,6 +427,7 @@ const holdCurrentPiece = () => {
   if (!currentPiece.value || isGameOver.value) {
     return
   }
+
   if (holdPiece.value.length === 0) {
     holdPiece.value = currentPiece.value.shape
     currentPiece.value = null
@@ -423,6 +442,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   if (!gameInterval.value || isGameOver.value) {
     return
   }
+
   switch (event.key) {
     case 'ArrowLeft':
       movePiece(-1, 0)
@@ -437,9 +457,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       rotatePiece()
       break
     case ' ':
-      while (movePiece(0, 1)) {
-        // Do Nothing
-      }
+      dropPiece()
       break
     case 'c':
     case 'C':
@@ -448,7 +466,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-const formatTime = (seconds: number) => {
+const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
 

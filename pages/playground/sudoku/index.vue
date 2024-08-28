@@ -169,19 +169,15 @@ const rankListFields = {
   gameOneAtrbCn: {
     show: false
   },
-
   gameTwoAtrbCn: {
     show: false
   },
-
   gameThreeAtrbCn: {
     show: false
   },
-
   gameFourAtrbCn: {
     show: false
   },
-
   gameFiveAtrbCn: {
     show: false
   }
@@ -189,8 +185,11 @@ const rankListFields = {
 
 const generateBoard = async () => {
   loading.show()
+
   resetTimer()
+
   await generateBoardPromise()
+
   loading.hide()
 }
 
@@ -298,8 +297,12 @@ const findEmptySpot = (board: number[][]): [number, number] | null => {
 const shuffle = (array: number[]): number[] => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
+    const temp = array[i]
+
+    array[i] = array[j]
+    array[j] = temp
   }
+
   return array
 }
 

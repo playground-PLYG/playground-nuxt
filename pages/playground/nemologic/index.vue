@@ -602,46 +602,39 @@ const puzzleData = ref<PuzzleData>({
 const gameState = ref<GameCell[]>(
   Array(puzzleData.value.rows * puzzleData.value.cols)
     .fill(undefined)
-    .map((_cell) => {
-      return {
-        filled: false,
-        marked: false
-      }
-    })
+    .map((_cell) => ({
+      filled: false,
+      marked: false
+    }))
 )
 
 // 힌트 계산
-const rowHints = computed(() => {
-  return calculateHints(puzzleData.value.cells, puzzleData.value.cols, true)
-})
+const rowHints = computed(() =>
+  calculateHints(puzzleData.value.cells, puzzleData.value.cols, true)
+)
 
-const colHints = computed(() => {
-  return calculateHints(puzzleData.value.cells, puzzleData.value.rows, false)
-})
+const colHints = computed(() =>
+  calculateHints(puzzleData.value.cells, puzzleData.value.rows, false)
+)
 
-const rowHintsMaxLength = computed(() => {
-  return rowHints.value.reduce((max, current) => {
-    return Math.max(max, current.length)
-  }, 0)
-})
+const rowHintsMaxLength = computed(() =>
+  rowHints.value.reduce((max, current) => Math.max(max, current.length), 0)
+)
 
 // 보드 스타일
-const boardStyle = computed(() => {
-  return {
-    gridTemplateColumns: `auto repeat(${puzzleData.value.cols}, 1fr)`,
-    gridTemplateRows: `auto repeat(${puzzleData.value.rows}, 1fr)`
-  }
-})
+const boardStyle = computed(() => ({
+  gridTemplateColumns: `auto repeat(${puzzleData.value.cols}, 1fr)`,
+  gridTemplateRows: `auto repeat(${puzzleData.value.rows}, 1fr)`
+}))
 
-const cellMinSize = computed(() => {
-  return (
+const cellMinSize = computed(
+  () =>
     40 -
     (puzzleData.value.cols > puzzleData.value.rows
       ? puzzleData.value.cols
       : puzzleData.value.rows) +
     'px'
-  )
-})
+)
 
 // 힌트 계산 함수
 const calculateHints = (
@@ -676,15 +669,18 @@ const calculateHints = (
     hints.push(lineHints.length ? lineHints : [0])
   }
 
-  const maxLength = hints.reduce((max, current) => {
-    return Math.max(max, current.length)
-  }, 0)
+  const maxLength = hints.reduce(
+    (max, current) => Math.max(max, current.length),
+    0
+  )
 
   return hints.map((arr) => {
     const diff = maxLength - arr.length
+
     if (diff > 0) {
       return Array(diff).fill(-1).concat(arr)
     }
+
     return arr
   })
 }
@@ -751,6 +747,7 @@ const endDrag = () => {
   if (isDragging.value && dragStartIndex.value !== null) {
     applyDragAction()
   }
+
   isDragging.value = false
   dragStartIndex.value = null
   initialCellState.value = null
@@ -770,15 +767,13 @@ const updateDragPreview = (startIndex: number, endIndex: number) => {
 
   dragPreview.value = Array(puzzleData.value.rows * puzzleData.value.cols)
     .fill(undefined)
-    .map((_cell) => {
-      return {
-        filled: false,
-        unfilled: false,
-        marked: false,
-        unmarked: false,
-        isTarget: false
-      }
-    })
+    .map(() => ({
+      filled: false,
+      unfilled: false,
+      marked: false,
+      unmarked: false,
+      isTarget: false
+    }))
 
   for (let row = minRow; row <= maxRow; row++) {
     for (let col = minCol; col <= maxCol; col++) {

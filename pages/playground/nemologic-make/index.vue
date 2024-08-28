@@ -178,6 +178,7 @@ const gridStyle = computed(() => {
 // 마우스 휠 이벤트 핸들러
 const handleWheel = (event: WheelEvent, type: GridAdjustmentType) => {
   const delta = Math.sign(event.deltaY)
+
   adjustGridSize(type, -delta)
 }
 
@@ -188,6 +189,7 @@ const adjustGridSize = (type: GridAdjustmentType, adjustment: number) => {
   } else {
     numCols.value = Math.max(10, numCols.value + adjustment)
   }
+
   resetGrid()
 }
 
@@ -200,6 +202,7 @@ const toggleCell = (index: number) => {
 const savePuzzle = () => {
   if (!puzzleName.value.trim()) {
     alert('퍼즐명을 입력하세요')
+
     return
   }
 
@@ -214,6 +217,8 @@ const savePuzzle = () => {
       filled: cell.filled
     }))
   }
+
+  // TODO 퍼즐 저장
   console.log('퍼즐 저장:', JSON.stringify(puzzleData))
 }
 
@@ -236,10 +241,13 @@ const resetGrid = () => {
 // 이미지를 그리드에 맞게 스케일링하는 함수
 const scaleImageToGrid = () => {
   const img = new Image()
+
   img.src = imageSrc.value as string
+
   img.onload = () => {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
+
     if (!ctx) {
       return
     }
@@ -251,6 +259,7 @@ const scaleImageToGrid = () => {
 
     canvas.width = imgWidth * scale
     canvas.height = imgHeight * scale
+
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -260,6 +269,7 @@ const scaleImageToGrid = () => {
     for (let row = 0; row < numRows.value; row++) {
       for (let col = 0; col < numCols.value; col++) {
         const cellIndex = row * numCols.value + col
+
         cells.value[cellIndex] = calculateAverageColor(
           ctx,
           data,
@@ -286,10 +296,10 @@ const calculateAverageColor = (
   const startY = row * cellSize
   const endX = startX + cellSize
   const endY = startY + cellSize
-  let rTotal = 0,
-    gTotal = 0,
-    bTotal = 0,
-    count = 0
+  let rTotal = 0
+  let gTotal = 0
+  let bTotal = 0
+  let count = 0
 
   for (let y = startY; y < endY; y++) {
     for (let x = startX; x < endX; x++) {
@@ -300,6 +310,7 @@ const calculateAverageColor = (
         rTotal += r
         gTotal += g
         bTotal += b
+
         count++
       }
     }
@@ -309,6 +320,7 @@ const calculateAverageColor = (
     const r = Math.round(rTotal / count)
     const g = Math.round(gTotal / count)
     const b = Math.round(bTotal / count)
+
     return {
       color: `rgb(${r}, ${g}, ${b})`,
       filled: true
@@ -321,15 +333,19 @@ const calculateAverageColor = (
 // 이미지 업로드 처리 함수
 const handleImageUpload = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
+
   if (!file) {
     return
   }
 
   const reader = new FileReader()
+
   reader.onload = (e) => {
     imageSrc.value = e.target?.result as string
+
     resetGrid()
   }
+
   reader.readAsDataURL(file)
 }
 
