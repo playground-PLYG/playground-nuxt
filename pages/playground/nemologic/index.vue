@@ -61,7 +61,9 @@
                 'preview-filled': dragPreview[index]?.filled,
                 'preview-unfilled': dragPreview[index]?.unfilled,
                 'preview-marked': dragPreview[index]?.marked,
-                'preview-unmarked': dragPreview[index]?.unmarked
+                'preview-unmarked': dragPreview[index]?.unmarked,
+                'right-border': isRightBorder(index),
+                'bottom-border': isBottomBorder(index)
               }"
             />
           </div>
@@ -687,6 +689,18 @@ const calculateHints = (
   })
 }
 
+const isBottomBorder = (index: number) => {
+  const row = Math.floor(index / puzzleData.value.cols)
+
+  return row % 5 === 4 && row !== puzzleData.value.rows - 1
+}
+
+const isRightBorder = (index: number) => {
+  const col = index % puzzleData.value.cols
+
+  return col % 5 === 4 && col !== puzzleData.value.cols - 1
+}
+
 const getClickedCellIndex = (event: MouseEvent | TouchEvent): number | null => {
   const target = event.target as HTMLElement
   const cellElement = target.closest('.cell') as HTMLElement | null
@@ -929,7 +943,8 @@ onMounted(() => {
         gap: 5px;
         min-height: v-bind('cellMinSize');
         text-align: center;
-        border-bottom: 2px solid whitesmoke;
+        border-top: 2px solid whitesmoke;
+        margin-left: 5px;
       }
     }
 
@@ -949,6 +964,7 @@ onMounted(() => {
         grid-template-columns: repeat(1, 1fr);
         text-align: center;
         border-left: 2px solid whitesmoke;
+        margin-top: 5px;
       }
     }
 
@@ -957,7 +973,6 @@ onMounted(() => {
       grid-row: 2 / -1;
       display: grid;
       grid-template-columns: repeat(v-bind('puzzleData.cols'), 1fr);
-      gap: 1px;
 
       .cell {
         aspect-ratio: 1;
@@ -1014,6 +1029,14 @@ onMounted(() => {
           height: 100%;
           font-size: 1.5em;
           color: rgba(255, 0, 0, 0.5);
+        }
+
+        &.right-border {
+          border-right: 1px solid #777;
+        }
+
+        &.bottom-border {
+          border-bottom: 1px solid #777;
         }
       }
     }
