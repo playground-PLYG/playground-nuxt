@@ -109,7 +109,7 @@
                       label="코드ID"
                       class="input"
                       outlined
-                      :rules="[codeid_rules]"
+                      :rules="[codeId_rules]"
                       :readonly="readonly"
                     />
                     <q-input
@@ -118,6 +118,14 @@
                       class="input"
                       outlined
                       :rules="[codeNm_rules]"
+                      :readonly="readonly"
+                    />
+                    <q-input
+                      v-model="param.codeValue"
+                      label="코드값"
+                      class="input"
+                      outlined
+                      :rules="[codeValue_rules]"
                       :readonly="readonly"
                     />
                     <q-checkbox
@@ -274,9 +282,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { type QTableProps, date, useQuasar } from 'quasar'
-import type { PageListInfo } from '../../interface/server'
+import type { ApiResponse, PageListInfo } from '../../interface/server'
 import paginationLayout from '../../components/PaginationComponent.vue'
-import { type ApiResponse } from '@/interface/server'
+
 const { loading } = useQuasar()
 
 const columns = ref<QTableProps['columns']>([
@@ -301,6 +309,13 @@ const columns = ref<QTableProps['columns']>([
     field: 'codeName'
   },
   {
+    name: 'codeValue',
+    align: 'left',
+    label: '코드값',
+    field: 'codeValue',
+    sortable: true
+  },
+  {
     name: 'upperCode',
     align: 'center',
     label: '상위코드ID',
@@ -318,6 +333,13 @@ const columns = ref<QTableProps['columns']>([
     align: 'center',
     label: '정렬순번',
     field: 'order',
+    sortable: true
+  },
+  {
+    name: 'useYn',
+    align: 'center',
+    label: '사용여부',
+    field: 'useYn',
     sortable: true
   },
   {
@@ -363,7 +385,7 @@ const oldData = ref<Data>() //기존데이터
 const currentPage = ref<number>(1)
 const totalPages = ref<number>(0)
 const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 개수
-const totalItems = ref<number | undefined>()
+const totalItems = ref<number>(0)
 
 const groupCdOptions = [
   { label: '전체', value: '' },
@@ -381,9 +403,11 @@ interface Data {
   codeSerialNo?: string
   code: string
   codeName: string
+  codeValue: string
   upperCode: string
   groupCode: string
   order?: number
+  useYn: string
   registUsrId: string
   registDt: string
   updtUsrId: string
@@ -400,16 +424,18 @@ const param = ref<Data>({
   codeSerialNo: '',
   code: '',
   codeName: '',
+  codeValue: '',
   upperCode: '',
   groupCode: '',
   order: 0,
+  useYn: '',
   registUsrId: '',
   registDt: '',
   updtUsrId: '',
   updtDt: ''
 })
 
-const codeid_rules = (val: string) => {
+const codeId_rules = (val: string) => {
   if (!val) {
     return '코드ID를 입력해주세요.'
   }
@@ -423,6 +449,13 @@ const codeNm_rules = (val: string) => {
   return true
 }
 
+const codeValue_rules = (val: string) => {
+  if (groupCdCheck.value && !val) {
+    return '코드값을 입력해주세요.'
+  }
+  return true
+}
+
 const upCode_rules = (val: string) => {
   if (!val) {
     return '코드를 선택해주세요.'
@@ -431,7 +464,7 @@ const upCode_rules = (val: string) => {
 }
 
 const sortSn_rules = (val: string) => {
-  if (!val) {
+  if (Number.isNaN(val)) {
     return '정렬순번을 입력해주세요.'
   }
   return true
@@ -611,17 +644,19 @@ const fn_getUpCodeList = async () => {
     .then((result) => {
       allCodeData.value = result.data
 
-      // 그룹 코드인 항목만 필터링
-      const filterOptions = allCodeData.value
-        .filter((item) => item.groupCode === 'Y')
-        .map((item) => ({ label: item.codeName, value: item.code }))
+      if (allCodeData.value) {
+        // 그룹 코드인 항목만 필터링
+        const filterOptions = allCodeData.value
+          .filter((item) => item.groupCode === 'Y')
+          .map((item) => ({ label: item.codeName, value: item.code }))
 
-      // 중복 제거 후 정렬
-      const uniqueSort = [...new Set(filterOptions)].sort((a, b) =>
-        a.value.localeCompare(b.value)
-      )
+        // 중복 제거 후 정렬
+        const uniqueSort = [...new Set(filterOptions)].sort((a, b) =>
+          a.value.localeCompare(b.value)
+        )
 
-      uppercodeList = uniqueSort
+        uppercodeList = uniqueSort
+      }
     })
     .catch((error) => {
       console.error(error)
@@ -693,9 +728,11 @@ const fn_codeReset = () => {
     codeSerialNo: '',
     code: '',
     codeName: '',
+    codeValue: '',
     upperCode: '',
     groupCode: '',
     order: 0,
+    useYn: '',
     registUsrId: '',
     registDt: '',
     updtUsrId: '',

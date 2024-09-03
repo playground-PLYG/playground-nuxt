@@ -5,8 +5,10 @@ export const codeUtil = {
     let resultCode: Code = {
       code: '',
       codeName: '',
+      codeValue: '',
       upperCode: '',
-      order: -1
+      order: -1,
+      useYn: ''
     };
 
     await $fetch<ApiResponse<Code>>(

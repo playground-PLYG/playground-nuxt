@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@formkit/auto-animate": "^0.8.2",
-    "@nuxt/devtools": "^1.3.9",
+    "@nuxt/devtools": "^1.4.1",
     "@nuxt/eslint": "^0.3.13",
     "@nuxt/eslint-config": "^0.3.13",
     "@nuxt/scripts": "^0.6.5",
@@ -58,7 +58,7 @@
     "hangul-util": "^0.1.4",
     "pinia": "^2.2.1",
     "pinpoint-node-agent": "^0.8.6",
-    "quasar": "^2.16.8",
+    "quasar": "^2.16.9",
     "sockjs-client": "^1.6.1",
     "vue-chartjs": "^5.3.1",
     "webstomp-client": "^1.2.6"

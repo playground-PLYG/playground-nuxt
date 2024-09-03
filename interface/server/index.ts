@@ -181,14 +181,18 @@ export interface Metadata {
  *
  * @property {string} code 코드
  * @property {string} codeName 코드명
+ * @property {string} codeValue 코드값
  * @property {string} upperCode 상위코드
  * @property {string} order 정렬순서
+ * @property {string} useYn 사용여부
  */
 export interface Code {
   code: string
   codeName: string
+  codeValue: string
   upperCode: string
   order: number
+  useYn: string
 }
 
 /**

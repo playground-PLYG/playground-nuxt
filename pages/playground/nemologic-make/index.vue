@@ -227,7 +227,7 @@ const savePuzzle = () => {
   }
 
   // TODO 퍼즐 저장
-  console.log('퍼즐 저장:', JSON.stringify(puzzleData))
+  console.debug('퍼즐 저장:', JSON.stringify(puzzleData))
 }
 
 // 이미지로 그리드 초기화 함수
