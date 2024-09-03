@@ -116,6 +116,7 @@ onMounted(() => {
 
 const nowVhclNo_rules = (val: string) => {
   if (val) {
+    // eslint-disable-next-line regexp/no-obscure-range
     if (/^[가-힇|0-9]*$/.test(val)) {
       return true
     } else {
