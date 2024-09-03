@@ -153,7 +153,7 @@
                     :readonly="mReadonly"
                   />
                   <q-select
-                    v-model="detailData.useAt"
+                    v-model="detailDataUseAt"
                     outlined
                     stack-label
                     class="q-pb-lg"
@@ -161,6 +161,7 @@
                     :options="useAtInputOption"
                     option-label="name"
                     option-value="code"
+                    :rules="[select_rules]"
                     :readonly="mReadonly"
                   />
                 </q-form>
@@ -290,13 +291,14 @@
                     :rules="[number_rules]"
                   />
                   <q-select
-                    v-model="inputData.useAt"
+                    v-model="inputDataUseAt"
                     outlined
                     stack-label
                     label="사용여부"
                     :options="useAtInputOption"
                     option-label="name"
                     option-value="code"
+                    :rules="[select_rules]"
                   />
                 </q-form>
               </q-card-section>
@@ -319,7 +321,6 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type QTableProps, date } from 'quasar'
 import type { ApiPagingResponse, ApiResponse } from '../../interface/server'
-import paginationLayout from '~/components/PaginationComponent.vue'
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
@@ -328,9 +329,9 @@ const itemsPerPage = ref<number>(5) // 테이블 UI에 보여지는 데이터 �
 const totalItems = ref<number | undefined>() // 데이터의 개수에 따라 페이지네이션 UI에 그려지는 숫자 리스트
 
 const router = useRouter()
-const addForm = ref<any>()
-const modifyForm = ref<any>()
-const searchForm = ref<any>()
+const addForm = ref()
+const modifyForm = ref()
+const searchForm = ref()
 const mReadonly = ref(true)
 
 interface Data {
@@ -356,6 +357,11 @@ interface Form {
   useAt: string
 }
 
+interface SelectOption {
+  name: string
+  code: string
+}
+
 const searchParam = ref<any>({
   menuSn: '',
   menuNm: '',
@@ -364,7 +370,12 @@ const searchParam = ref<any>({
 })
 
 const listData = ref<Data[]>([])
-let selected = ref<Data[]>([])
+const selected = ref<Data[]>([])
+
+const inputDataUseAt = ref<SelectOption>({
+  name: '',
+  code: ''
+})
 
 const inputData = ref<Form>({
   menuSn: '',
@@ -373,6 +384,11 @@ const inputData = ref<Form>({
   menuSortOrdr: 99,
   upperMenuSn: 1,
   useAt: ''
+})
+
+const detailDataUseAt = ref<SelectOption>({
+  name: '',
+  code: ''
 })
 
 const detailData = ref<Data>({
@@ -443,7 +459,7 @@ const columns = ref<QTableProps['columns']>([
 
 // 목록 조회
 const getMenuPageList = async () => {
-  selected = ref<Data[]>([])
+  selected.value = []
 
   if (searchParam.value.useAt && typeof searchParam.value.useAt == 'object') {
     searchParam.value.useAt = searchParam.value.useAt.code
@@ -509,7 +525,7 @@ const resetSearchParam = () => {
 
 // 상세조회 - 목록 선택
 const clickRow = async (evt: any, row: any) => {
-  selected = ref<Data[]>([])
+  selected.value = []
 
   const menuSn = row.menuSn
 
@@ -518,6 +534,9 @@ const clickRow = async (evt: any, row: any) => {
   )
 
   detailData.value = result.data
+  detailDataUseAt.value = useAtInputOption.find(
+    (obj) => obj.code == result.data.useAt
+  ) ?? { name: '미사용', code: 'N' }
 
   showDetailDialog.value = true
 }
@@ -554,8 +573,10 @@ const addMenu = async () => {
     }
 
     if (valid && upperMenuSnValid) {
-      if (!inputData.value.useAt) {
+      if (!inputDataUseAt.value) {
         inputData.value.useAt = 'N'
+      } else {
+        inputData.value.useAt = inputDataUseAt.value.code
       }
 
       if (!inputData.value.upperMenuSn) {
@@ -596,10 +617,7 @@ const modifyMenu = async () => {
 
     const upperMenuSn = detailData.value.upperMenuSn
 
-    // 오류나서 일단 주석처리
-    //valid = await modifyForm.value.validate();
-    //
-    valid = true
+    valid = await modifyForm.value.validate()
 
     if (!valid) {
       return
@@ -623,12 +641,14 @@ const modifyMenu = async () => {
     }
 
     if (valid && upperMenuSnValid) {
-      if (!inputData.value.upperMenuSn) {
-        inputData.value.upperMenuSn = 1
+      if (!detailDataUseAt.value) {
+        detailData.value.useAt = 'N'
+      } else {
+        detailData.value.useAt = detailDataUseAt.value.code
       }
 
       if (!inputData.value.menuSortOrdr) {
-        inputData.value.menuSortOrdr = 99
+        detailData.value.menuSortOrdr = 99
       }
 
       // 저장 API 호출
@@ -654,6 +674,14 @@ const modifyMenu = async () => {
   }
 }
 
+const select_rules = (val: any) => {
+  if (!val || val.code == '') {
+    return '필수 입력항목 입니다.'
+  }
+
+  return true
+}
+
 const required_rules = (val: string) => {
   if (!val || val.trim() == '') {
     return '필수 입력항목 입니다.'
@@ -663,7 +691,7 @@ const required_rules = (val: string) => {
 }
 
 const number_rules = (val: string) => {
-  if (val && val.trim() != '') {
+  if (val && Number.isNaN(val) && val.trim() != '') {
     const num = val.match(/^\d*$/)
 
     if (!num) {
@@ -749,6 +777,8 @@ const modifyUseAtMenu = async () => {
 }
 
 const resetInputData = () => {
+  inputDataUseAt.value = { name: '', code: '' }
+
   inputData.value = {
     menuSn: '',
     menuNm: '',
@@ -760,6 +790,8 @@ const resetInputData = () => {
 }
 
 const resetDetailData = () => {
+  detailDataUseAt.value = { name: '', code: '' }
+
   detailData.value = {
     menuSn: 0,
     menuNm: '',
