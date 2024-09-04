@@ -71,7 +71,7 @@ const { loading, platform } = useQuasar()
 
 // 페이징을 위한 파라미터
 const currentPage = ref<number>(1)
-const itemsPerPage = ref<number>(20) // 테이블 UI에 보여지는 데이터 개수
+const itemsPerPage = ref<number>(100) // 테이블 UI에 보여지는 데이터 개수
 
 interface FloodedCarSrch {
   nowVhclNo: string
