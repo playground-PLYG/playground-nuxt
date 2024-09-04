@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import type { ApiResponse } from 'interface/server'
 
@@ -109,10 +109,6 @@ const isMobile = ref<boolean | undefined>(platform.is.mobile)
 const floodedCarResList = ref<FloodedCarResBody[]>([])
 const maxDataYn = ref<boolean>(false)
 let observer: IntersectionObserver | null = null
-
-onMounted(() => {
-  fn_getFloodedCarList()
-})
 
 const nowVhclNo_rules = (val: string) => {
   if (val) {
